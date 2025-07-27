@@ -23,6 +23,14 @@ import MyAccount from "./Pages/MyAccount";
 import MyList from "./Pages/MyList";
 import Orders from "./Pages/Orders";
 
+// react toast alert function
+  const alertBox = (status, msg) => {
+    if (status === "success") {
+      toast.success(msg);
+    } else {
+      toast.error(msg);
+    }
+  }
 
 const MyContext = createContext();
 function App() {
@@ -40,14 +48,6 @@ function App() {
   const handleCloseProductDetailModel = () => {
     setOpenProductDetailModel(false);
   };
-
-  const alertBox = (status, msg) => {
-    if (status) {
-      toast.success(msg);
-    } else {
-      toast.error(msg);
-    }
-  }
 
   const value = {
     // Add your context values here
@@ -159,8 +159,6 @@ function App() {
           </div>
         </DialogContent>
       </Dialog>
-
-
     </>
   );
 }

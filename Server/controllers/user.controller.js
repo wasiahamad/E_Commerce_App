@@ -131,10 +131,11 @@ export const registerUser = async (req, res) => {
         }
 
         res.status(201).json({
-            message: "User registered successfully",
+            message: "User registered successfully please Verify your Email",
             error: false,
             success: true,
             token: token,
+            data: user,
         });
     } catch (error) {
         return res.status(500).json({

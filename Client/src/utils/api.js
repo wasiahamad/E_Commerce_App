@@ -1,17 +1,24 @@
 import axios from "axios";
+const apiUrl = import.meta.env.VITE_API_URL;
 
 
 export const postData = async (url, formData) => {
     try {
-        const response = await fetch(process.env.REACT_APP_API_URL + url, {
+        const response = await fetch(apiUrl + url, {
             method: "POST",
             headers: {
-                "Authorization": `Bearer ${token}`, // Include the token in the headers
+                "Authorization": `Bearer ${localStorage.getItem("token")}`, // Include the token in the headers
                 "Content-Type": "application/json", // Specify the content type as JSON
             },
             body: JSON.stringify(formData),
         })  
-        return response.data;
+
+        // if (!response.ok) {
+        //     throw new Error(data?.message || "Something went wrong");
+        // }
+        
+        const data = await response.json();
+        return data;
     } catch (error) {
         console.error(error);
         throw error;
