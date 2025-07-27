@@ -1,0 +1,318 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto+Slab:wght@400;500&display=swap'); */
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  background-color: #f5f0f0;
+  overflow-x: hidden !important;
+}
+
+p {
+  font-size: 14px;
+  line-height: 25px;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+}
+
+::-webkit-scrollbar {
+  width: 8px !important;
+  height: 8px !important; 
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: #ff5252 !important;
+  border-radius: 10px !important;
+}
+::-webkit-scrollbar-track {
+  background-color: #f5f0f0 !important;
+}
+
+.scroll::-webkit-scrollbar {
+  width: 4px !important;
+}
+
+.scroll::-webkit-scrollbar-thumb {
+  background-color: #ccc !important;
+  border-radius: 10px !important;
+}
+
+.overflow-x-auto::-webkit-scrollbar-thumb {
+  background-color: #ccc !important;
+  border-radius: 10px !important;
+}
+
+
+
+.container {
+  width: 95%;
+  margin: auto;
+}
+
+/* header .top-strip {
+    border-top : 1px solid rgba(0,0,0,0.1);
+    border-bottom : 1px solid rgba(0,0,0,0.1);
+} */
+
+.link:hover {
+    color: #ff5252;
+}
+
+.MuiBadge-badge {
+  background-color: #ff5252 !important;
+}
+
+/* nav ul button:hover .MuiTouchRipple-root {
+  background-color: #ff5252 !important;
+} */
+
+
+nav ul button {
+  text-transform: capitalize !important;
+}
+
+
+.homeSlider {
+  overflow: inherit !important;
+}
+
+.homeSlider img {
+  border-radius: 5px;
+  transition: all 0.3s ease-in-out;
+  filter: brightness(0.85);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+/* .homeSlider img:hover {
+  transform: scale(1.05);
+  filter: brightness(1);
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+} */
+
+.swiper-button-prev, .swiper-button-next {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 45px;
+  min-width: 45px;
+  height: 45px;
+  background-color: #fff;
+  border-radius: 100%;
+  transition: all 0.3s ease-in-out;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.swiper-button-prev:hover, .swiper-button-next:hover {
+  background-color: #ff5252;
+  box-shadow: 0 0 20px rgba(0, 0, 0, 0.7);
+}
+.swiper-button-prev::after, .swiper-button-next::after {
+  color: #000;
+  font-size: 22px !important;
+}
+
+.homeCatSlider .item:hover img {
+  transform: scale(1.1);
+}
+
+.MuiTabs-indicator {
+  background-color: #ff5252 !important;
+  
+}
+.MuiTab-textColorPrimary.Mui-selected {
+  color: #ff5252 !important;
+  /* border-radius: 5px;
+  width: 10px;
+  height: 10px; */
+}
+
+.productsSlider .swiper-wrapper {
+  padding: 15px;
+  margin-left: -15px;
+  margin-right: -15px;
+}
+
+.css-imrjgg-MuiButtonBase-root-MuiCheckbox-root.Mui-checked, .css-imrjgg-MuiButtonBase-root-MuiCheckbox-root.MuiCheckbox-indeterminate {
+  color: #ff5252 !important;
+}
+
+.MuiFormControlLabel-label {
+  font-size: 13px !important;
+}
+
+.swiper-pagination-bullet-active {
+  background-color: #ff5252 !important;
+  width: 10px !important;
+  height: 10px !important;
+}
+
+.homeSliderV2 .swiper-slide-active .info, .homeSliderV2 .swiper-slide-active .info h4, .homeSliderV2 .swiper-slide-active .info h2, .homeSliderV2 .swiper-slide-active .info h3, .homeSliderV2 .swiper-slide-active .info .btn_  {
+  opacity: 1;
+  right: 0px;
+}
+
+
+.homeSliderV2 .info h4 {
+  transition-duration: 1.2s;
+}
+
+.homeSliderV2 .info h2 {
+  transition-duration: 1.6s;
+}
+.homeSliderV2 .info h3 {
+  transition-duration: 1.9s;
+}
+.homeSliderV2 .info .btn_ {
+  transition-duration: 2.1s;
+}
+
+.ReactCollapse--collapse {
+  transition: height 400ms;
+}
+
+.btn-org {
+  background-color: #ff5252 !important;
+  color: #fff !important;
+  border-radius: 5px !important;
+  padding: 5px 20px !important;
+  font-size: 15px !important;
+  font-weight: 500 !important;
+
+}
+
+.btn-org:hover {
+  background-color: #171717 !important;
+}
+
+.itemViewActions button.active svg {
+  color: #ff5252 !important;
+  opacity: 1 !important;
+}
+
+.css-1l5xwdx-MuiButtonBase-root-MuiPaginationItem-root.Mui-selected {
+  background-color: #ff5252 !important;
+  color: #fff !important;
+}
+
+.productZoomSwiper .swiper-slide {
+  height: auto !important;
+}
+
+.productZoomSwiper .swiper-button-next{
+    bottom: 0px !important;
+    right: inherit !important;
+    top: inherit !important;
+    width: 100% !important;
+    height: 30px !important;
+    border-radius: 0px;
+}
+
+.productZoomSwiper .swiper-button-prev {
+  top: 20px !important;
+  left: 0 !important;
+  width: 100% !important;
+  height: 30px !important;
+  border-radius: 0px;
+}
+
+.productZoomSwiper .swiper-button-next::after, .productZoomSwiper .swiper-button-prev::after {
+  transform: rotate(90deg) !important;
+}
+
+.productContent .actions Button {
+  height: 30px !important;
+  min-width: 40px !important;
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 5px !important;
+  /* color: #000 !important; */
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+    /* display: none; <- Crashes Chrome on hover */
+    -webkit-appearance: none;
+    margin: 0; /* <-- Apparently some margin are still there even though it's hidden */
+}
+
+input[type=number] {
+    -moz-appearance:textfield; /* Firefox */
+}
+.reviewsScroll::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important; 
+}
+.reviewsScroll::-webkit-scrollbar-thumb { 
+  background-color: #ccc !important;
+}
+
+.cardPanel .MuiPaper-root {
+  overflow: hidden !important;
+  width: 400px !important;
+}
+
+#size-menu .MuiButtonBase-root {
+  font-size: 12px !important;
+}
+
+.optBox input {
+  border: 1px solid rgba(0, 0, 0, 0.3) !important;
+  outline: none;
+  border-radius: 4px !important;
+}
+
+.optBox input:focus {
+  border: 1px solid rgba(0, 0, 0, 0.7) !important;
+}
+
+.otpPage .container {
+  display: flex;
+  height: 90vh;
+}
+
+#account-menu .MuiPaper-root {
+  min-width: 200px !important;
+}
+
+.myAccountTabs li a {
+  position: relative;
+  display: block;
+}
+
+.myAccountTabs li a:before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 3px;
+  height: 50%;
+  background-color: #ff5252;
+  transition: width 0.3s ease-in-out;
+  opacity: 0;
+  /* transform: translateY(-50%); */
+}
+
+.myAccountTabs li a.active::before {
+  height: 100%;
+  opacity: 1;
+  top: 0px;
+}
+
+.myAccountTabs li a.active button svg {
+  color: #ff5252 !important;
+  opacity: 1 !important;
+}

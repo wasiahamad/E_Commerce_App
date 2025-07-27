@@ -1,0 +1,16 @@
+import React, { useContext } from 'react'
+import { MyContext } from '../../App';
+import ProductTable from '../../Components/ProductTable';
+
+const Products = () => {
+    const context = useContext(MyContext);
+    return (
+        <>
+            <div className={`contentRight py-4 px-5 ${context.isSidebarOpen ? "w-[80%]" : "w-[100%] pl-0"} transition-all duration-300`}>
+                <ProductTable />
+            </div>
+        </>
+    )
+}
+
+export default Products
