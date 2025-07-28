@@ -255,7 +255,7 @@ export const loginUser = async (req, res) => {
             httpOnly: true,
             secure: true,
             sameSite: "none", // Adjust based on your requirements
-            maxAge: 24 * 60 * 60 * 1000,
+            maxAge: 24 * 60 * 60 * 1000, // 1 day
         };
 
         res.cookie("refreshToken", refreshToken, cookieOptions);
@@ -265,10 +265,7 @@ export const loginUser = async (req, res) => {
             message: "User logged in successfully",
             error: false,
             success: true,
-            data: {
-                accessToken,
-                refreshToken,
-            },
+            data: user,
         });
     } catch (error) {
         return res.status(500).json({

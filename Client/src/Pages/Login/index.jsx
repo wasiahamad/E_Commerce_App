@@ -6,14 +6,24 @@ import { IoEyeOffSharp } from "react-icons/io5";
 import { Link, useNavigate } from "react-router-dom";
 import { FcGoogle } from "react-icons/fc";
 import { MyContext } from "../../App";
+import CircularProgress from '@mui/material/CircularProgress';
+import { postData } from "../../utils/api";
 
-const Login = () => {
+
+
+const Login = ( props) => {
+    // loading state
+    const [loading, setLoading] = useState(false);
     // password visibility state
     const [showPassword, setShowPassword] = useState(false);
-    const [formFields, setFormFields] = useState({
+    const [formData, setFormData] = useState({
         email: "",
         password: "",
     })
+
+    // validate 
+    const validValue = Object.values(formData).every((item) => item);
+
     // function to handle password visibility
     const handlePasswordVisibility = () => {
         setShowPassword(!showPassword);
@@ -21,17 +31,49 @@ const Login = () => {
     const context = useContext(MyContext);
     const history = useNavigate();
 
-    const forgotPassword = () => {
-        // if (formFields.email !== "") {
-        //     // localStorage.setItem("email", formFields.email);
-           
-        // } 
+    // function to handle input change
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormData(() => {
+            return {
+                ...formData,
+                [name]: value,
+            };
+        });
+    };
 
+    // handle to the form
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        // API call
+        postData("/api/v1/user/login", formData)
+            .then((res) => {
+                console.log("response", res);
+                if (res?.error !== true) {
+                    context.alertBox("success", res?.message);
+                    setFormData({
+                        email: "",
+                        password: "",
+                    });
+                    setLoading(false);   
+                    localStorage.setItem("accessToken", res?.data?.accessToken);
+                    localStorage.setItem("refreshToken", res?.data?.refreshToken);  
+                    console.log("username", res?.data?.name);
+
+                    history("/");
+                } else {
+                    context.alertBox("error", res?.message);
+                    setLoading(false);
+                }
+            });
+    };
+
+    const forgotPassword = () => {
         context.alertBox("success", "OTP has been sent to your email");
         history("/verify");
     }
-
-
 
     return (
         <section className="section py-10">
@@ -40,7 +82,7 @@ const Login = () => {
                     <h2 className="text-[18px] font-semibold text-black text-center mb-4">
                         Login to your account
                     </h2>
-                    <form action="" className="w-full mt-5 ">
+                    <form action="" className="w-full mt-5 " onSubmit={handleSubmit}>
                         <div className="form-group relative w-full mb-5">
                             <TextField
                                 id="email"
@@ -49,7 +91,9 @@ const Login = () => {
                                 className="w-full"
                                 type="email"
                                 name="email"
-                                required
+                                onChange={onChangeInput}
+                                value={formData.email}
+                                disabled={loading === true ? true : false}
                             />
                         </div>
                         <div className="form-group relative w-full mb-5">
@@ -59,8 +103,10 @@ const Login = () => {
                                 variant="outlined"
                                 className="w-full"
                                 name="password"
+                                onChange={onChangeInput}
+                                value={formData.password}
+                                disabled={loading === true ? true : false}
                                 type={showPassword ? "text" : "password"}
-                                required
                             />
 
                             <Button
@@ -80,14 +126,21 @@ const Login = () => {
                         </div>
 
                         <a href="" className="text-[#000] link text-[14px] font-semibold"
-                        onClick={forgotPassword}>
+                            onClick={forgotPassword}>
                             Forgot Password?
                         </a>
+
                         <div className="flex items-center mt-4">
                             <Button
-                                className="w-full !bg-[#ff5252] !text-white !rounded-md !h-[47px] !text-[14px] !font-[600] "
+                                disabled={!validValue}
+                                type="submit"
+                                className="w-full !bg-[#ff5252] !text-white hover:!bg-black !rounded-md !h-[47px] !text-[14px] !font-[600] flex gap-3"
                             >
-                                Login
+                                {
+                                    loading === true ? <CircularProgress color="inherit" size={20} />
+                                        :
+                                        "Login"
+                                }
                             </Button>
                         </div>
 

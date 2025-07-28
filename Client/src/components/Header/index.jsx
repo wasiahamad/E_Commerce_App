@@ -29,7 +29,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
         padding: "0 4px",
     },
 }));
-const Header = () => {
+const Header = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const handleClick = (event) => {
@@ -120,10 +120,10 @@ const Header = () => {
 
                                         <div className="info flex flex-col">
                                             <h4 className="text-[14px] font-[300] text-left justify-start leading-3 text-[rgba(0,0,0,0.6)]">
-                                                Md Abir Hossain
+                                                {props?.data?.name}
                                             </h4>
                                             <span className="text-[13px] text-left justify-start text-[rgba(0,0,0,0.6)]">
-                                                random85@gmail.com
+                                                {props?.data?.email}
                                             </span>
                                         </div>
                                     </Button>

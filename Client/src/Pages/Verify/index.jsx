@@ -1,19 +1,43 @@
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import OtpBox from '../../components/OtpBox';
 import { Button } from '@mui/material';
+import { postData } from '../../utils/api';
+import { MyContext } from '../../App';
+import { useNavigate } from "react-router-dom";
 
-const Verify = () => {
+
+const Verify = (props) => {
     const [otp, setOtp] = useState('');
 
+    const context = useContext(MyContext);
+    const history = useNavigate();
     const handleOtpChange = (e) => {
         setOtp(e);
     };
 
+
     const verifyOtp = (e) => {
         e.preventDefault();
-        // console.log(otp);
-        alert("OTP verified successfully");
-    }
+        postData("/api/v1/user/verify-email", {
+            email: localStorage.getItem("userEmail"),
+            otp: otp, // ✅ Fix here
+        }).then((res) => {
+            console.log(res);
+
+            if (res.success) {
+                context.alertBox("success", res?.message);
+                localStorage.removeItem("userEmail")
+                history("/login");
+                // Navigate or clear localStorage if needed
+            } else {
+                context.alertBox("error", res?.message || "OTP verification failed.");
+            }
+        }).catch((err) => {
+            console.error(err);
+            context.alertBox("error", "An error occurred while verifying OTP.");
+        });
+    };
+
 
     return (
         <section className="section py-10">
@@ -27,7 +51,7 @@ const Verify = () => {
                     </h2>
                     <p className="text-[14px] font-[400] text-[rgba(0,0,0,0.6)] text-center">
                         OTP sent to
-                        <span className="font-bold text-primary"> random58@gmail.com</span>
+                        <span className="font-bold text-primary">{localStorage.getItem("userEmail")}</span>
                     </p>
 
                     <form action="" onSubmit={verifyOtp}>

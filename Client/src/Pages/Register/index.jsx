@@ -8,7 +8,7 @@ import { FcGoogle } from "react-icons/fc";
 import { postData } from "../../utils/api";
 import { MyContext } from "../../App";
 import CircularProgress from '@mui/material/CircularProgress';
-
+import { useNavigate } from "react-router-dom";
 
 const Register = () => {
     // loading state
@@ -16,13 +16,13 @@ const Register = () => {
     // password visibility state
     const [showPassword, setShowPassword] = useState(false);
     const context = useContext(MyContext);
+    const history = useNavigate();
 
     // passwors visibility function
     const isStrongPassword = (password) => {
         const hasUppercase = /[A-Z]/.test(password);
         const hasLowercase = /[a-z]/.test(password);
         const hasNumber = /[0-9]/.test(password);
-
         return hasUppercase && hasLowercase && hasNumber;
     };
 
@@ -51,9 +51,8 @@ const Register = () => {
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
-        // check validation here
-        
 
+        // check validation here
         const password = formData.password;
         if (password.length < 6) {
             return context.alertBox("error", "Password must be at least 6 characters long");
@@ -66,27 +65,25 @@ const Register = () => {
             return false;
         }
 
-
         // API call
         postData("/api/v1/user/register", formData)
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {
                     context.alertBox("success", res?.message);
-
+                    localStorage.setItem("userEmail", formData.email);
                     setFormData({
                         name: "",
                         email: "",
                         password: "",
                     });
                     setLoading(false);
+                    history("/verify");
                 } else {
                     context.alertBox("error", res?.message);
                     setLoading(false);
                 }
             });
-
-
     };
 
     console.log("formData...", formData);
@@ -95,7 +92,6 @@ const Register = () => {
     const handlePasswordVisibility = () => {
         setShowPassword(!showPassword);
     };
-
 
     return (
         <section className="section py-10">

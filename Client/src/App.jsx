@@ -37,7 +37,7 @@ function App() {
   const [openProductDetailModel, setOpenProductDetailModel] = useState(false);
   const [maxWidth, setMaxWidth] = useState("lg");
   const [fullWidth, setFullWidth] = useState(true);
-  const [isLoggedIn, setIsLoggedIn] = useState(true);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const [openCardPanel, setOpenCardPanel] = useState(false);
 
