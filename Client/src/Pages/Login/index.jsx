@@ -29,7 +29,7 @@ const Login = (props) => {
         setShowPassword(!showPassword);
     };
     const context = useContext(MyContext);
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     // function to handle input change
     const onChangeInput = (e) => {
@@ -62,7 +62,7 @@ const Login = (props) => {
                     localStorage.setItem("refreshToken", res?.refreshToken);
                     console.log("username", res?.data?.name);
                     context.setIsLoggedIn(true);
-                    history("/");
+                    navigate("/");
 
                 } else {
                     context.alertBox("error", res?.message);
@@ -74,13 +74,28 @@ const Login = (props) => {
     const forgotPassword = () => {
         if (formData.email === "") {
             context.alertBox("error", "Please enter your email address");
-        } else {
-            localStorage.setItem("userEmail", formData.email);
-            localStorage.setItem("actionType", 'forgot-password');
-           history("/verify");
-           context.alertBox("success", "An OTP has been sent to your email address");
-
+            return;
         }
+
+        context.alertBox("success", "An OTP has been sent to your email address");
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("actionType", 'forgot-password');
+
+        postData("/api/v1/user/forgot-password", {
+            email: formData.email,
+        }).then((res) => {
+            console.log(res);
+            if (res?.error === false) {
+                context.alertBox("success", res?.message);
+                console.log("Navigating to /verify...");
+                navigate("/verify"); // ✅ proper redirect
+            } else {
+                context.alertBox("error", res?.message);
+            }
+        }).catch((err) => {
+            console.error(err);
+            context.alertBox("error", "An error occurred while verifying OTP.");
+        });
     }
 
     return (
@@ -133,10 +148,11 @@ const Login = (props) => {
                             </Button>
                         </div>
 
-                        <a href="" className="text-[#000] link text-[14px] font-semibold"
-                            onClick={forgotPassword}>
-                            Forgot Password?
-                        </a>
+                        <p className="text-[#000] text-[14px] font-[400]">
+                            <span className="text-[#ff5252] font-[600] cursor-pointer" onClick={forgotPassword}>
+                                Forgot Password?
+                            </span>
+                        </p>
 
                         <div className="flex items-center mt-4">
                             <Button

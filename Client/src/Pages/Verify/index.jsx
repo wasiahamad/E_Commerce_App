@@ -10,56 +10,54 @@ const Verify = (props) => {
     const [otp, setOtp] = useState('');
 
     const context = useContext(MyContext);
-    const history = useNavigate();
+    const navigate = useNavigate();
     const handleOtpChange = (e) => {
         setOtp(e);
     };
 
-
     const verifyOtp = (e) => {
         e.preventDefault();
+
         const actionType = localStorage.getItem("actionType");
-
-        if (actionType !== "forgot-password") {
+        if (actionType !== 'forgot-password') {
             postData("/api/v1/user/verify-email", {
-            email: localStorage.getItem("userEmail"),
-            otp: otp, // ✅ Fix here
-        }).then((res) => {
-            console.log(res);
-
-            if (res.success) {
-                context.alertBox("success", res?.message);
-                localStorage.removeItem("userEmail")
-                history("/login");
-                // Navigate or clear localStorage if needed
-            } else {
-                context.alertBox("error", res?.message || "OTP verification failed.");
-            }
-        }).catch((err) => {
-            console.error(err);
-            context.alertBox("error", "An error occurred while verifying OTP.");
-        });
+                email: localStorage.getItem("userEmail"),
+                otp: otp, // ✅ Fix here
+            }).then((res) => {
+                console.log(res);
+                if (res?.error === false) {
+                    context.alertBox("success", res?.message);
+                    localStorage.removeItem("userEmail")
+                    navigate("/login");
+                    // Navigate or clear localStorage if needed
+                } else {
+                    context.alertBox("error", res?.message || "OTP verification failed.");
+                }
+            }).catch((err) => {
+                console.error(err);
+                context.alertBox("error", "An error occurred while verifying OTP.");
+            });
         } else {
             postData("/api/v1/user/forgot-password", {
-            email: localStorage.getItem("userEmail"),
-            otp: otp, // ✅ Fix here
-        }).then((res) => {
-            console.log(res);
-
-            if (res.success) {
-                context.alertBox("success", res?.message);
-                localStorage.removeItem("userEmail")
-                history("/forgot-password");
-                // Navigate or clear localStorage if needed
-            } else {
-                context.alertBox("error", res?.message || "OTP verification failed.");
-            }
-        }).catch((err) => {
-            console.error(err);
-            context.alertBox("error", "An error occurred while verifying OTP.");
-        });
+                email: localStorage.getItem("userEmail"),
+                otp: otp,
+            }).then((res) => {
+                console.log(res);
+                if (res?.error === false) {
+                    context.alertBox("success", res?.message);
+                    localStorage.removeItem("userEmail")
+                    navigate("/login");
+                    // Navigate or clear localStorage if needed
+                } else {
+                    context.alertBox("error", res?.message || "OTP verification failed.");
+                }
+            }).catch((err) => {
+                console.error(err);
+                context.alertBox("error", "An error occurred while verifying OTP.");
+            });
         }
-        
+
+
     };
 
 

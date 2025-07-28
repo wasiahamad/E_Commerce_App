@@ -18,7 +18,7 @@ const ForgotPassword = () => {
         setShowPassword(!showPassword);
     };
     const context = useContext(MyContext);
-    const history = useNavigate();
+    const navigate = useNavigate();
 
     return (
         <section className="section py-10">

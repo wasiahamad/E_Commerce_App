@@ -30,7 +30,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
         padding: "0 4px",
     },
 }));
-const Header = (props) => {
+const Header = () => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
     const context = useContext(MyContext);
@@ -53,7 +53,7 @@ const Header = (props) => {
                 localStorage.removeItem("refreshToken");
                 // localStorage.removeItem("userEmail");
                 context.alertBox("success", res?.message);
-                window.location.reload();
+                // window.location.reload();
             }
         });
     }
