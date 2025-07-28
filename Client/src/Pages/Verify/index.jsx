@@ -20,8 +20,8 @@ const Verify = (props) => {
         e.preventDefault();
         const actionType = localStorage.getItem("actionType");
 
-        if (actionType !== "forgot-password")
-        postData("/api/v1/user/verify-email", {
+        if (actionType !== "forgot-password") {
+            postData("/api/v1/user/verify-email", {
             email: localStorage.getItem("userEmail"),
             otp: otp, // ✅ Fix here
         }).then((res) => {
@@ -39,6 +39,27 @@ const Verify = (props) => {
             console.error(err);
             context.alertBox("error", "An error occurred while verifying OTP.");
         });
+        } else {
+            postData("/api/v1/user/forgot-password", {
+            email: localStorage.getItem("userEmail"),
+            otp: otp, // ✅ Fix here
+        }).then((res) => {
+            console.log(res);
+
+            if (res.success) {
+                context.alertBox("success", res?.message);
+                localStorage.removeItem("userEmail")
+                history("/forgot-password");
+                // Navigate or clear localStorage if needed
+            } else {
+                context.alertBox("error", res?.message || "OTP verification failed.");
+            }
+        }).catch((err) => {
+            console.error(err);
+            context.alertBox("error", "An error occurred while verifying OTP.");
+        });
+        }
+        
     };
 
 
