@@ -20,6 +20,7 @@ import { SlLocationPin } from "react-icons/sl";
 import { FaRegHeart } from "react-icons/fa6";
 import { IoBagCheckOutline } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
+import { getData, postData } from "../../utils/api.js";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
@@ -32,6 +33,9 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = (props) => {
     const [anchorEl, setAnchorEl] = useState(null);
     const open = Boolean(anchorEl);
+    const context = useContext(MyContext);
+
+
     const handleClick = (event) => {
         setAnchorEl(event.currentTarget);
     };
@@ -39,7 +43,20 @@ const Header = (props) => {
         setAnchorEl(null);
     };
 
-    const context = useContext(MyContext);
+    const logout = () => {
+        setAnchorEl(null);
+        postData("/api/v1/user/logout", {withCredentials: true}).then((res) => {
+            console.log(res);
+            if (res?.error !== true) {
+                context.setIsLoggedIn(false);
+                localStorage.removeItem("accessToken");
+                localStorage.removeItem("refreshToken");
+                // localStorage.removeItem("userEmail");
+                context.alertBox("success", res?.message);
+                window.location.reload();
+            }
+        });
+    }
 
     return (
         <header className="bg-white sticky shadow-sm top-0 z-50">
@@ -120,10 +137,10 @@ const Header = (props) => {
 
                                         <div className="info flex flex-col">
                                             <h4 className="text-[14px] font-[300] text-left justify-start leading-3 text-[rgba(0,0,0,0.6)]">
-                                                {props?.data?.name}
+                                                {context?.userData?.name}
                                             </h4>
                                             <span className="text-[13px] text-left justify-start text-[rgba(0,0,0,0.6)]">
-                                                {props?.data?.email}
+                                                {context?.userData?.email}
                                             </span>
                                         </div>
                                     </Button>
@@ -205,7 +222,7 @@ const Header = (props) => {
                                             </MenuItem>
                                         </Link>
                                         <MenuItem
-                                            onClick={handleClose}
+                                            onClick={logout}
                                             className="flex gap-2 opacity-75 !py-2"
                                         >
                                             <MdLogout className="text-[18px]" />{" "}

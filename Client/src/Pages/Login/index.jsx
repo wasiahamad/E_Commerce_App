@@ -11,7 +11,7 @@ import { postData } from "../../utils/api";
 
 
 
-const Login = ( props) => {
+const Login = (props) => {
     // loading state
     const [loading, setLoading] = useState(false);
     // password visibility state
@@ -48,7 +48,7 @@ const Login = ( props) => {
         setLoading(true);
 
         // API call
-        postData("/api/v1/user/login", formData)
+        postData("/api/v1/user/login", formData, { withCredentials: true })
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {
@@ -57,12 +57,13 @@ const Login = ( props) => {
                         email: "",
                         password: "",
                     });
-                    setLoading(false);   
-                    localStorage.setItem("accessToken", res?.data?.accessToken);
-                    localStorage.setItem("refreshToken", res?.data?.refreshToken);  
+                    setLoading(false);
+                    localStorage.setItem("accessToken", res?.accessToken);
+                    localStorage.setItem("refreshToken", res?.refreshToken);
                     console.log("username", res?.data?.name);
-
+                    context.setIsLoggedIn(true);
                     history("/");
+
                 } else {
                     context.alertBox("error", res?.message);
                     setLoading(false);
@@ -71,8 +72,15 @@ const Login = ( props) => {
     };
 
     const forgotPassword = () => {
-        context.alertBox("success", "OTP has been sent to your email");
-        history("/verify");
+        if (formData.email === "") {
+            context.alertBox("error", "Please enter your email address");
+        } else {
+            localStorage.setItem("userEmail", formData.email);
+            localStorage.setItem("actionType", 'forgot-password');
+           history("/verify");
+           context.alertBox("success", "An OTP has been sent to your email address");
+
+        }
     }
 
     return (

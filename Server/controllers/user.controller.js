@@ -266,6 +266,8 @@ export const loginUser = async (req, res) => {
             error: false,
             success: true,
             data: user,
+            accessToken: accessToken,
+            refreshToken: refreshToken,
         });
     } catch (error) {
         return res.status(500).json({
@@ -281,14 +283,6 @@ export const loginUser = async (req, res) => {
 export const logoutUser = async (req, res) => {
     try {
         const userId = req.query.userId; // Get user ID from query parameter 
-        // if (!userId) {
-        //     return res.status(400).json({
-        //         message: "User ID is required",
-        //         error: true,
-        //         success: false,
-        //     });
-        // }
-
         // Clear cookies
         res.clearCookie("refreshToken", { httpOnly: true, secure: true, sameSite: "none" });
         res.clearCookie("accessToken", { httpOnly: true, secure: true, sameSite: "none" });

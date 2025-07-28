@@ -5,7 +5,7 @@ import Home from "./Pages/Home";
 import ProductListing from "./Pages/ProdustListing";
 import Footer from "./components/Footer";
 import ProductDetails from "./Pages/ProductDetails";
-import { createContext, useState } from "react";
+import { createContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import Dialog from "@mui/material/Dialog";
 import DialogContent from "@mui/material/DialogContent";
@@ -22,15 +22,16 @@ import Checkout from "./Pages/Checkout";
 import MyAccount from "./Pages/MyAccount";
 import MyList from "./Pages/MyList";
 import Orders from "./Pages/Orders";
+import { getData } from "./utils/api";
 
 // react toast alert function
-  const alertBox = (status, msg) => {
-    if (status === "success") {
-      toast.success(msg);
-    } else {
-      toast.error(msg);
-    }
+const alertBox = (status, msg) => {
+  if (status === "success") {
+    toast.success(msg);
+  } else {
+    toast.error(msg);
   }
+}
 
 const MyContext = createContext();
 function App() {
@@ -38,8 +39,25 @@ function App() {
   const [maxWidth, setMaxWidth] = useState("lg");
   const [fullWidth, setFullWidth] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   const [openCardPanel, setOpenCardPanel] = useState(false);
+
+  // useEffect
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token !== null && token !== undefined && token !== "") {
+      setIsLoggedIn(true);
+      getData("/api/v1/user/details").then((res) => {
+        console.log(res);
+        if (res?.error !== true) {
+          setUserData(res?.data);
+        }
+      })
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [isLoggedIn]);
 
   const toggleCardPanel = (newOpen) => () => {
     setOpenCardPanel(newOpen);
@@ -57,7 +75,9 @@ function App() {
     openCardPanel,
     alertBox,
     isLoggedIn,
-    setIsLoggedIn
+    setIsLoggedIn,
+    userData,
+    setUserData
   };
 
   return (
@@ -127,9 +147,7 @@ function App() {
         </MyContext.Provider>
       </BrowserRouter>
 
-      <Toaster position="top-right"
-        reverseOrder={true}
-      />
+      <Toaster />
 
       <Dialog
         fullWidth={fullWidth}

@@ -18,6 +18,9 @@ const Verify = (props) => {
 
     const verifyOtp = (e) => {
         e.preventDefault();
+        const actionType = localStorage.getItem("actionType");
+
+        if (actionType !== "forgot-password")
         postData("/api/v1/user/verify-email", {
             email: localStorage.getItem("userEmail"),
             otp: otp, // ✅ Fix here
