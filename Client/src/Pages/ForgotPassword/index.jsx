@@ -1,24 +1,75 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState } from "react";
 import TextField from "@mui/material/TextField";
-import { Button } from "@mui/material";
+import { Button, CircularProgress } from "@mui/material";
 import { IoEyeSharp } from "react-icons/io5";
 import { IoEyeOffSharp } from "react-icons/io5";
-import { Link, useNavigate } from "react-router-dom";
-import { FcGoogle } from "react-icons/fc";
+import { useNavigate } from "react-router-dom";
 import { MyContext } from "../../App";
+import { postData } from "../../utils/api";
 
 const ForgotPassword = () => {
     // password visibility state
     const [showPassword, setShowPassword] = useState(false);
     const [showPassword2, setShowPassword2] = useState(false);
+    const [loading, setLoading] = useState(false);
 
-
-    // function to handle password visibility
-    const handlePasswordVisibility = () => {
-        setShowPassword(!showPassword);
-    };
     const context = useContext(MyContext);
     const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+        email: localStorage.getItem("userEmail"),
+        newPassword: "",
+        confirmPassword: "",
+    })
+
+    const validValue = Object.values(formData).every((item) => item);
+
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormData(() => {
+            return {
+                ...formData,
+                [name]: value,
+            };
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        if (formData.newPassword === "" || formData.confirmPassword === "") {
+            setLoading(false);
+            return context.alertBox("error", "All fields are required");
+        }
+
+        if (formData.newPassword !== formData.confirmPassword) {
+            setLoading(false);
+            return context.alertBox("error", "Passwords do not match");
+        }
+
+        // API call
+        postData("/api/v1/user/resetPassword", formData)
+            .then((res) => {
+                console.log("response", res);
+                if (res?.error !== true) {
+                    context.alertBox("success", res?.message);
+                    setFormData({
+                        newPassword: "",
+                        confirmPassword: "",
+                    });
+                    localStorage.removeItem("userEmail");
+                    // Clear localStorage or perform any other necessary actions
+                    setLoading(false);
+                    navigate("/login");
+                } else {
+                    context.alertBox("error", res?.message);
+                    setLoading(false);
+                }
+            });
+    };
+
+
 
     return (
         <section className="section py-10">
@@ -27,7 +78,7 @@ const ForgotPassword = () => {
                     <h2 className="text-[18px] font-semibold text-black text-center mb-4">
                         Login to your account
                     </h2>
-                    <form action="" className="w-full mt-5 ">
+                    <form action="" className="w-full mt-5 " onSubmit={handleSubmit}>
                         <div className="form-group relative w-full mb-5">
                             <TextField
                                 id="password"
@@ -35,8 +86,10 @@ const ForgotPassword = () => {
                                 variant="outlined"
                                 className="w-full"
                                 type={showPassword ? "text" : "password"}
-                                name="password"
-                                required
+                                name="newPassword"
+                                onChange={onChangeInput}
+                                value={formData.newPassword}
+                                disabled={loading === true ? true : false}
                             />
 
                             <Button
@@ -60,9 +113,11 @@ const ForgotPassword = () => {
                                 label="Confirm Password "
                                 variant="outlined"
                                 className="w-full"
-                                name="confirmpassword"
+                                name="confirmPassword"
                                 type={showPassword2 ? "text" : "password"}
-                                required
+                                onChange={onChangeInput}
+                                value={formData.confirmPassword}
+                                disabled={loading === true ? true : false}
                             />
 
                             <Button
@@ -83,9 +138,15 @@ const ForgotPassword = () => {
 
                         <div className="flex items-center mt-4">
                             <Button
-                                className="w-full !bg-[#ff5252] !text-white !rounded-md !h-[47px] !text-[14px] !font-[600] "
+                                disabled={!validValue}
+                                type="submit"
+                                className="w-full !bg-[#ff5252] !text-white hover:!bg-black !rounded-md !h-[47px] !text-[14px] !font-[600] flex gap-3"
                             >
-                                Change Password
+                                {
+                                    loading === true ? <CircularProgress color="inherit" size={20} />
+                                        :
+                                        "Change Password"
+                                }
                             </Button>
                         </div>
 

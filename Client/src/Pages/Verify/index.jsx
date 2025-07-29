@@ -38,15 +38,15 @@ const Verify = (props) => {
                 context.alertBox("error", "An error occurred while verifying OTP.");
             });
         } else {
-            postData("/api/v1/user/forgot-password", {
+            postData("/api/v1/user/verify-otp", {
                 email: localStorage.getItem("userEmail"),
                 otp: otp,
             }).then((res) => {
                 console.log(res);
                 if (res?.error === false) {
                     context.alertBox("success", res?.message);
-                    localStorage.removeItem("userEmail")
-                    navigate("/login");
+                    // localStorage.removeItem("userEmail")
+                    navigate("/forgot-password");
                     // Navigate or clear localStorage if needed
                 } else {
                     context.alertBox("error", res?.message || "OTP verification failed.");

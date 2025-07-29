@@ -595,7 +595,7 @@ export const verifyForgotPasswordOtp = async (req, res) => {
 
         // 5. Success response
         return res.status(200).json({
-            message: "OTP is valid",
+            message: "OTP verified successfully",
             error: false,
             success: true,
         });
