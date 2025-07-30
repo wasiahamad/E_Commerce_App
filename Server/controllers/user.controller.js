@@ -339,11 +339,6 @@ export const uploadUserImage = async (req, res) => {
                     });
                 }
                 console.log("Image deleted:", imagePrev);
-                return res.status(200).json({
-                    message: "Image removed successfully",
-                    error: false,
-                    success: true,
-                });
             });
         }
 
@@ -367,7 +362,7 @@ export const uploadUserImage = async (req, res) => {
             message: "Image uploaded successfully",
             error: false,
             success: true,
-            data: imagesArr,
+            data: user,
         });
 
     } catch (error) {

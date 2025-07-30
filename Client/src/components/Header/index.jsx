@@ -20,7 +20,7 @@ import { SlLocationPin } from "react-icons/sl";
 import { FaRegHeart } from "react-icons/fa6";
 import { IoBagCheckOutline } from "react-icons/io5";
 import { MdLogout } from "react-icons/md";
-import { getData, postData } from "../../utils/api.js";
+import { postData } from "../../utils/api.js";
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
     "& .MuiBadge-badge": {
@@ -45,15 +45,16 @@ const Header = () => {
 
     const logout = () => {
         setAnchorEl(null);
-        postData("/api/v1/user/logout", {withCredentials: true}).then((res) => {
+        postData("/api/v1/user/logout", { withCredentials: true }).then((res) => {
             console.log(res);
             if (res?.error !== true) {
-                context.setIsLoggedIn(false);
+                context.alertBox("success", res?.message);
+                
                 localStorage.removeItem("accessToken");
                 localStorage.removeItem("refreshToken");
-                // localStorage.removeItem("userEmail");
-                context.alertBox("success", res?.message);
-                // window.location.reload();
+                localStorage.removeItem("userEmail");
+                context.setIsLoggedIn(false);
+                window.location.href = "/"; // Redirect to home page
             }
         });
     }

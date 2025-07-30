@@ -23,6 +23,7 @@ import MyAccount from "./Pages/MyAccount";
 import MyList from "./Pages/MyList";
 import Orders from "./Pages/Orders";
 import { getData } from "./utils/api";
+import PrivateRoute from "./components/PrivateRoute";
 
 // react toast alert function
 const alertBox = (status, msg) => {
@@ -89,58 +90,47 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route
               path="/productListing"
-              exact={true}
               element={<ProductListing />}
             />
             <Route
               path="/productDetails/:id"
-              exact={true}
               element={<ProductDetails />}
             />
             <Route
               path="/login"
-              exact={true}
               element={<Login />}
             />
             <Route
               path="/register"
-              exact={true}
               element={<Register />}
             />
             <Route
               path="/cart"
-              exact={true}
-              element={<Card />}
+              element={<PrivateRoute><Card /></PrivateRoute>}
             />
             <Route
               path="/verify"
-              exact={true}
               element={<Verify />}
             />
             <Route
               path="/forgot-password"
-              exact={true}
               element={<ForgotPassword />}
             />
             <Route
               path="/checkout"
-              exact={true}
-              element={<Checkout />}
+              element={<PrivateRoute><Checkout /></PrivateRoute>}
             />
             <Route
               path="/my-account"
-              exact={true}
-              element={<MyAccount />}
+              element={<PrivateRoute><MyAccount /></PrivateRoute>}
             />
             <Route
               path="/my-list"
-              exact={true}
-              element={<MyList />}
+              element={<PrivateRoute><MyList /></PrivateRoute>}
             />
             <Route
               path="/my-orders"
-              exact={true}
-              element={<Orders />}
+              element={<PrivateRoute><Orders /></PrivateRoute>}
             />
           </Routes>
           <Footer />
