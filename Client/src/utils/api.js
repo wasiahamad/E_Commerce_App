@@ -51,7 +51,6 @@ export const postData = async (url, formData) => {
     }
 };
 
-
 // Function to make a GET request
 export const getData = async (url) => {
     try {

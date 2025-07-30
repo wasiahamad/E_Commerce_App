@@ -45,19 +45,58 @@ function App() {
   const [openCardPanel, setOpenCardPanel] = useState(false);
 
   // useEffect
+  // useEffect(() => {
+  //   const token = localStorage.getItem("accessToken");
+  //   if (token !== null && token !== undefined && token !== "") {
+  //     setIsLoggedIn(true);
+  //     getData("/api/v1/user/details").then((res) => {
+  //       setUserData(res.data);
+  //       console.log(res?.data?.error);
+  //       if (res?.response?.data?.error && res?.response?.data?.error?.message === "Invalid token") {
+  //         alertBox("error", res.data.error || "Something went wrong");
+  //         localStorage.removeItem("accessToken");
+  //         localStorage.removeItem("refreshToken");
+  //         window.location.href = "/login"; // redirect to login
+  //         setIsLoggedIn(false);
+  //       } else {
+  //         alertBox("success", "User data fetched successfully");
+  //       }
+
+  //     })
+  //   } else {
+  //     setIsLoggedIn(false);
+  //   }
+  // }, [isLoggedIn]);
+
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token !== null && token !== undefined && token !== "") {
+
+    if (token) {
       setIsLoggedIn(true);
-      getData("/api/v1/user/details").then((res) => {
-        setUserData(res.data);
-        console.log(res);
-        
-      })
+
+      getData("/api/v1/user/details")
+        .then((res) => {
+          setUserData(res.data);
+          alertBox("success", "User data fetched successfully");
+        })
+        .catch((err) => {
+          const message = err?.response?.data?.message || err?.message;
+
+          if (message === "Invalid token") {
+            alertBox("error", "Session expired. Please login again.");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            setIsLoggedIn(false);
+            window.location.href = "/login"; // force redirect
+          } else {
+            alertBox("error", "Something went wrong while fetching user.");
+          }
+        });
     } else {
       setIsLoggedIn(false);
     }
-  }, [isLoggedIn]);
+  }, []);
+
 
   const toggleCardPanel = (newOpen) => () => {
     setOpenCardPanel(newOpen);

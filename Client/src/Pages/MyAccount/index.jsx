@@ -5,7 +5,7 @@ import { Button, CircularProgress, TextField } from '@mui/material';
 import AccountSideBar from '../../components/AccountSideBar';
 import { useNavigate } from 'react-router-dom';
 import { MyContext } from '../../App';
-import { editUserData } from '../../utils/api';
+import { editUserData, postData } from '../../utils/api';
 
 
 const MyAccount = () => {
@@ -13,11 +13,20 @@ const MyAccount = () => {
     const navigate = useNavigate();
 
     const [loading, setLoading] = useState(false);
-    const [userId, setUserId] = useState(context.userId || "");
+    const [loading2, setLoading2] = useState(false);
+    const [openChangePassword, setOpenChangePassword] = useState(false);
+
     const [formData, setFormData] = useState({
         name: "",
         email: "",
         mobile: "",
+    });
+
+    const [changePassword, setChangePassword] = useState({
+        email: "",
+        oldpassword: "",
+        newpassword: "",
+        confirmpassword: "",
     });
 
     // useEffect to set initial form data
@@ -27,6 +36,10 @@ const MyAccount = () => {
                 name: context?.userData?.name,
                 email: context?.userData?.email,
                 mobile: context?.userData?.mobile,
+            });
+
+            setChangePassword({
+                email: context?.userData?.email
             });
         }
     }, [context?.userData]);
@@ -44,7 +57,19 @@ const MyAccount = () => {
                 [name]: value,
             };
         });
+
+        setChangePassword(() => {
+            return {
+                ...changePassword,
+                [name]: value,
+            };
+        });
     };
+
+    // check if all form fields are valid
+    const validValue2 = Object.values(changePassword).every((item) => item);
+
+
 
     // function to handle form submission
     const handleSubmit = (e) => {
@@ -58,19 +83,54 @@ const MyAccount = () => {
                 if (res?.error !== true) {
                     context.alertBox("success", res?.message);
                     setFormData({
-                        email: "",
-                        password: "",
+                        name: res?.data?.name,
+                        email: res?.data?.email,
+                        mobile: res?.data?.mobile,
                     });
                     setLoading(false);
-                    localStorage.setItem("accessToken", res?.accessToken);
-                    localStorage.setItem("refreshToken", res?.refreshToken);
-                    console.log("username", res?.data?.name);
-                    context.setIsLoggedIn(true);
-                    navigate("/");
-
+                    navigate("/my-account");
+                    context.setUserData(res?.data);
                 } else {
                     context.alertBox("error", res?.message);
                     setLoading(false);
+                }
+            });
+    };
+
+    // function to handle password change
+    const handleChangePassword = (e) => {
+        e.preventDefault();
+        setLoading2(true);
+
+        if (changePassword.oldpassword === "") {
+            setLoading2(false);
+            context.alertBox("error", "Old password is required");
+            return;
+        }
+
+        if (changePassword.newpassword === "" || changePassword.confirmpassword === "") {
+            setLoading2(false);
+            context.alertBox("error", "Please fill in all fields");
+            return;
+        }
+
+        if (changePassword.newpassword !== changePassword.confirmpassword) {
+            setLoading2(false);
+            context.alertBox("error", "Passwords do not match");
+            return;
+        }
+
+        // API call
+        postData(`/api/v1/user/resetPassword`, changePasswordData, { withCredentials: true })
+            .then((res) => {
+                console.log("response", res);
+                if (res?.error !== true) {
+                    context.alertBox("success", res?.message);
+                    setLoading2(false);
+                    navigate("/my-account");
+                } else {
+                    context.alertBox("error", res?.message);
+                    setLoading2(false);
                 }
             });
     };
@@ -83,11 +143,16 @@ const MyAccount = () => {
                 </div>
 
                 <div className="col2 w-[50%]">
-                    <div className="card shadow-md rounded-md bg-white p-5">
-                        <h2 className='pb-3'>My Profile</h2>
+                    <div className="card shadow-md mb-5 rounded-md bg-white p-5">
+                        <div className="flex items-center justify-between mb-5">
+                            <h2 className='pb-3'>My Profile</h2>
+                            <Button onClick={() => setOpenEditProfile(true)}>
+                                Change Password
+                            </Button>
+                        </div>
                         <hr />
 
-                        <form action="" className=" my-5" onSubmit={handleSubmit}>
+                        <form action="" className="mt-8" onSubmit={handleSubmit}>
                             <div className="form-group flex items-center gap-5">
                                 <div className="w-[50%]">
                                     <TextField
@@ -115,7 +180,7 @@ const MyAccount = () => {
                                         name="email"
                                         onChange={onChangeInput}
                                         value={formData.email}
-                                        disabled={loading === true ? true : false}
+                                        disabled={true}
                                     />
                                 </div>
                             </div>
@@ -150,6 +215,79 @@ const MyAccount = () => {
                             </div>
                         </form>
                     </div>
+
+                    {
+                        openChangePassword === true &&
+                        <div className="card shadow-md rounded-md bg-white p-5">
+                            <div className="flex items-center justify-between pb-3">
+                                <h2 className='pb-0'>Change Password</h2>
+                            </div>
+                            <hr />
+                            <form action="" className="mt-8" onSubmit={handleChangePassword}>
+                                <div className="form-group flex items-center gap-5">
+                                    <div className="w-[50%]">
+                                        <TextField
+                                            id="oldpassword"
+                                            label="Old Password"
+                                            variant="outlined"
+                                            className="w-full"
+                                            type="password"
+                                            size="small"
+                                            name="oldpassword"
+                                            onChange={onChangeInput}
+                                            value={changePassword.oldpassword}
+                                            disabled={loading2 === true ? true : false}
+                                        />
+                                    </div>
+
+                                    <div className="w-[50%]">
+                                        <TextField
+                                            id="newpassword"
+                                            label="New Password"
+                                            variant="outlined"
+                                            className="w-full"
+                                            type="password"
+                                            size="small"
+                                            name="newpassword"
+                                            onChange={onChangeInput}
+                                            value={changePassword.newpassword}
+                                            disabled={loading2 === true ? true : false}
+                                        />
+                                    </div>
+                                </div>
+
+                                <div className="form-group flex items-center gap-5 mt-4">
+                                    <div className="w-[50%]">
+                                        <TextField
+                                            id="confirmpassword"
+                                            label="Confirm Password"
+                                            variant="outlined"
+                                            className="w-full"
+                                            type="text"
+                                            size="small"
+                                            name="confirmpassword"
+                                            onChange={onChangeInput}
+                                            value={changePassword.confirmpassword}
+                                            disabled={loading2 === true ? true : false}
+                                        />
+                                    </div>
+                                </div>
+                                <br />
+                                <div className="flex items-center ">
+                                    <Button variant='contained' className='!bg-[#f44336] font-[500]'
+                                        disabled={!validValue2 || loading2 === true ? true : false}
+                                        type="submit">
+                                        {
+                                            loading2 === true ? <CircularProgress color="inherit" size={20} />
+                                                :
+                                                "Change Password"
+                                        }
+                                    </Button>
+                                </div>
+                            </form>
+                        </div>
+
+                    }
                 </div>
             </div>
         </section>

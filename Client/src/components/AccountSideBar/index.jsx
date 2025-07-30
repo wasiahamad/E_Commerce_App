@@ -78,7 +78,7 @@ const AccountSideBar = () => {
                                   {previewImage ? (
                                         <img src={previewImage} alt="User Avatar" className="w-full h-full object-cover" />
                                     ) : (
-                                        <img src="/public/user.jpg" alt="Default Avatar" className="w-full h-full object-cover" />
+                                        <img src="/user.jpg" alt="Default Avatar" className="w-full h-full object-cover" />
                                     )}   
 
                             </>
