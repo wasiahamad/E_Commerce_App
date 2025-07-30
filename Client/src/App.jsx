@@ -50,10 +50,9 @@ function App() {
     if (token !== null && token !== undefined && token !== "") {
       setIsLoggedIn(true);
       getData("/api/v1/user/details").then((res) => {
+        setUserData(res.data);
         console.log(res);
-        if (res?.error !== true) {
-          setUserData(res?.data);
-        }
+        
       })
     } else {
       setIsLoggedIn(false);
