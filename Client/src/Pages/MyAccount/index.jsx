@@ -1,7 +1,7 @@
 import React, { use, useContext, useEffect, useState } from 'react';
 
 import { Button, CircularProgress, TextField } from '@mui/material';
-
+import { Collapse } from 'react-collapse';
 import AccountSideBar from '../../components/AccountSideBar';
 import { useNavigate } from 'react-router-dom';
 import { MyContext } from '../../App';
@@ -121,7 +121,7 @@ const MyAccount = () => {
         }
 
         // API call
-        postData(`/api/v1/user/resetPassword`, changePasswordData, { withCredentials: true })
+        postData(`/api/v1/user/resetPassword`, changePassword, { withCredentials: true })
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {
@@ -146,7 +146,7 @@ const MyAccount = () => {
                     <div className="card shadow-md mb-5 rounded-md bg-white p-5">
                         <div className="flex items-center justify-between mb-5">
                             <h2 className='pb-3'>My Profile</h2>
-                            <Button onClick={() => setOpenEditProfile(true)}>
+                            <Button onClick={() => setOpenChangePassword(!openChangePassword)}>
                                 Change Password
                             </Button>
                         </div>
@@ -216,8 +216,7 @@ const MyAccount = () => {
                         </form>
                     </div>
 
-                    {
-                        openChangePassword === true &&
+                    <Collapse isOpened={openChangePassword}>
                         <div className="card shadow-md rounded-md bg-white p-5">
                             <div className="flex items-center justify-between pb-3">
                                 <h2 className='pb-0'>Change Password</h2>
@@ -285,9 +284,9 @@ const MyAccount = () => {
                                     </Button>
                                 </div>
                             </form>
-                        </div>
 
-                    }
+                        </div>
+                    </Collapse>
                 </div>
             </div>
         </section>

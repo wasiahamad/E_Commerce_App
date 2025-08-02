@@ -76,6 +76,7 @@ function App() {
 
       getData("/api/v1/user/details")
         .then((res) => {
+          
           setUserData(res.data);
           alertBox("success", "User data fetched successfully");
         })
