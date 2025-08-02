@@ -24,9 +24,9 @@ const MyAccount = () => {
 
     const [changePassword, setChangePassword] = useState({
         email: "",
-        oldpassword: "",
-        newpassword: "",
-        confirmpassword: "",
+        password: "",
+        newPassword: "",
+        confirmPassword: "",
     });
 
     // useEffect to set initial form data
@@ -71,7 +71,7 @@ const MyAccount = () => {
 
 
 
-    // function to handle form submission
+    // function to handle form submission for profile
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
@@ -102,21 +102,21 @@ const MyAccount = () => {
         e.preventDefault();
         setLoading2(true);
 
-        if (changePassword.oldpassword === "") {
+        if (changePassword.password === "") {
             setLoading2(false);
             context.alertBox("error", "Old password is required");
             return;
         }
 
-        if (changePassword.newpassword === "" || changePassword.confirmpassword === "") {
+        if (changePassword.newPassword === "" || changePassword.confirmPassword === "") {
             setLoading2(false);
-            context.alertBox("error", "Please fill in all fields");
+            context.alertBox("error", "Please fill new password and confirm password");
             return;
         }
 
-        if (changePassword.newpassword !== changePassword.confirmpassword) {
+        if (changePassword.newPassword !== changePassword.confirmPassword) {
             setLoading2(false);
-            context.alertBox("error", "Passwords do not match");
+            context.alertBox("error", "New password and confirm password do not match");
             return;
         }
 
@@ -128,6 +128,13 @@ const MyAccount = () => {
                     context.alertBox("success", res?.message);
                     setLoading2(false);
                     navigate("/my-account");
+                    // uske bad form ko bnd kr dena h 
+                    setChangePassword({
+                        password: "",
+                        newPassword: "",
+                        confirmPassword: "",
+                    });
+
                 } else {
                     context.alertBox("error", res?.message);
                     setLoading2(false);
@@ -226,30 +233,30 @@ const MyAccount = () => {
                                 <div className="form-group flex items-center gap-5">
                                     <div className="w-[50%]">
                                         <TextField
-                                            id="oldpassword"
+                                            id="password"
                                             label="Old Password"
                                             variant="outlined"
                                             className="w-full"
                                             type="password"
                                             size="small"
-                                            name="oldpassword"
+                                            name="password"
                                             onChange={onChangeInput}
-                                            value={changePassword.oldpassword}
+                                            value={changePassword.password}
                                             disabled={loading2 === true ? true : false}
                                         />
                                     </div>
 
                                     <div className="w-[50%]">
                                         <TextField
-                                            id="newpassword"
+                                            id="newPassword"
                                             label="New Password"
                                             variant="outlined"
                                             className="w-full"
                                             type="password"
                                             size="small"
-                                            name="newpassword"
+                                            name="newPassword"
                                             onChange={onChangeInput}
-                                            value={changePassword.newpassword}
+                                            value={changePassword.newPassword}
                                             disabled={loading2 === true ? true : false}
                                         />
                                     </div>
@@ -258,15 +265,15 @@ const MyAccount = () => {
                                 <div className="form-group flex items-center gap-5 mt-4">
                                     <div className="w-[50%]">
                                         <TextField
-                                            id="confirmpassword"
+                                            id="confirmPassword"
                                             label="Confirm Password"
                                             variant="outlined"
                                             className="w-full"
                                             type="text"
                                             size="small"
-                                            name="confirmpassword"
+                                            name="confirmPassword"
                                             onChange={onChangeInput}
-                                            value={changePassword.confirmpassword}
+                                            value={changePassword.confirmPassword}
                                             disabled={loading2 === true ? true : false}
                                         />
                                     </div>

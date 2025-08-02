@@ -607,9 +607,9 @@ export const verifyForgotPasswordOtp = async (req, res) => {
 // Reset password controller
 export const resetPaaword = async (req, res) => {
     try {
-        const { email, newPassword, confirmPassword } = req.body;
+        const { email,password, newPassword, confirmPassword } = req.body;
 
-        if (!email || !newPassword || !confirmPassword) {
+        if (!email || !password || !newPassword || !confirmPassword) {
             return res.status(404).json({
                 message: "All Fields are required",
                 error: true,
@@ -622,6 +622,16 @@ export const resetPaaword = async (req, res) => {
         if (!user) {
             return res.status(404).json({
                 message: "User not found",
+                error: true,
+                success: false,
+            });
+        }
+
+        // check if password is correct 
+        const isPasswordCorrect = await bcrypt.compare(password, user.password);
+        if (!isPasswordCorrect) {
+            return res.status(404).json({
+                message: "your old password is incorrect",
                 error: true,
                 success: false,
             });

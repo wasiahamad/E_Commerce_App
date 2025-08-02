@@ -70,15 +70,12 @@ function App() {
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-
-    if (token) {
+    if (token !== null && token !== undefined && token !== "") {
       setIsLoggedIn(true);
-
       getData("/api/v1/user/details")
         .then((res) => {
-          
-          setUserData(res.data);
           alertBox("success", "User data fetched successfully");
+          setUserData(res?.data);
         })
         .catch((err) => {
           const message = err?.response?.data?.message || err?.message;
@@ -96,7 +93,7 @@ function App() {
     } else {
       setIsLoggedIn(false);
     }
-  }, []);
+  }, [ isLoggedIn]);
 
 
   const toggleCardPanel = (newOpen) => () => {

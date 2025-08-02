@@ -20,7 +20,17 @@ import VerifyAccount from './Pages/VerifyAccount'
 import ChangePassword from './Pages/ChangePassword'
 import BannerV1 from './Pages/BannerV1'
 import BannerV2 from './Pages/BannerV2'
+import toast, { Toaster } from 'react-hot-toast';
 
+
+
+const alertBox = (status, msg) => {
+  if (status === "success") {
+    toast.success(msg);
+  } else {
+    toast.error(msg);
+  }
+}
 
 export const MyContext = createContext();
 function App() {
@@ -180,7 +190,7 @@ function App() {
                 <Sidebar />
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-                <SubCategoryList />
+              <SubCategoryList />
               {/* </div> */}
             </div>
           </section>
@@ -201,7 +211,7 @@ function App() {
                 <Sidebar />
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-                <Users />
+              <Users />
               {/* </div> */}
             </div>
           </section>
@@ -222,7 +232,7 @@ function App() {
                 <Sidebar />
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-                <Orders />
+              <Orders />
               {/* </div> */}
             </div>
           </section>
@@ -243,7 +253,7 @@ function App() {
                 <Sidebar />
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-                <BannerV1 />
+              <BannerV1 />
               {/* </div> */}
             </div>
           </section>
@@ -263,7 +273,7 @@ function App() {
                 <Sidebar />
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-                <BannerV2 />
+              <BannerV2 />
               {/* </div> */}
             </div>
           </section>
@@ -278,7 +288,8 @@ function App() {
     isLoggedIn,
     setIsLoggedIn,
     isOpenAddProductForm,
-    setIsOpenAddProductForm
+    setIsOpenAddProductForm,
+    alertBox
   }
 
 
@@ -287,6 +298,7 @@ function App() {
       <MyContext.Provider value={value}>
         <RouterProvider router={router} />
         <AddProductForm />
+        <Toaster />
       </MyContext.Provider>
     </>
   )

@@ -9,7 +9,6 @@ import { postData } from "../../utils/api";
 import { MyContext } from "../../App";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from "react-router-dom";
-
 const Register = () => {
     // loading state
     const [loading, setLoading] = useState(false);

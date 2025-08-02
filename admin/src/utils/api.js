@@ -1,0 +1,123 @@
+import axios from "axios";
+const apiUrl = import.meta.env.VITE_API_URL;
+
+
+// Function to make a POST request
+// export const postData = async (url, formData) => {
+//     try {
+//         const response = await fetch(apiUrl + url, {
+//             method: "POST",
+//             headers: {
+//                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+//                 "Content-Type": "application/json", // Specify the content type as JSON
+//             },
+//             body: JSON.stringify(formData),
+//         });
+
+//         const data = await response.json();
+//         return data;
+//     } catch (error) {
+//         console.error(error);
+//         throw error;
+//     }
+// };
+
+export const postData = async (url, formData) => {
+    try {
+        const response = await fetch(apiUrl + url, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(formData),
+        });
+
+        // If token is expired or invalid
+        if (response.status === 401 || response.status === 403) {
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            localStorage.removeItem("userEmail");
+            window.location.href = "/"; // 👈 redirect to home
+            return { error: true, message: "Session expired. Please login again." };
+        }
+
+        const data = await response.json();
+        return data;
+
+    } catch (error) {
+        console.error("Fetch error:", error);
+        throw error;
+    }
+};
+
+// Function to make a GET request
+export const getData = async (url) => {
+    try {
+        const { data } = await axios.get(apiUrl + url, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+                "Content-Type": "application/json",
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+// Function to make a PUT request
+export const editData = async (url, updateData) => {
+    try {
+        const params = {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+                "Content-Type": "multipart/form-data", // Specify the content type as multipart/form-data for file uploads
+            },
+        }
+
+        let response;
+        await axios.put(apiUrl + url, updateData, params)
+            .then((res) => {
+                console.log("Response from editData:", res);
+                response = res;
+            })
+            .catch((err) => {
+                console.error(err);
+                response = { error: true, message: "Error updating data" };
+            });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+export const editUserData = async (url, updateData) => {
+    try {
+        const params = {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+                "Content-Type": "application/json", // Specify the content type as JSON
+            },
+        }
+
+        let response;
+        await axios.put(apiUrl + url, updateData, params)
+            .then((res) => {
+                console.log("Response from editData:", res);
+                response = res;
+            })
+            .catch((err) => {
+                console.error(err);
+                response = { error: true, message: "Error updating data" };
+            });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
+
+

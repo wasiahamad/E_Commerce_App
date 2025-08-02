@@ -1,6 +1,6 @@
 import { Button } from '@mui/material'
 import React, { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { FaRegUser } from "react-icons/fa6";
 import { TbLogin2 } from "react-icons/tb";
 import { FcGoogle } from "react-icons/fc";
@@ -8,18 +8,71 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { FaRegEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
+import { CircularProgress } from '@mui/material';
+import { postData } from '../../utils/api';
+import { MyContext } from '../../App';
+import { useContext } from 'react';
+
 
 
 const LogIn = () => {
-
+    // loading state
+    const [loading, setLoading] = useState(false);
     const [loadingGoogle, setLoadingGoogle] = useState(false);
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const context = useContext(MyContext);
+    const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+        email: "",
+        password: "",
+    });
+
+    // function to handle input change
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormData(() => {
+            return {
+                ...formData,
+                [name]: value,
+            };
+        });
+    };
+
+    // handle to the form
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        // API call
+        postData("/api/v1/user/login", formData, { withCredentials: true })
+            .then((res) => {
+                console.log("response", res);
+                if (res?.error !== true) {
+                    context.alertBox("success", res?.message);
+                    setFormData({
+                        email: "",
+                        password: "",
+                    });
+                    setLoading(false);
+                    localStorage.setItem("accessToken", res?.accessToken);
+                    localStorage.setItem("refreshToken", res?.refreshToken);
+                    console.log("username", res?.data?.name);
+                    context.setIsLoggedIn(true);
+                    navigate("/");
+
+                } else {
+                    context.alertBox("error", res?.message);
+                    setLoading(false);
+                }
+            });
+    };
 
     function handleClickGoogle() {
         setLoadingGoogle(true);
     }
 
-   
+
 
     return (
         <section className=' bg-[#fff] w-full'>
@@ -37,10 +90,10 @@ const LogIn = () => {
                     </NavLink>
 
                     <Link to="/signup">
-                    <Button 
-                        className=' !text-black !rounded-full !py-2 !px-4'>
-                        <FaRegUser size={15} className='mr-1' /> Sign Up
-                    </Button>
+                        <Button
+                            className=' !text-black !rounded-full !py-2 !px-4'>
+                            <FaRegUser size={15} className='mr-1' /> Sign Up
+                        </Button>
                     </Link>
                 </div>
             </header>
@@ -76,26 +129,36 @@ const LogIn = () => {
                     <span className='flex items-center w-[150px] h-[1px] bg-slate-400 '></span>
                 </div>
 
-                <form action="" className='w-full px-8 mt-5'>
+                <form action="" onSubmit={handleSubmit} className='w-full px-8 mt-5'>
                     <div className="form-group mb-4 w-full">
                         <h4 className='text-[14px] font-[500] mb-1'>Email</h4>
                         <input type="email"
                             className='w-full h-[50px] border border-[rgba(0,0,0,0.2)] rounded-md px-4 focus:border-[rgba(0,0,0,0.5)] focus:outline-none'
-                            placeholder='Enter Your Email' />
+                            placeholder='Enter Your Email'
+                            name="email"
+                            onChange={onChangeInput}
+                            value={formData.email}
+                            disabled={loading === true ? true : false}
+                        />
                     </div>
 
                     <div className="form-group mb-4 w-full">
                         <h4 className='text-[14px] font-[500] mb-1'>Password</h4>
                         <div className="relative w-full ">
-                            <input 
+                            <input
                                 type={isPasswordVisible ? "text" : "password"}
                                 className='w-full h-[50px] border border-[rgba(0,0,0,0.2)] rounded-md px-4 focus:border-[rgba(0,0,0,0.5)] focus:outline-none'
-                                placeholder='Enter Your Password' />
+                                placeholder='Enter Your Password'
+                                name="password"
+                                onChange={onChangeInput}
+                                value={formData.password}
+                                disabled={loading === true ? true : false}
+                            />
 
-                                <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
-                                onClick={() => {setIsPasswordVisible(!isPasswordVisible)}}>
-                                    {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
-                                </Button>
+                            <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
+                                onClick={() => { setIsPasswordVisible(!isPasswordVisible) }}>
+                                {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
+                            </Button>
                         </div>
                     </div>
 
@@ -119,7 +182,11 @@ const LogIn = () => {
                         type='submit'
                         className='!bg-[#3838ff] !text-white hover:!bg-[#000] !capitalize !rounded-md font-[600] !text-[15px] !py-2 !px-4 w-full'
                     >
-                        Sign In
+                        {
+                            loading === true ? <CircularProgress color="inherit" size={20} />
+                                :
+                                "Sign In"
+                        }
                     </Button>
                 </form>
             </div>

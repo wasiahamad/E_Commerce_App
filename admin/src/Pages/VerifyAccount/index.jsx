@@ -4,15 +4,65 @@ import { Link, NavLink } from 'react-router-dom'
 import { FaRegUser } from "react-icons/fa6";
 import { TbLogin2 } from "react-icons/tb";
 import OtpBox from '../../Components/OtpBox';
-
+import { MyContext } from '../../App';
+import { useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { postData } from '../../utils/api';
 
 
 const VerifyAccount = () => {
+    const navigate = useNavigate();
+    const context = useContext(MyContext);
 
     const [otp, setOtp] = useState('');
 
     const handleOtpChange = (e) => {
         setOtp(e);
+    };
+
+    const verifyOtp = (e) => {
+        e.preventDefault();
+
+        const actionType = localStorage.getItem("actionType");
+        if (actionType !== 'forgot-password') {
+            postData("/api/v1/user/verify-email", {
+                email: localStorage.getItem("userEmail"),
+                otp: otp, // ✅ Fix here
+            }).then((res) => {
+                console.log(res);
+                if (res?.error === false) {
+                    context.alertBox("success", res?.message);
+                    localStorage.removeItem("userEmail")
+                    navigate("/login");
+                    // Navigate or clear localStorage if needed
+                } else {
+                    context.alertBox("error", res?.message || "OTP verification failed.");
+                }
+            }).catch((err) => {
+                console.error(err);
+                context.alertBox("error", "An error occurred while verifying OTP.");
+            });
+        } else {
+            postData("/api/v1/user/verify-otp", {
+                email: localStorage.getItem("userEmail"),
+                otp: otp,
+            }).then((res) => {
+                console.log(res);
+                if (res?.error === false) {
+                    context.alertBox("success", res?.message);
+                    // localStorage.removeItem("userEmail")
+                    navigate("/forgot-password");
+                    // Navigate or clear localStorage if needed
+                } else {
+                    context.alertBox("error", res?.message || "OTP verification failed.");
+                }
+            }).catch((err) => {
+                console.error(err);
+                context.alertBox("error", "An error occurred while verifying OTP.");
+            });
+        }
+
+
     };
 
     return (
@@ -49,7 +99,7 @@ const VerifyAccount = () => {
                     Please Verify your Email
                 </h1>
                 <br />
-                <p className='text-center text-[15px] text-[rgba(0,0,0,0.8)]'>OTP send to <span className='font-bold text-[#3838ff]'> random3@gmail.com</span></p>
+                <p className='text-center text-[15px] text-[rgba(0,0,0,0.8)]'>OTP send to <span className='font-bold text-[#3838ff]'> {localStorage.getItem("userEmail")}</span></p>
 
                 <div className="flex items-center justify-center text-center flex-col mt-5 ">
                     <OtpBox length={6} onChange={handleOtpChange} />
@@ -57,12 +107,12 @@ const VerifyAccount = () => {
 
                 <div className="text-center mt-5 ">
                     <Button
-                    type='submit'
-                    
-                    className='!bg-[#3838ff] !text-white !py-2 !px-4 w-[300px] !rounded-md !capitalize font-[600] mt-5 mx-auto'
-                >
-                    Verify
-                </Button>
+                        type='submit'
+                        onClick={verifyOtp}
+                        className='!bg-[#3838ff] !text-white !py-2 !px-4 w-[300px] !rounded-md !capitalize font-[600] mt-5 mx-auto'
+                    >
+                        Verify
+                    </Button>
                 </div>
             </div>
         </section>
