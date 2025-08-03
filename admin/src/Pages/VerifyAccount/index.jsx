@@ -51,7 +51,7 @@ const VerifyAccount = () => {
                 if (res?.error === false) {
                     context.alertBox("success", res?.message);
                     // localStorage.removeItem("userEmail")
-                    navigate("/forgot-password");
+                    navigate("/change-password");
                     // Navigate or clear localStorage if needed
                 } else {
                     context.alertBox("error", res?.message || "OTP verification failed.");

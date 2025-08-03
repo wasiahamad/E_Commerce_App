@@ -21,6 +21,8 @@ import ChangePassword from './Pages/ChangePassword'
 import BannerV1 from './Pages/BannerV1'
 import BannerV2 from './Pages/BannerV2'
 import toast, { Toaster } from 'react-hot-toast';
+import { getData } from './utils/api'
+import { useEffect } from 'react'
 
 
 
@@ -37,10 +39,40 @@ function App() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [userData, setUserData] = useState(null);
   const [isOpenAddProductForm, setIsOpenAddProductForm] = useState({
     isOpen: false,
     model: '',
   });
+
+  useEffect(() => {
+    const token = localStorage.getItem("accessToken");
+    if (token !== null && token !== undefined && token !== "") {
+      setIsLoggedIn(true);
+      getData("/api/v1/user/details")
+        .then((res) => {
+          alertBox("success", "User data fetched successfully");
+          setUserData(res?.data);
+          console.log( "user data",res?.data);
+        })
+        .catch((err) => {
+          const message = err?.response?.data?.message || err?.message;
+
+          if (message === "Invalid token") {
+            alertBox("error", "Session expired. Please login again.");
+            localStorage.removeItem("accessToken");
+            localStorage.removeItem("refreshToken");
+            setIsLoggedIn(false);
+            window.location.href = "/login"; // force redirect
+          } else {
+            alertBox("error", "Something went wrong while fetching user.");
+          }
+        });
+    } else {
+      setIsLoggedIn(false);
+    }
+  }, [isLoggedIn]);
+
 
   const router = createBrowserRouter([
     {
@@ -289,7 +321,9 @@ function App() {
     setIsLoggedIn,
     isOpenAddProductForm,
     setIsOpenAddProductForm,
-    alertBox
+    alertBox,
+    userData,
+    setUserData,
   }
 
 

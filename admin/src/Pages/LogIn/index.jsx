@@ -68,11 +68,36 @@ const LogIn = () => {
             });
     };
 
+    const forgotPassword = () => {
+        if (formData.email === "") {
+            context.alertBox("error", "Please enter your email address");
+            return;
+        }
+
+        context.alertBox("success", "An OTP has been sent to your email address");
+        localStorage.setItem("userEmail", formData.email);
+        localStorage.setItem("actionType", 'forgot-password');
+
+        postData("/api/v1/user/forgot-password", {
+            email: formData.email,
+        }).then((res) => {
+            console.log(res);
+            if (res?.error === false) {
+                context.alertBox("success", res?.message);
+                console.log("Navigating to /verify...");
+                navigate("/verify-account"); // ✅ proper redirect
+            } else {
+                context.alertBox("error", res?.message);
+            }
+        }).catch((err) => {
+            console.error(err);
+            context.alertBox("error", "An error occurred while verifying OTP.");
+        });
+    }
+
     function handleClickGoogle() {
         setLoadingGoogle(true);
     }
-
-
 
     return (
         <section className=' bg-[#fff] w-full'>
@@ -165,7 +190,7 @@ const LogIn = () => {
                     <div className="form-group mb-2 w-full flex items-center justify-between ">
                         <FormControlLabel control={<Checkbox />} label="Remember Me" />
 
-                        <Link to="/forgot-password" className='text-[15px] font-[600] text-[#3838ff] hover:underline hover:text-[#000]'>
+                        <Link onClick={forgotPassword} className='text-[15px] font-[600] text-[#3838ff] hover:underline hover:text-[#000]'>
                             Forgot Password?
                         </Link>
                     </div>

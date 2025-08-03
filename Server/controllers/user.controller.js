@@ -520,7 +520,7 @@ export const forgotPassword = async (req, res) => {
             text: `Your OTP is ${otp}`,
             html: forgotPasswordTemplate({
                 username: user.name,
-                verificationLink: `${process.env.CLIENT_URL}/reset-password?code=${otp}&email=${email}`,
+                verificationLink: `${process.env.CLIENT_URL}/resetPassword?code=${otp}&email=${email}`,
                 otp,
             }),
         });
@@ -661,6 +661,56 @@ export const resetPaaword = async (req, res) => {
             success: false,
         });
     }
+}
+
+// resetpassword with otp controller 
+export const resetPasswordWithOtp = async (req, res) => {
+    try {
+        const { email, newPassword, confirmPassword } = req.body;
+
+        if (!email|| !newPassword || !confirmPassword) {
+            return res.status(404).json({
+                message: "All Fields are required",
+                error: true,
+                success: false,
+            });
+        }
+
+        // check if user exist 
+        const user = await UserModel.findOne({ email: email });
+        if (!user) {
+            return res.status(404).json({
+                message: "User not found",
+                error: true,
+                success: false,
+            });
+        }
+
+        if (newPassword !== confirmPassword) {
+            return res.status(404).json({
+                message: "newPassword and confirmPassword must be same",
+                error: true,
+                success: false,
+            });
+        }
+
+        // update user password 
+        user.password = await bcrypt.hash(newPassword, 10);
+        await user.save();
+
+        return res.status(200).json({
+            message: "Password reset successfully",
+            error: false,
+            success: true,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Server error",
+            error: true,
+            success: false,
+        });
+    }
+        
 }
 
 // refresh token controller

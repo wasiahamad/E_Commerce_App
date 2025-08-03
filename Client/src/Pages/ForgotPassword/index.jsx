@@ -49,7 +49,7 @@ const ForgotPassword = () => {
         }
 
         // API call
-        postData("/api/v1/user/resetPassword", formData)
+        postData("/api/v1/user/resetPasswordWithOtp", formData)
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {

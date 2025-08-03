@@ -1,19 +1,78 @@
 import { Button } from '@mui/material'
 import React, { useState } from 'react'
-import { Link, NavLink } from 'react-router-dom'
+import { Link, NavLink, useNavigate } from 'react-router-dom'
 import { FaRegUser } from "react-icons/fa6";
 import { TbLogin2 } from "react-icons/tb";
-import { FcGoogle } from "react-icons/fc";
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
 import { FaRegEye } from "react-icons/fa";
 import { FaEyeSlash } from "react-icons/fa";
-
+import { CircularProgress } from '@mui/material';
+import { MyContext } from '../../App';
+import { useContext } from 'react';
+import { postData } from '../../utils/api';
 
 const ChangePassword = () => {
 
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
-    const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);   
+    const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);
+    const [loading, setLoading] = useState(false);
+    const context = useContext(MyContext);
+    const navigate = useNavigate();
+
+    const [formData, setFormData] = useState({
+        email: localStorage.getItem("userEmail"),
+        newPassword: "",
+        confirmPassword: "",
+    })
+
+    // const validValue = Object.values(formData).every((item) => item);
+
+    // function to handle input change
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormData(() => {
+            return {
+                ...formData,
+                [name]: value,
+            };
+        });
+    };
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setLoading(true);
+
+        if (formData.newPassword === "" || formData.confirmPassword === "") {
+            setLoading(false);
+            return context.alertBox("error", "All fields are required");
+        }
+
+        if (formData.newPassword !== formData.confirmPassword) {
+            setLoading(false);
+            return context.alertBox("error", "Passwords do not match");
+        }
+
+        // API call
+        postData("/api/v1/user/resetPasswordWithOtp", formData)
+            .then((res) => {
+                console.log("response", res);
+                if (res?.error !== true) {
+                    context.alertBox("success", res?.message);
+                    setFormData({
+                        newPassword: "",
+                        confirmPassword: "",
+                    });
+                    localStorage.removeItem("userEmail");
+                    // Clear localStorage or perform any other necessary actions
+                    setLoading(false);
+                    navigate("/login");
+                } else {
+                    context.alertBox("error", res?.message);
+                    setLoading(false);
+                }
+            });
+    };
+
+
 
     return (
         <section className=' bg-[#fff] w-full h-[100vh]'>
@@ -31,10 +90,10 @@ const ChangePassword = () => {
                     </NavLink>
 
                     <Link to="/signup">
-                    <Button 
-                        className=' !text-black !rounded-full !py-2 !px-4'>
-                        <FaRegUser size={15} className='mr-1' /> Sign Up
-                    </Button>
+                        <Button
+                            className=' !text-black !rounded-full !py-2 !px-4'>
+                            <FaRegUser size={15} className='mr-1' /> Sign Up
+                        </Button>
                     </Link>
                 </div>
             </header>
@@ -49,42 +108,57 @@ const ChangePassword = () => {
                     You can Change your password here
                 </h1>
 
-                <form action="" className='w-full px-8 mt-5'>
+                <form action="" onSubmit={handleSubmit} className='w-full px-8 mt-5'>
                     <div className="form-group mb-4 w-full">
                         <h4 className='text-[14px] font-[500] mb-1'>New Password</h4>
                         <div className="relative w-full ">
-                            <input 
+                            <input
                                 type={isPasswordVisible ? "text" : "password"}
                                 className='w-full h-[50px] border border-[rgba(0,0,0,0.2)] rounded-md px-4 focus:border-[rgba(0,0,0,0.5)] focus:outline-none'
-                                placeholder='Enter Your Password' />
+                                placeholder='Enter Your Password'
+                                name="newPassword"
+                                onChange={onChangeInput}
+                                value={formData.newPassword}
+                                disabled={loading === true ? true : false}
+                            />
 
-                                <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
-                                onClick={() => {setIsPasswordVisible(!isPasswordVisible)}}>
-                                    {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
-                                </Button>
+                            <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
+                                onClick={() => { setIsPasswordVisible(!isPasswordVisible) }}>
+                                {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
+                            </Button>
                         </div>
                     </div>
 
                     <div className="form-group mb-4 w-full">
                         <h4 className='text-[14px] font-[500] mb-1'>Confirm Password</h4>
                         <div className="relative w-full ">
-                            <input 
+                            <input
                                 type={isPasswordVisible2 ? "text" : "password"}
                                 className='w-full h-[50px] border border-[rgba(0,0,0,0.2)] rounded-md px-4 focus:border-[rgba(0,0,0,0.5)] focus:outline-none'
-                                placeholder='Enter Your Password' />
+                                placeholder='Enter Your Password'
+                                name="confirmPassword"
+                                onChange={onChangeInput}
+                                value={formData.confirmPassword}
+                                disabled={loading === true ? true : false}
+                            />
 
-                                <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
-                                onClick={() => {setIsPasswordVisible2(!isPasswordVisible2)}}>
-                                    {isPasswordVisible2 ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
-                                </Button>
+                            <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
+                                onClick={() => { setIsPasswordVisible2(!isPasswordVisible2) }}>
+                                {isPasswordVisible2 ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
+                            </Button>
                         </div>
                     </div>
 
                     <Button
                         type='submit'
+                        // disabled={!validValue}
                         className='!bg-[#3838ff] !text-white hover:!bg-[#000] !capitalize !rounded-md font-[600] !text-[15px] !py-2 !px-4 w-full'
                     >
-                        Change Password
+                        {
+                            loading === true ? <CircularProgress color="inherit" size={20} />
+                                :
+                                "Change Password"
+                        }
                     </Button>
                 </form>
             </div>

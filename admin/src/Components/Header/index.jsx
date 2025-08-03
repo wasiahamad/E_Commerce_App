@@ -27,6 +27,7 @@ const StyledBadge = styled(Badge)(({ theme }) => ({
 const Header = () => {
 
   const [anchorMyAcc, setAnchorMyAcc] = useState(null);
+  const [anchorEl, setAnchorEl] = useState(null);
   const openMyAcc = Boolean(anchorMyAcc);
   const handleClickMyAcc = (event) => {
     setAnchorMyAcc(event.currentTarget);
@@ -36,6 +37,23 @@ const Header = () => {
   };
 
   const context = useContext(MyContext);
+
+  const logout = () => {
+    setAnchorEl(null);
+    postData("/api/v1/user/logout", { withCredentials: true }).then((res) => {
+      console.log(res);
+      if (res?.error !== true) {
+        context.alertBox("success", res?.message);
+
+        localStorage.removeItem("accessToken");
+        localStorage.removeItem("refreshToken");
+        localStorage.removeItem("userEmail");
+        context.setIsLoggedIn(false);
+        window.location.href = "/"; // Redirect to home page
+      }
+    });
+  }
+
 
 
   return (
@@ -102,7 +120,7 @@ const Header = () => {
                 },
               }}
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
             >
               <MenuItem onClick={handleCloseMyAcc} className="!bg-white">
                 <div className="flex items-center gap-3">
@@ -115,8 +133,8 @@ const Header = () => {
                   </div>
 
                   <div className="info flex flex-col">
-                    <h3 className="text-[15px] font-[500] leading-4">John Doe</h3>
-                    <span className="text-[12px] font-[400]  text-[rgba(0,0,0,0.5)]">Admin85@gmail.com</span>
+                    <h3 className="text-[15px] font-[500] leading-4">{context?.userData?.name}</h3>
+                    <span className="text-[12px] font-[400]  text-[rgba(0,0,0,0.5)]">{context?.userData?.email}</span>
                   </div>
                 </div>
               </MenuItem>
@@ -126,9 +144,9 @@ const Header = () => {
                 <Link to="/dashboard/profile" className="flex items-center gap-2 text-[14px] opacity-80"><FaRegUser size={15} /> Profile</Link>
               </MenuItem>
               <MenuItem onClick={handleCloseMyAcc}>
-                <Link to="/dashboard/orders" className="flex items-center gap-2 text-[14px] opacity-80"><PiSignOutBold size={16} />Sign out</Link>
+                <Link to="/login" className="flex items-center gap-2 text-[14px] opacity-80"><PiSignOutBold size={16}
+                  onClick={logout} />Sign out</Link>
               </MenuItem>
-
             </Menu>
 
           </div>
