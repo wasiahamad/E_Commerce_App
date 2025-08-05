@@ -120,7 +120,7 @@ const Header = () => {
                 },
               }}
               transformOrigin={{ horizontal: 'right', vertical: 'top' }}
-              anchorOrigin={{ horizontal: 'right', vertical: 'top' }}
+              anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
             >
               <MenuItem onClick={handleCloseMyAcc} className="!bg-white">
                 <div className="flex items-center gap-3">
@@ -141,7 +141,7 @@ const Header = () => {
               <Divider />
 
               <MenuItem onClick={handleCloseMyAcc}>
-                <Link to="/dashboard/profile" className="flex items-center gap-2 text-[14px] opacity-80"><FaRegUser size={15} /> Profile</Link>
+                <Link to="/profile" className="flex items-center gap-2 text-[14px] opacity-80"><FaRegUser size={15} /> Profile</Link>
               </MenuItem>
               <MenuItem onClick={handleCloseMyAcc}>
                 <Link to="/login" className="flex items-center gap-2 text-[14px] opacity-80"><PiSignOutBold size={16}

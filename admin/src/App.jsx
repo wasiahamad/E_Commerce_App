@@ -22,6 +22,7 @@ import BannerV2 from './Pages/BannerV2'
 import toast, { Toaster } from 'react-hot-toast';
 import { getData } from './utils/api'
 import { useEffect } from 'react'
+import Profile from './Pages/Profile'
 
 
 
@@ -305,6 +306,26 @@ function App() {
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
               <BannerV2 />
+              {/* </div> */}
+            </div>
+          </section>
+        </>
+      )
+    },
+
+    {
+      path: "/profile",
+      excat: true,
+      element: (
+        <>
+          <section className='main'>
+            <Header />
+            <div className="containerMain flex">
+              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+                <Sidebar />
+              </div>
+              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
+              <Profile />
               {/* </div> */}
             </div>
           </section>
