@@ -4,7 +4,7 @@ import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from "react-router-dom";
 import { IoMdCloudUpload } from "react-icons/io";
 import { editData, editUserData } from "../../utils/api";
-import { Button } from "@mui/material";
+import { Button, TextField } from "@mui/material";
 
 const Profile = () => {
     const context = useContext(MyContext);
@@ -127,7 +127,7 @@ const Profile = () => {
                 if (res?.error !== true) {
                     context.alertBox("success", res?.message);
                     setLoading2(false);
-                    navigate("/my-account");
+                    navigate("/profile");
                     // uske bad form ko bnd kr dena h 
                     setChangePassword({
                         password: "",
@@ -233,8 +233,70 @@ const Profile = () => {
                             />
                         </div>
                     </div>
-                </div>
 
+                    <form action="" className="mt-8" onSubmit={handleSubmit}>
+                        <div className="form-group flex items-center gap-5">
+                            <div className="w-[50%]">
+                                <TextField
+                                    id="name"
+                                    label="Full Name"
+                                    variant="outlined"
+                                    className="w-full"
+                                    type="text"
+                                    size="small"
+                                    name="name"
+                                    onChange={onChangeInput}
+                                    value={formFileds.name}
+                                    disabled={loading === true ? true : false}
+                                />
+                            </div>
+
+                            <div className="w-[50%]">
+                                <TextField
+                                    id="email"
+                                    label="Email"
+                                    variant="outlined"
+                                    className="w-full"
+                                    type="email"
+                                    size="small"
+                                    name="email"
+                                    onChange={onChangeInput}
+                                    value={formFileds.email}
+                                    disabled={true}
+                                />
+                            </div>
+                        </div>
+
+                        <div className="form-group flex items-center gap-5 mt-4">
+                            <div className="w-[50%]">
+                                <TextField
+                                    id="phone"
+                                    label="Phone Number"
+                                    variant="outlined"
+                                    className="w-full"
+                                    type="text"
+                                    size="small"
+                                    name="mobile"
+                                    onChange={onChangeInput}
+                                    value={formFileds.mobile}
+                                    disabled={loading === true ? true : false}
+                                />
+                            </div>
+                        </div>
+                        <br />
+                        <div className="flex items-center ">
+                            <Button variant='contained' className='!bg-[#f44336] font-[500]'
+                                disabled={!validValue || loading === true ? true : false}
+                                type="submit">
+                                {
+                                    loading === true ? <CircularProgress color="inherit" size={20} />
+                                        :
+                                        "Update Profile"
+                                }
+                            </Button>
+                        </div>
+                    </form>
+                </div>
 
             </div>
         </>
