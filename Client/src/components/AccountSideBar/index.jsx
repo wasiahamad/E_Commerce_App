@@ -1,4 +1,4 @@
-import React, { use, useContext, useEffect, useState } from 'react'
+import { use, useContext, useEffect, useState } from 'react'
 import { SlLocationPin } from "react-icons/sl";
 import { FaRegHeart } from "react-icons/fa6";
 import { IoBagCheckOutline } from "react-icons/io5";
@@ -67,6 +67,7 @@ const AccountSideBar = () => {
             context.alertBox("error", error.message || "Error uploading file");
         }
     }
+
     return (
         <div className="card shadow-md rounded-md bg-white sticky top-[250px]">
             <div className="w-full p-5 flex items-center justify-center flex-col  ">
