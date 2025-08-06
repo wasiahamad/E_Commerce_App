@@ -5,11 +5,15 @@ import { useNavigate } from "react-router-dom";
 import { IoMdCloudUpload } from "react-icons/io";
 import { editData, editUserData } from "../../utils/api";
 import { Button, TextField } from "@mui/material";
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 const Profile = () => {
     const context = useContext(MyContext);
     const [uploadedImage, setUploadedImage] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
+    const [phone, setPhone] = useState('');
+
 
     const navigate = useNavigate();
 
@@ -38,6 +42,9 @@ const Profile = () => {
                 email: context?.userData?.email,
                 mobile: context?.userData?.mobile,
             });
+
+            const ph = `"+91${context?.userData?.mobile}"`;
+            setPhone(ph);
 
             setChangePassword({
                 email: context?.userData?.email
@@ -88,7 +95,7 @@ const Profile = () => {
                         mobile: res?.data?.mobile,
                     });
                     setLoading(false);
-                    navigate("/my-account");
+                    navigate("/profile");
                     context.setUserData(res?.data);
                 } else {
                     context.alertBox("error", res?.message);
@@ -269,7 +276,7 @@ const Profile = () => {
 
                         <div className="form-group flex items-center gap-5 mt-4">
                             <div className="w-[50%]">
-                                <TextField
+                                {/* <TextField
                                     id="phone"
                                     label="Phone Number"
                                     variant="outlined"
@@ -280,6 +287,13 @@ const Profile = () => {
                                     onChange={onChangeInput}
                                     value={formFileds.mobile}
                                     disabled={loading === true ? true : false}
+                                /> */}
+
+                                <PhoneInput
+                                    defaultCountry="in"
+                                    value={phone}
+                                    disabled={loading === true ? true : false}
+                                    onChange={(phone) => setPhone(phone)}
                                 />
                             </div>
                         </div>
@@ -296,8 +310,8 @@ const Profile = () => {
                             </Button>
                         </div>
                     </form>
+                    <br />
                 </div>
-
             </div>
         </>
     )
