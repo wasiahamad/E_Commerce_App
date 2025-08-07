@@ -3,17 +3,20 @@ import { MyContext } from "../../App";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from "react-router-dom";
 import { IoMdCloudUpload } from "react-icons/io";
-import { editData, editUserData } from "../../utils/api";
+import { editData, editUserData, postData } from "../../utils/api";
 import { Button, TextField } from "@mui/material";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
+import { Collapse } from 'react-collapse';
+import { FaEyeSlash, FaRegEye } from "react-icons/fa6";
 
 const Profile = () => {
     const context = useContext(MyContext);
     const [uploadedImage, setUploadedImage] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
     const [phone, setPhone] = useState("");
-
+    const [isPasswordVisible, setIsPasswordVisible] = useState(false);
+    const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);
 
     const navigate = useNavigate();
 
@@ -83,8 +86,9 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
 
-       // Add full phone with country code to form fields
-    const updatedForm = { ...formFileds, mobile: phone };
+        // Add full phone with country code to form fields
+        const updatedForm = { ...formFileds, mobile: phone };
+
         // API call
         editUserData(`/api/v1/user/${context.userId}`, updatedForm)
             .then((res) => {
@@ -105,6 +109,14 @@ const Profile = () => {
                 }
             });
     };
+
+    // useEffect for token null check
+    useEffect(() => {
+        const token = localStorage.getItem("accessToken");
+        if (token === null || token === undefined || token === "") {
+            navigate("/login");
+        }
+    }, [context?.isLoggedIn]);
 
     // function to handle password change
     const handleChangePassword = (e) => {
@@ -206,7 +218,7 @@ const Profile = () => {
         <>
             <div className={`contentRight  py-4 px-5 ${context.isSidebarOpen ? "w-[80%]" : "w-[100%] pl-0"} transition-all duration-300`}>
 
-                <div className="w-full bg-white pt-5 px-5 border border-[rgba(0,0,0,0.1)] shadow-md sm:rounded-lg ">
+                <div className=" bg-white pt-5 px-5 border border-[rgba(0,0,0,0.1)] shadow-md sm:rounded-lg  w-[65%] ">
                     <div className="flex items-center justify-between">
                         <h2 className="text-[18px] font-[600]">
                             User Profile
@@ -315,6 +327,94 @@ const Profile = () => {
                     </form>
                     <br />
                 </div>
+
+                <br />
+
+                <Collapse isOpened={openChangePassword}>
+                    <div className="card shadow-md rounded-md bg-white p-5 w-[65%]">
+                        <div className="flex items-center justify-between pb-3">
+                            <h2 className='pb-0'>Change Password</h2>
+                        </div>
+                        <hr />
+                        <form action="" className="mt-8" onSubmit={handleChangePassword}>
+                            <div className="form-group flex items-center gap-5">
+                                <div className="w-[50%]">
+                                    <div className="relative w-full ">
+                                        <TextField
+                                            id="password"
+                                            label="Old Password"
+                                            variant="outlined"
+                                            className="w-full"
+                                            type={isPasswordVisible ? "text" : "password"}
+                                            size="small"
+                                            name="password"
+                                            onChange={onChangeInput}
+                                            value={changePassword.password}
+                                            disabled={loading2 === true ? true : false}
+
+                                        />
+                                        <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
+                                            onClick={() => { setIsPasswordVisible(!isPasswordVisible) }}>
+                                            {isPasswordVisible ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
+                                        </Button>
+                                    </div>
+                                </div>
+
+                                <div className="w-[50%]">
+                                   <div className="relative w-full ">
+                                        <TextField
+                                            id="password"
+                                            label="New Password"
+                                            variant="outlined"
+                                            className="w-full"
+                                            type={isPasswordVisible2 ? "text" : "password"}
+                                            size="small"
+                                            name="newPassword"
+                                            onChange={onChangeInput}
+                                            value={changePassword.newPassword}
+                                            disabled={loading2 === true ? true : false}
+
+                                        />
+                                        <Button className='!absolute !text-[rgba(0,0,0,0.7)] !right-[10px] !top-[8px] !rounded-full  !w-[35px] !h-[35px] !min-w-[35px] z-50'
+                                            onClick={() => { setIsPasswordVisible2(!isPasswordVisible2) }}>
+                                            {isPasswordVisible2 ? <FaEyeSlash size={20} /> : <FaRegEye size={20} />}
+                                        </Button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="form-group flex items-center gap-5 mt-4">
+                                <div className="w-[50%]">
+                                    <TextField
+                                        id="confirmPassword"
+                                        label="Confirm Password"
+                                        variant="outlined"
+                                        className="w-full"
+                                        type="text"
+                                        size="small"
+                                        name="confirmPassword"
+                                        onChange={onChangeInput}
+                                        value={changePassword.confirmPassword}
+                                        disabled={loading2 === true ? true : false}
+                                    />
+                                </div>
+                            </div>
+                            <br />
+                            <div className="flex items-center ">
+                                <Button variant='contained' className='!bg-[#f44336] font-[500]'
+                                    disabled={!validValue2 || loading2 === true ? true : false}
+                                    type="submit">
+                                    {
+                                        loading2 === true ? <CircularProgress color="inherit" size={20} />
+                                            :
+                                            "Change Password"
+                                    }
+                                </Button>
+                            </div>
+                        </form>
+
+                    </div>
+                </Collapse>
             </div>
         </>
     )

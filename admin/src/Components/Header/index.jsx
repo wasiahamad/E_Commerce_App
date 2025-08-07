@@ -1,4 +1,4 @@
-import React, { use, useContext, useState } from "react";
+import React, { use, useContext, useEffect, useState } from "react";
 import Button from "@mui/material/Button";
 import { IoSearchOutline } from "react-icons/io5";
 import { RiMenu2Line } from "react-icons/ri";
@@ -9,10 +9,11 @@ import { FaRegBell } from "react-icons/fa6";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Avatar, Divider, ListItemIcon } from "@mui/material";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import { PiSignOutBold } from "react-icons/pi";
 import { MyContext } from "../../App";
+import { postData } from "../../utils/api";
 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -38,23 +39,58 @@ const Header = () => {
 
   const context = useContext(MyContext);
 
+  // const logout = () => {
+  //   setAnchorEl(null);
+  //   postData("/api/v1/user/logout", { withCredentials: true }).then((res) => {
+  //     if (res?.error !== true) {
+  //       context.alertBox("success", res?.message);
+
+  //       // Clear tokens
+  //       console.log("Before removeItem:", localStorage.getItem("accessToken"));
+  //       localStorage.removeItem("accessToken");
+  //       localStorage.removeItem("refreshToken");
+  //       localStorage.removeItem("userEmail");
+  //       console.log("After removeItem:", localStorage.getItem("accessToken"));
+
+
+  //       // Update context and redirect
+  //       context.setIsLoggedIn(false);
+  //       window.location.href = "/login";
+  //     }
+  //   });
+  // };
+
   const logout = () => {
+    console.log("Logging out...");
     setAnchorEl(null);
-    postData("/api/v1/user/logout", { withCredentials: true }).then((res) => {
-      console.log(res);
+
+    // Ensure correct axios config
+    postData(`/api/v1/user/logout?userId=${context?.userData?._id}`, { withCredentials: true }).then((res) => {
       if (res?.error !== true) {
         context.alertBox("success", res?.message);
 
+        console.log("Before removeItem:", localStorage.getItem("accessToken"));
+
+        // Remove tokens
         localStorage.removeItem("accessToken");
         localStorage.removeItem("refreshToken");
         localStorage.removeItem("userEmail");
+
+        console.log("After removeItem:", localStorage.getItem("accessToken"));
+
+        // Redirect to login
         context.setIsLoggedIn(false);
-        window.location.href = "/"; // Redirect to home page
+        Navigate("/login");
       }
     });
-  }
+  };
 
-
+  // logout useEffect
+  useEffect(() => {
+    if (context?.isLoggedIn === false) {
+      window.location.href = "/login";
+    }
+  }, [context?.isLoggedIn]);
 
   return (
     <header className={`w-full h-[auto] py-2 pr-7 ${context.isSidebarOpen ? "pl-[320px]" : "pl-[10px]"} flex items-center justify-between bg-white shadow-md`}>
@@ -86,7 +122,7 @@ const Header = () => {
             </div>
 
             <Menu
-              anchorMyAcc={anchorMyAcc}
+              anchorEl={anchorMyAcc}
               id="account-menu"
               open={openMyAcc}
               onClose={handleCloseMyAcc}
@@ -144,8 +180,9 @@ const Header = () => {
                 <Link to="/profile" className="flex items-center gap-2 text-[14px] opacity-80"><FaRegUser size={15} /> Profile</Link>
               </MenuItem>
               <MenuItem onClick={handleCloseMyAcc}>
-                <Link to="/login" className="flex items-center gap-2 text-[14px] opacity-80"><PiSignOutBold size={16}
-                  onClick={logout} />Sign out</Link>
+                <Button className="flex items-center gap-2 text-[14px] opacity-80" onClick={logout}><PiSignOutBold size={16}
+                />Sign out
+                </Button>
               </MenuItem>
             </Menu>
 

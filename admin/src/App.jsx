@@ -23,6 +23,7 @@ import toast, { Toaster } from 'react-hot-toast';
 import { getData } from './utils/api'
 import { useEffect } from 'react'
 import Profile from './Pages/Profile'
+import ProtectedRoute from './ProtectedRoute'
 
 
 
@@ -53,7 +54,7 @@ function App() {
         .then((res) => {
           alertBox("success", "User data fetched successfully");
           setUserData(res?.data);
-          console.log( "user data",res?.data);
+          console.log("user data", res?.data);
         })
         .catch((err) => {
           const message = err?.response?.data?.message || err?.message;
@@ -79,7 +80,7 @@ function App() {
       path: "/",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
 
           <section className='main'>
             <Header />
@@ -93,14 +94,12 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
     {
-      path: "/login",
-      excat: true,
-      element: (
+      path: "/login", element: (
         <>
           <LogIn />
         </>
@@ -151,7 +150,7 @@ function App() {
       path: "/product",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -164,7 +163,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -172,7 +171,7 @@ function App() {
       path: "/homeslider/list",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -185,7 +184,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -193,7 +192,7 @@ function App() {
       path: "/category/list",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -206,7 +205,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -214,7 +213,7 @@ function App() {
       path: "/subCategory/list",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -227,7 +226,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -235,7 +234,7 @@ function App() {
       path: "/users",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -248,7 +247,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -256,7 +255,7 @@ function App() {
       path: "/orders",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -269,7 +268,7 @@ function App() {
             </div>
           </section>
 
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -277,7 +276,7 @@ function App() {
       path: "/bannerV1/list",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -289,7 +288,7 @@ function App() {
               {/* </div> */}
             </div>
           </section>
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -297,7 +296,7 @@ function App() {
       path: "/bannerV2/list",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -309,7 +308,7 @@ function App() {
               {/* </div> */}
             </div>
           </section>
-        </>
+        </ProtectedRoute>
       )
     },
 
@@ -317,7 +316,7 @@ function App() {
       path: "/profile",
       excat: true,
       element: (
-        <>
+        <ProtectedRoute>
           <section className='main'>
             <Header />
             <div className="containerMain flex">
@@ -329,7 +328,7 @@ function App() {
               {/* </div> */}
             </div>
           </section>
-        </>
+        </ProtectedRoute>
       )
     },
   ]);

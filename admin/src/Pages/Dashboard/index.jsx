@@ -46,50 +46,50 @@ const Dashboard = () => {
                         <h2 className='text-[20px] font-semibold'>Recent Orders</h2>
                         <input type="text" placeholder="Search..." className="border border-[rgba(0,0,0,0.1)] p-2 rounded-md w-[50%] outline-none " />
                     </div>
-                    <div class="relative overflow-x-auto mt-5 pb-5">
-                        <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                            <thead class="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                    <div className="relative overflow-x-auto mt-5 pb-5">
+                        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                            <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                 <tr >
                                     <th>
 
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Order Id
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Paymant Id
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Name
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Phone Number
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Address
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Pincode
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Total Amount
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Email
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         User Id
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Order Status
                                     </th>
-                                    <th scope="col" class="px-4 py-3 whitespace-nowrap">
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Date
                                     </th>
                                 </tr>
                             </thead>
                             <tbody className='text-[13px]'>
-                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                     <td className='px-4 py-4'>
                                         <Button className='!min-w-[35px] !w-[35px] !h-[35px] !text-[rgba(0,0,0,0.5)] !rounded-full !bg-[#f1f1f1] 
                                                 ' onClick={() => { isShowOrderedProducts(0) }}>
@@ -138,34 +138,34 @@ const Dashboard = () => {
                                 {isOpenOrderedProducts === 0 &&
                                     <tr>
                                         <td className='pl-7' colSpan='6'>
-                                            <div class="relative overflow-x-auto">
-                                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                                    <thead class="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                            <div className="relative overflow-x-auto">
+                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                                    <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                                         <tr>
 
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Product Id
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Product Title
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Image
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Quantity
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Price
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Sub Total
                                                             </th>
 
                                                         </tr>
                                                     </thead>
                                                     <tbody className='text-[13px]'>
-                                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
 
                                                             <td className='px-4 py-4 whitespace-nowrap'>
                                                                 <span>682b89b4228db479bb420460</span>
@@ -189,7 +189,7 @@ const Dashboard = () => {
 
                                                         </tr>
 
-                                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
 
                                                             <td className='px-4 py-4 whitespace-nowrap'>
                                                                 682b89b4228db479bb420460
@@ -220,7 +220,7 @@ const Dashboard = () => {
                             </tbody>
 
                             <tbody className='text-[13px]'>
-                                <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
                                     <td className='px-4 py-4'>
                                         <Button className='!min-w-[35px] !w-[35px] !h-[35px] !text-[rgba(0,0,0,0.5)] !rounded-full !bg-[#f1f1f1] 
                                                 ' onClick={() => { isShowOrderedProducts(1) }}>
@@ -269,34 +269,34 @@ const Dashboard = () => {
                                 {isOpenOrderedProducts === 1 &&
                                     <tr>
                                         <td className='pl-7' colSpan='6'>
-                                            <div class="relative overflow-x-auto">
-                                                <table class="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                                    <thead class="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                            <div className="relative overflow-x-auto">
+                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                                    <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                                         <tr>
 
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Product Id
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Product Title
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Image
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Quantity
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Price
                                                             </th>
-                                                            <th scope="col" class="px-4 py-3">
+                                                            <th scope="col" className="px-4 py-3">
                                                                 Sub Total
                                                             </th>
 
                                                         </tr>
                                                     </thead>
                                                     <tbody className='text-[13px]'>
-                                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
 
                                                             <td className='px-4 py-4 whitespace-nowrap'>
                                                                 682b89b4228db479bb420460
@@ -320,7 +320,7 @@ const Dashboard = () => {
 
                                                         </tr>
 
-                                                        <tr class="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
 
                                                             <td className='px-4 py-4 whitespace-nowrap'>
                                                                 682b89b4228db479bb420460

@@ -107,12 +107,26 @@ const LogIn = () => {
                 </Link>
 
                 <div className="flex items-center gap-4">
-                    <NavLink to="/login" exact={true} activeClassName="isActive">
+                    {/* <NavLink to="/login" activeClassName="isActive">
                         <Button
                             className=' !text-black  !rounded-full !py-2 !px-4'>
                             <TbLogin2 size={18} className='mr-1' /> Log In
                         </Button>
+                    </NavLink> */}
+
+                    <NavLink
+                        to="/login"
+                        className={({ isActive }) =>
+                            isActive
+                                ? "isActive" // your active class
+                                : ""
+                        }
+                    >
+                        <Button className="!text-black !rounded-full !py-2 !px-4">
+                            <TbLogin2 size={18} className="mr-1" /> Log In
+                        </Button>
                     </NavLink>
+
 
                     <Link to="/signup">
                         <Button
