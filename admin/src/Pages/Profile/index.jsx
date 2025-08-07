@@ -12,7 +12,7 @@ const Profile = () => {
     const context = useContext(MyContext);
     const [uploadedImage, setUploadedImage] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
-    const [phone, setPhone] = useState('');
+    const [phone, setPhone] = useState("");
 
 
     const navigate = useNavigate();
@@ -43,7 +43,7 @@ const Profile = () => {
                 mobile: context?.userData?.mobile,
             });
 
-            const ph = `"+91${context?.userData?.mobile}"`;
+            const ph = `${context?.userData?.mobile}`;
             setPhone(ph);
 
             setChangePassword({
@@ -83,8 +83,10 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
 
+       // Add full phone with country code to form fields
+    const updatedForm = { ...formFileds, mobile: phone };
         // API call
-        editUserData(`/api/v1/user/${context.userId}`, formFileds)
+        editUserData(`/api/v1/user/${context.userId}`, updatedForm)
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {
@@ -294,6 +296,7 @@ const Profile = () => {
                                     value={phone}
                                     disabled={loading === true ? true : false}
                                     onChange={(phone) => setPhone(phone)}
+                                    name="mobile"
                                 />
                             </div>
                         </div>
