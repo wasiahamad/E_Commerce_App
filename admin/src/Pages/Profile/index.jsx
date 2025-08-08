@@ -313,8 +313,15 @@ const Profile = () => {
                             </div>
                         </div>
                         <br />
-                        <div className="flex items-center ">
-                            <Button variant='contained' className='!bg-[#f44336] font-[500]'
+
+                        <div className="flex items-center justify-center p-5 border border-dashed border-[rgba(0,0,0,0.2)] bg-[#f1faff] hover:bg-[#e7f3f9] cursor-pointer "
+                        onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: "Add Address" })}>
+                            <span className="text-[15px] font-[500] text-[#262424]">Add Address</span>
+                        </div>
+
+                        <br />
+                        <div className="flex items-center gap-4 ">
+                            <Button variant='contained' className='!bg-[#f44336] font-[500] w-full'
                                 disabled={!validValue || loading === true ? true : false}
                                 type="submit">
                                 {

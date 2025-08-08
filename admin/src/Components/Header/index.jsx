@@ -9,7 +9,7 @@ import { FaRegBell } from "react-icons/fa6";
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import { Avatar, Divider, ListItemIcon } from "@mui/material";
-import { Link, Navigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import { PiSignOutBold } from "react-icons/pi";
 import { MyContext } from "../../App";
@@ -38,6 +38,7 @@ const Header = () => {
   };
 
   const context = useContext(MyContext);
+  const navigate =  useNavigate();
 
   // const logout = () => {
   //   setAnchorEl(null);
@@ -65,7 +66,7 @@ const Header = () => {
     setAnchorEl(null);
 
     // Ensure correct axios config
-    postData(`/api/v1/user/logout?userId=${context?.userData?._id}`, { withCredentials: true }).then((res) => {
+    postData("/api/v1/user/logout", { withCredentials: true }).then((res) => {
       if (res?.error !== true) {
         context.alertBox("success", res?.message);
 
@@ -80,17 +81,10 @@ const Header = () => {
 
         // Redirect to login
         context.setIsLoggedIn(false);
-        Navigate("/login");
+        navigate("/login");
       }
     });
   };
-
-  // logout useEffect
-  useEffect(() => {
-    if (context?.isLoggedIn === false) {
-      window.location.href = "/login";
-    }
-  }, [context?.isLoggedIn]);
 
   return (
     <header className={`w-full h-[auto] py-2 pr-7 ${context.isSidebarOpen ? "pl-[320px]" : "pl-[10px]"} flex items-center justify-between bg-white shadow-md`}>

@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useState } from "react";
 import {
     Button,
     Tooltip,
@@ -26,8 +26,8 @@ const columns = [
 ];
 
 const CategoryList = (props) => {
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -40,7 +40,7 @@ const CategoryList = (props) => {
 
     // slected row
 
-    const [age, setAge] = React.useState("");
+    const [age, setAge] = useState("");
 
     const handleChange = (event) => {
         setAge(event.target.value);

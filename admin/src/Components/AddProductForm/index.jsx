@@ -14,6 +14,7 @@ import AddCategoryList from '../../Pages/CategoryList/AddCategoryList.jsx';
 import AddSubCategoryList from '../../Pages/CategoryList/AddSubCategoryList.jsx';
 import AddBannerV1 from '../../Pages/BannerV1/AddBannerV1.jsx';
 import AddBannerV2 from '../../Pages/BannerV2/AddBannerV2.jsx';
+import AddAddress from '../../Pages/Address/AddAddress.jsx';
 
 const Transition = React.forwardRef(function Transition(props, ref) {
     return <Slide direction="up" ref={ref} {...props} />;
@@ -75,6 +76,10 @@ const AddProductForm = () => {
 
             {
                 context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2  />
+            }
+
+            {
+                context.isOpenAddProductForm?.model === "Add Address" && <AddAddress  />
             }
             
         </Dialog>
