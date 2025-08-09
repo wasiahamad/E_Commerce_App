@@ -10,6 +10,7 @@ import categoryRouter from './routes/category.route.js'
 import productRouter from './routes/product.route.js'
 import cartRouter from './routes/cart.route.js'
 import myListRouter from './routes/myList.route.js'
+import addressRouter from './routes/address.route.js'
 
 const app = express()
 dotenv.config()
@@ -36,6 +37,7 @@ app.use("/api/v1/category", categoryRouter);
 app.use("/api/v1/product", productRouter);
 app.use("/api/v1/cart", cartRouter);
 app.use("/api/v1/myList", myListRouter);
+app.use("/api/v1/address", addressRouter);
 
 // server start here
 const PORT = process.env.PORT || 5000;

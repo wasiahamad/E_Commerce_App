@@ -30,16 +30,8 @@ const userSchema = new mongoose.Schema({
     },
     mobile : {
         type: Number,
-        // required: [true, 'Mobile number is required'],
-        // unique: true,
-        // trim: true,
         default : null,
-        // validate: {
-        //     validator: function(v) {
-        //         return /\d{10}/.test(v);
-        //     },
-        //     message: props => `${props.value} is not a valid mobile number!`
-        // }
+        unique: true
     },
     verify_email : {
         type: Boolean,

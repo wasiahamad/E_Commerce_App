@@ -9,7 +9,6 @@ import SignUp from './Pages/SignUp'
 import Products from './Pages/Products'
 import AddProductForm from './Components/AddProductForm'
 import HomeSliderBanner from './Pages/HomeSliderBanner'
-import AddHomeSlider from './Pages/HomeSliderBanner/AddHomeSlider'
 import CategoryList from './Pages/CategoryList'
 import SubCategoryList from './Pages/CategoryList/SubCategoryList'
 import Users from './Pages/Users'
@@ -24,6 +23,7 @@ import { getData } from './utils/api'
 import { useEffect } from 'react'
 import Profile from './Pages/Profile'
 import ProtectedRoute from './ProtectedRoute'
+import AddAddress from './Pages/Address/AddAddress'
 
 
 
@@ -78,7 +78,7 @@ function App() {
   const router = createBrowserRouter([
     {
       path: "/",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
 
@@ -108,7 +108,7 @@ function App() {
 
     {
       path: "/forgot-password",
-      excat: true,
+      // excat: true,
       element: (
         <>
           <ForgotPassword />
@@ -118,7 +118,7 @@ function App() {
 
     {
       path: "/verify-account",
-      excat: true,
+      // excat: true,
       element: (
         <>
           <VerifyAccount />
@@ -128,7 +128,7 @@ function App() {
 
     {
       path: "/change-password",
-      excat: true,
+      // excat: true,
       element: (
         <>
           <ChangePassword />
@@ -138,7 +138,7 @@ function App() {
 
     {
       path: "/signup",
-      excat: true,
+      // excat: true,
       element: (
         <>
           <SignUp />
@@ -148,7 +148,7 @@ function App() {
 
     {
       path: "/product",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -169,7 +169,7 @@ function App() {
 
     {
       path: "/homeslider/list",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -190,7 +190,7 @@ function App() {
 
     {
       path: "/category/list",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -211,7 +211,7 @@ function App() {
 
     {
       path: "/subCategory/list",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -232,7 +232,7 @@ function App() {
 
     {
       path: "/users",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -253,7 +253,7 @@ function App() {
 
     {
       path: "/orders",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -274,7 +274,7 @@ function App() {
 
     {
       path: "/bannerV1/list",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -294,7 +294,7 @@ function App() {
 
     {
       path: "/bannerV2/list",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -314,7 +314,7 @@ function App() {
 
     {
       path: "/profile",
-      excat: true,
+      // excat: true,
       element: (
         <ProtectedRoute>
           <section className='main'>
@@ -325,6 +325,26 @@ function App() {
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
               <Profile />
+              {/* </div> */}
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
+
+     {
+      path: "/address",
+      // excat: true,
+      element: (
+        <ProtectedRoute>
+          <section className='main'>
+            <Header />
+            <div className="containerMain flex">
+              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+                <Sidebar />
+              </div>
+              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
+              <AddAddress />
               {/* </div> */}
             </div>
           </section>
