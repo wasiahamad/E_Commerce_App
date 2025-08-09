@@ -15,7 +15,7 @@ import { useContext } from 'react';
 
 
 const SignUp = () => {
-    const nagigate = useNavigate();
+    const navigate = useNavigate();
     const context = useContext(MyContext);
 
     const [loadingGoogle, setLoadingGoogle] = useState(false);
@@ -79,7 +79,7 @@ const SignUp = () => {
                         password: "",
                     });
                     setIsLoading(false);
-                    nagigate("/verify-account");
+                    navigate("/verify-account");
                 } else {
                     context.alertBox("error", res?.message);
 

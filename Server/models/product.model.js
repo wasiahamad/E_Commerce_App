@@ -72,29 +72,29 @@ const productSchema = new mongoose.Schema({
         type: Boolean,
         default: false
     },
-    discount : {
+    discount: {
         type: Number,
         required: [true, 'Product discount is required'],
     },
     productRam: [
         {
-        type: String,
-        default: ""
-    }
+            type: String,
+            default: ""
+        }
     ],
     size: [
         {
-        type: String,
-        default: ""
-    }
+            type: String,
+            default: ""
+        }
     ],
-    productWeight :[
+    productWeight: [
         {
-        type: String,
-        default: ""
-    }
+            type: String,
+            default: ""
+        }
     ],
-    dateCreated : {
+    dateCreated: {
         type: Date,
         default: Date.now
     }
@@ -102,6 +102,6 @@ const productSchema = new mongoose.Schema({
     timestamps: true
 });
 
-const ProductModel = mongoose.model('Product', productSchema); 
+const ProductModel = mongoose.model('Product', productSchema);
 
 export default ProductModel;   
