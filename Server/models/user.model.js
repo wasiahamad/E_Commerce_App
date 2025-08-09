@@ -48,7 +48,7 @@ const userSchema = new mongoose.Schema({
     },
     address_details: [{
         type: mongoose.Schema.ObjectId,
-        ref: 'address'
+        ref: 'Address'
     }],
     shopping_cart: [{
         type: mongoose.Schema.ObjectId,
@@ -56,7 +56,7 @@ const userSchema = new mongoose.Schema({
     }],
     orderHistory :[{
         type: mongoose.Schema.ObjectId,
-        ref: 'order'
+        ref: 'Order'
     }],
     otp: {
         type: String,

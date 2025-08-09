@@ -37,7 +37,7 @@ export const addAddressController = async (req, res) => {
 
         const updatedUserAddress = await UserModel.updateOne({ _id: userId }, {
             $push: {
-                address: savedAddress._id
+                address_details: savedAddress._id
             }
         });
 

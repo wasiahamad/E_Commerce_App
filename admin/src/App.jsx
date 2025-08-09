@@ -23,9 +23,6 @@ import { getData } from './utils/api'
 import { useEffect } from 'react'
 import Profile from './Pages/Profile'
 import ProtectedRoute from './ProtectedRoute'
-import AddAddress from './Pages/Address/AddAddress'
-
-
 
 const alertBox = (status, msg) => {
   if (status === "success") {
@@ -325,26 +322,6 @@ function App() {
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
               <Profile />
-              {/* </div> */}
-            </div>
-          </section>
-        </ProtectedRoute>
-      )
-    },
-
-     {
-      path: "/address",
-      // excat: true,
-      element: (
-        <ProtectedRoute>
-          <section className='main'>
-            <Header />
-            <div className="containerMain flex">
-              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
-                <Sidebar />
-              </div>
-              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-              <AddAddress />
               {/* </div> */}
             </div>
           </section>

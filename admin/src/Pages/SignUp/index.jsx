@@ -109,7 +109,7 @@ const SignUp = () => {
                         </Button>
                     </Link>
 
-                    <NavLink to="/signup" exact={true} activeClassName="isActive">
+                    <NavLink to="/signup" activeClassName="isActive">
                         <Button
                             className=' !text-black !rounded-full !py-2 !px-4'>
                             <FaRegUser size={15} className='mr-1' /> Sign Up

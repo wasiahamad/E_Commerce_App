@@ -278,7 +278,6 @@ export const loginUser = async (req, res) => {
     }
 };
 
-
 // Logout user controller
 export const logoutUser = async (req, res) => {
     try {
@@ -769,7 +768,9 @@ export const userDetails = async (req, res) => {
         const userId = req.user.id; // or whatever field you set in the JWT
         console.log("USER ID:", userId);
 
-        const user = await UserModel.findById(userId).select("-password -refresh_token");
+        const user = await UserModel.findById(userId)
+        .select("-password -refresh_token")
+        .populate("address_details") // address ka data laane ke liye
         return res.status(200).json({
             message: "User details fetched successfully",
             error: false,
