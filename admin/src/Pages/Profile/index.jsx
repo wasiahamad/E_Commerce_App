@@ -32,7 +32,7 @@ const Profile = () => {
         name: "",
         email: "",
         mobile: "",
-        address_details: [],
+        // address_details: [],
     });
 
     const [changePassword, setChangePassword] = useState({
@@ -45,11 +45,67 @@ const Profile = () => {
     // radio button handler
     const [selectedValue, setSelectedValue] = useState('');
 
-    const handleChange = (event) => {
-        setSelectedValue(event.target.value);
+    // const handleChange = (event) => {
+    //     setSelectedValue(event.target.value);
+    //     // address id v pas krna hai
+    //     if (event.target.checked === true) {
+    //         postData("/api/v1/address/select-address", { addressId: event.target.value }).then((res) => {
+    //             console.log(res)
+    //         })
+    //     } else {
+    //         postData("/api/v1/address/select-address", { addressId: "" }).then((res) => {
+    //             console.log(res)
+    //         })
+    //     }
+    //     console.log(event.target.value);
+    // };
 
-        console.log(event.target.value);
+    // const handleChange = (event) => {
+    //     const value = event.target.value;
+    //     setSelectedValue(value);
+
+    //     postData("/api/v1/address/select-address", { addressId: value })
+    //         .then((res) => console.log(res));
+    // };
+
+    // // useEffect for select address
+    // useEffect(() => {
+    //     if (context?.userData?.address) {
+    //         setSelectedValue(context?.userData?.address);
+    //     }
+    // }, [context?.userData?.address]);
+
+    const handleChange = (event) => {
+        const value = event.target.value;
+        setSelectedValue(value);
+
+        // store in localStorage
+        localStorage.setItem("selected", value);
+
+        postData("/api/v1/address/select-address", { addressId: value })
+            .then((res) => console.log(res));
     };
+
+    // useEffect for setting initial selected address
+    useEffect(() => {
+        // Try localStorage first
+        const savedAddress = localStorage.getItem("selected");
+
+        if (savedAddress) {
+            setSelectedValue(savedAddress);
+        } else if (context?.userData?.address) {
+            setSelectedValue(context.userData.address);
+        }
+    }, [context?.userData?.address]);
+
+
+
+    useEffect(() => {
+        if (context?.userData?.profile) {
+            setPreviewImage(context?.userData?.profile);
+        }
+    }, [context?.userData?.profile]);
+
 
     // useEffect to set initial form data
     useEffect(() => {
@@ -64,7 +120,7 @@ const Profile = () => {
                 name: context?.userData?.name,
                 email: context?.userData?.email,
                 mobile: context?.userData?.mobile,
-                address_details: context?.userData?.address_details,
+                // address_details: context?.userData?.address_details,
             });
 
             const ph = `${context?.userData?.mobile}`;
@@ -120,7 +176,7 @@ const Profile = () => {
                         name: res?.data?.name,
                         email: res?.data?.email,
                         mobile: res?.data?.mobile,
-                        address_details: res?.data?.address_details
+                        // address_details: res?.data?.address_details
                     });
                     setLoading(false);
                     navigate("/profile");

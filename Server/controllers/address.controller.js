@@ -99,51 +99,6 @@ export const getAllAddressController = async (req, res) => {
 }
 
 // select address controller
-// export const selectAddressController = async (req, res) => {
-//     try {
-//         const { addressId } = req.body;
-
-//         if (!addressId) {
-//             return res.status(400).json({
-//                 message: "Address ID is required",
-//                 error: true,
-//                 success: false
-//             });
-//         }
-
-//         const address = await AddressModel.findById(addressId);
-
-//         if (!address) {
-//             return res.status(404).json({
-//                 message: "Address not found",
-//                 error: true,
-//                 success: false
-//             });
-//         }
-
-//         const updatedUser = await UserModel.updateOne({ _id: req?.user?.id }, {
-//             $set: {
-//                 selected: addressId
-//             }
-//         });
-
-//         res.status(200).json({
-//             message: "Address selected successfully",
-//             error: false,
-//             success: true,
-//             data: address
-//         });
-//     } catch (error) {
-//         console.error("Error selecting address:", error);
-//         res.status(500).json({
-//             message: "Error selecting address",
-//             error: true,
-//             success: false
-//         });
-//     }
-// }
-
-
 export const selectAddressController = async (req, res) => {
     try {
         const { addressId } = req.body;
@@ -176,11 +131,11 @@ export const selectAddressController = async (req, res) => {
         address.selected = true;
         await address.save();
 
-        // ✅ User ke document me bhi update karo (optional)
-        await UserModel.updateOne(
-            { _id: userId },
-            { $set: { selected: addressId } }
-        );
+        // // ✅ User ke document me bhi update karo (optional)
+        // await UserModel.updateOne(
+        //     { _id: userId },
+        //     { $set: { selected: addressId } }
+        // );
 
         res.status(200).json({
             message: "Address selected successfully",

@@ -476,18 +476,18 @@ export const updateUser = async (req, res) => {
             }
         }
 
-        // update selected address to false and update selected address to true
-        const selectedAddress = await AddressModel.findOne({ userId, selected: true });
-        if (selectedAddress) {
-            await AddressModel.updateMany(
-                { userId },
-                { $set: { selected: false } }
-            );
-            await AddressModel.updateOne(
-                { _id: selectedAddress._id, userId },
-                { $set: { selected: true } }
-            );
-        }
+        // // update selected address to false and update selected address to true
+        // const selectedAddress = await AddressModel.findOne({ userId, selected: true });
+        // if (selectedAddress) {
+        //     await AddressModel.updateMany(
+        //         { userId },
+        //         { $set: { selected: false } }
+        //     );
+        //     await AddressModel.updateOne(
+        //         { _id: selectedAddress._id, userId },
+        //         { $set: { selected: true } }
+        //     );
+        // }
 
 
         return res.status(200).json({
