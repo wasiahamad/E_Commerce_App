@@ -24,6 +24,7 @@ import MyList from "./Pages/MyList";
 import Orders from "./Pages/Orders";
 import { getData } from "./utils/api";
 import PrivateRoute from "./components/PrivateRoute";
+import Address from "./Pages/MyAccount/Address.jsx";
 
 // react toast alert function
 const alertBox = (status, msg) => {
@@ -167,6 +168,11 @@ function App() {
             <Route
               path="/my-orders"
               element={<PrivateRoute><Orders /></PrivateRoute>}
+            />
+
+            <Route
+              path="/address"
+              element={<PrivateRoute><Address /></PrivateRoute>}
             />
           </Routes>
           <Footer />

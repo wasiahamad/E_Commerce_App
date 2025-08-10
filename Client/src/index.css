@@ -316,3 +316,17 @@ input[type=number] {
   color: #ff5252 !important;
   opacity: 1 !important;
 }
+
+/* international phone */
+.react-international-phone-input {
+  width: 100% !important;
+}
+
+.react-international-phone-input-container {
+  border: 1px solid rgba(0, 0, 0, 0.1) !important;
+  border-radius: 5px !important;
+}
+
+.react-international-phone-country-selecter-button {
+  width: 55px !important;
+}

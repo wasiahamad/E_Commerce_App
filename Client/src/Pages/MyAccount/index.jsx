@@ -1,4 +1,4 @@
-import React, { use, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 
 import { Button, CircularProgress, TextField } from '@mui/material';
 import { Collapse } from 'react-collapse';
@@ -6,6 +6,8 @@ import AccountSideBar from '../../components/AccountSideBar';
 import { useNavigate } from 'react-router-dom';
 import { MyContext } from '../../App';
 import { editUserData, postData } from '../../utils/api';
+import { PhoneInput } from 'react-international-phone';
+import 'react-international-phone/style.css';
 
 
 const MyAccount = () => {
@@ -15,6 +17,7 @@ const MyAccount = () => {
     const [loading, setLoading] = useState(false);
     const [loading2, setLoading2] = useState(false);
     const [openChangePassword, setOpenChangePassword] = useState(false);
+    const [phone, setPhone] = useState("");
 
     const [formData, setFormData] = useState({
         name: "",
@@ -37,6 +40,9 @@ const MyAccount = () => {
                 email: context?.userData?.email,
                 mobile: context?.userData?.mobile,
             });
+
+            const ph = `${context?.userData?.mobile}`;
+            setPhone(ph);
 
             setChangePassword({
                 email: context?.userData?.email
@@ -193,18 +199,13 @@ const MyAccount = () => {
                             </div>
 
                             <div className="form-group flex items-center gap-5 mt-4">
-                                <div className="w-[50%]">
-                                    <TextField
-                                        id="phone"
-                                        label="Phone Number"
-                                        variant="outlined"
-                                        className="w-full"
-                                        type="text"
-                                        size="small"
-                                        name="mobile"
-                                        onChange={onChangeInput}
-                                        value={formData.mobile}
+                                <div className=" w-[50%]">
+                                    <PhoneInput
+                                        defaultCountry="in"
+                                        value={phone}
                                         disabled={loading === true ? true : false}
+                                        onChange={(phone) => setPhone(phone)}
+                                        name="mobile"
                                     />
                                 </div>
                             </div>
