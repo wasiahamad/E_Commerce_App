@@ -3,13 +3,15 @@ import { MyContext } from "../../App";
 import CircularProgress from '@mui/material/CircularProgress';
 import { useNavigate } from "react-router-dom";
 import { IoMdCloudUpload } from "react-icons/io";
-import { editData, editUserData, postData } from "../../utils/api";
-import { Button, TextField } from "@mui/material";
+import { editData, editUserData, getData, postData } from "../../utils/api";
+import { Button, Checkbox, TextField } from "@mui/material";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { Collapse } from 'react-collapse';
 import { FaEyeSlash, FaRegEye } from "react-icons/fa6";
 
+
+const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 const Profile = () => {
     const context = useContext(MyContext);
     const [uploadedImage, setUploadedImage] = useState(false);
@@ -17,6 +19,7 @@ const Profile = () => {
     const [phone, setPhone] = useState("");
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
     const [isPasswordVisible2, setIsPasswordVisible2] = useState(false);
+    const [address, setAddress] = useState([]);
 
     const navigate = useNavigate();
 
@@ -40,6 +43,12 @@ const Profile = () => {
     // useEffect to set initial form data
     useEffect(() => {
         if (context?.userData) {
+
+            getData(`/api/v1/address/get/${context.userData._id}`).then((res) => {
+                console.log("response", res);
+                setAddress(res.data);
+            });
+
             setFormFileds({
                 name: context?.userData?.name,
                 email: context?.userData?.email,
@@ -315,8 +324,22 @@ const Profile = () => {
                         <br />
 
                         <div className="flex items-center justify-center p-5 border border-dashed border-[rgba(0,0,0,0.2)] bg-[#f1faff] hover:bg-[#e7f3f9] cursor-pointer "
-                        onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: "Add Address" })}>
+                            onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: "Add Address" })}>
                             <span className="text-[15px] font-[500] text-[#262424]">Add Address</span>
+                        </div>
+
+                        <div className="flex gap-4 flex-col ">
+                            {
+                                address?.length > 0 && address.map((item, index) => {
+                                    return (
+                                        <label key={index} className="addressBox w-full flex items-center justify-center bg-[#f1faff] border border-dashed border-[rgba(0,0,0,0.2)] hover:bg-[#e7f3f9] cursor-pointer p-5 mt-4">
+                                            <Checkbox {...label} />
+                                            <span className="text-[15px] font-[500] ">{ item?.address }</span>
+                                        </label>
+                                    )
+                                })
+                            }
+
                         </div>
 
                         <br />
@@ -368,7 +391,7 @@ const Profile = () => {
                                 </div>
 
                                 <div className="w-[50%]">
-                                   <div className="relative w-full ">
+                                    <div className="relative w-full ">
                                         <TextField
                                             id="password"
                                             label="New Password"
