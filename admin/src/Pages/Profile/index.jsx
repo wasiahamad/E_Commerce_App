@@ -9,6 +9,7 @@ import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { Collapse } from 'react-collapse';
 import { FaEyeSlash, FaRegEye } from "react-icons/fa6";
+import Radio from '@mui/material/Radio';
 
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
@@ -39,6 +40,14 @@ const Profile = () => {
         newPassword: "",
         confirmPassword: "",
     });
+
+    // radio button handler
+    const [selectedValue, setSelectedValue] = useState('');
+
+    const handleChange = (event) => {
+        setSelectedValue(event.target.value);
+        console.log(selectedValue);
+    };
 
     // useEffect to set initial form data
     useEffect(() => {
@@ -333,8 +342,14 @@ const Profile = () => {
                                 address?.length > 0 && address.map((item, index) => {
                                     return (
                                         <label key={index} className="addressBox w-full flex items-center justify-center bg-[#f1faff] border border-dashed border-[rgba(0,0,0,0.2)] hover:bg-[#e7f3f9] cursor-pointer p-5 mt-4">
-                                            <Checkbox {...label} />
-                                            <span className="text-[15px] font-[500] ">{ item?.address }</span>
+                                            <Radio
+                                                checked={selectedValue === item?._id}
+                                                onChange={handleChange}
+                                                value={item?._id}
+                                                name="radio-buttons"
+                                                inputProps={{ 'aria-label': 'A' }}
+                                            />
+                                            <span className="text-[15px] font-[500] ">{item?.address_line + ", " + item?.country + ", " + item?.city + ", " + item?.state + ", " + item?.pincode + ", " + item?.mobile}</span>
                                         </label>
                                     )
                                 })

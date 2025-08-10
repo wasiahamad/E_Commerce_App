@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 
 export const addAddressController = async (req, res) => {
     try {
-        const { address_line, city, state, country, pincode, mobile, status } = req.body;
+        const { address_line, city, state, country, pincode, mobile, status, selected } = req.body;
         const userId = req.body.userId;
 
         if (!userId) {
@@ -31,7 +31,8 @@ export const addAddressController = async (req, res) => {
             country,
             pincode,
             mobile,
-            status
+            status,
+            selected
         });
 
         const savedAddress = await address.save();
