@@ -32,6 +32,7 @@ const Profile = () => {
         name: "",
         email: "",
         mobile: "",
+        address_details: [],
     });
 
     const [changePassword, setChangePassword] = useState({
@@ -46,7 +47,8 @@ const Profile = () => {
 
     const handleChange = (event) => {
         setSelectedValue(event.target.value);
-        console.log(selectedValue);
+
+        console.log(event.target.value);
     };
 
     // useEffect to set initial form data
@@ -62,6 +64,7 @@ const Profile = () => {
                 name: context?.userData?.name,
                 email: context?.userData?.email,
                 mobile: context?.userData?.mobile,
+                address_details: context?.userData?.address_details,
             });
 
             const ph = `${context?.userData?.mobile}`;
@@ -117,6 +120,7 @@ const Profile = () => {
                         name: res?.data?.name,
                         email: res?.data?.email,
                         mobile: res?.data?.mobile,
+                        address_details: res?.data?.address_details
                     });
                     setLoading(false);
                     navigate("/profile");

@@ -84,7 +84,7 @@ export const getAllAddressController = async (req, res) => {
 
         res.status(200).json({
             message: "Address fetched successfully",
-            error: false,   
+            error: false,
             success: true,
             data: address
         });
@@ -98,25 +98,103 @@ export const getAllAddressController = async (req, res) => {
     }
 }
 
-
-// export const getAllAddressController = async (req, res) => {
+// select address controller
+// export const selectAddressController = async (req, res) => {
 //     try {
-//         const addressList = await AddressModel.find({
-//             userId: new mongoose.Types.ObjectId(req.user.id)
+//         const { addressId } = req.body;
+
+//         if (!addressId) {
+//             return res.status(400).json({
+//                 message: "Address ID is required",
+//                 error: true,
+//                 success: false
+//             });
+//         }
+
+//         const address = await AddressModel.findById(addressId);
+
+//         if (!address) {
+//             return res.status(404).json({
+//                 message: "Address not found",
+//                 error: true,
+//                 success: false
+//             });
+//         }
+
+//         const updatedUser = await UserModel.updateOne({ _id: req?.user?.id }, {
+//             $set: {
+//                 selected: addressId
+//             }
 //         });
 
 //         res.status(200).json({
-//             message: "Address fetched successfully",
+//             message: "Address selected successfully",
 //             error: false,
 //             success: true,
-//             data: addressList
+//             data: address
 //         });
 //     } catch (error) {
-//         console.error("Error fetching address:", error);
+//         console.error("Error selecting address:", error);
 //         res.status(500).json({
-//             message: "Error fetching address",
+//             message: "Error selecting address",
 //             error: true,
 //             success: false
 //         });
 //     }
-// };
+// }
+
+
+export const selectAddressController = async (req, res) => {
+    try {
+        const { addressId } = req.body;
+        const userId = req.user.id;
+
+        if (!addressId) {
+            return res.status(400).json({
+                message: "Address ID is required",
+                error: true,
+                success: false
+            });
+        }
+
+        const address = await AddressModel.findOne({ _id: addressId, userId });
+        if (!address) {
+            return res.status(404).json({
+                message: "Address not found for this user",
+                error: true,
+                success: false
+            });
+        }
+
+        // ✅ Sab addresses ka selected false
+        await AddressModel.updateMany(
+            { userId },
+            { $set: { selected: false } }
+        );
+
+        // ✅ Sirf selected address ka selected true
+        address.selected = true;
+        await address.save();
+
+        // ✅ User ke document me bhi update karo (optional)
+        await UserModel.updateOne(
+            { _id: userId },
+            { $set: { selected: addressId } }
+        );
+
+        res.status(200).json({
+            message: "Address selected successfully",
+            error: false,
+            success: true,
+            data: address
+        });
+    } catch (error) {
+        console.error("Error selecting address:", error);
+        res.status(500).json({
+            message: "Error selecting address",
+            error: true,
+            success: false
+        });
+    }
+};
+

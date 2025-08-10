@@ -10,6 +10,7 @@ import fs from "fs";
 import { verify } from "crypto";
 import { sendEmail } from "../utils/EmailService.js";
 import forgotPasswordTemplate from "../utils/forgotPasswordTemplate.js";
+import AddressModel from "../models/address.model.js";
 
 // Initialize Cloudinary
 const cloudinaryConfig = {
@@ -474,6 +475,21 @@ export const updateUser = async (req, res) => {
                 });
             }
         }
+
+        // update selected address to false and update selected address to true
+        const selectedAddress = await AddressModel.findOne({ userId, selected: true });
+        if (selectedAddress) {
+            await AddressModel.updateMany(
+                { userId },
+                { $set: { selected: false } }
+            );
+            await AddressModel.updateOne(
+                { _id: selectedAddress._id, userId },
+                { $set: { selected: true } }
+            );
+        }
+
+
         return res.status(200).json({
             message: "User updated successfully",
             error: false,
@@ -606,7 +622,7 @@ export const verifyForgotPasswordOtp = async (req, res) => {
 // Reset password controller
 export const resetPaaword = async (req, res) => {
     try {
-        const { email,password, newPassword, confirmPassword } = req.body;
+        const { email, password, newPassword, confirmPassword } = req.body;
 
         if (!email || !password || !newPassword || !confirmPassword) {
             return res.status(404).json({
@@ -667,7 +683,7 @@ export const resetPasswordWithOtp = async (req, res) => {
     try {
         const { email, newPassword, confirmPassword } = req.body;
 
-        if (!email|| !newPassword || !confirmPassword) {
+        if (!email || !newPassword || !confirmPassword) {
             return res.status(404).json({
                 message: "All Fields are required",
                 error: true,
@@ -709,7 +725,7 @@ export const resetPasswordWithOtp = async (req, res) => {
             success: false,
         });
     }
-        
+
 }
 
 // refresh token controller
@@ -769,8 +785,8 @@ export const userDetails = async (req, res) => {
         console.log("USER ID:", userId);
 
         const user = await UserModel.findById(userId)
-        .select("-password -refresh_token")
-        .populate("address_details") // address ka data laane ke liye
+            .select("-password -refresh_token")
+            .populate("address_details") // address ka data laane ke liye
         return res.status(200).json({
             message: "User details fetched successfully",
             error: false,
