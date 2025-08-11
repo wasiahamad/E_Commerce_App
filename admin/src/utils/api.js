@@ -120,4 +120,30 @@ export const editUserData = async (url, updateData) => {
     }
 }
 
+// craete a category function for post request and image upload
+export const createCategory = async (url, formData) => {
+    try {
+        const params = {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+                "Content-Type": "multipart/form-data", // Specify the content type as multipart/form-data for file uploads
+            },
+        }
+
+        let response;
+        await axios.post(apiUrl + url, formData , params)
+            .then((res) => {
+                console.log("Response from createCategory:", res);
+                response = res;
+            })
+            .catch((err) => {
+                console.error(err);
+                response = { error: true, message: "Error creating category" };
+            });
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
 

@@ -1,19 +1,27 @@
-
-import { Button, MenuItem, Select } from '@mui/material'
-import React from 'react'
-import Rating from '@mui/material/Rating';
+import { Button } from '@mui/material'
 import UploadBox from '../../Components/UploadBox';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { IoMdClose } from "react-icons/io";
 import { MdCloudUpload } from "react-icons/md";
+import { useState } from 'react';
 
 
 const AddCategoryList = () => {
-    const [age, setAge] = React.useState("");
+    const [formFileds, setFormFileds] = useState({
+        name: '',
+        image: []
+    });
 
-    const handleChange = (event) => {
-        setAge(event.target.value);
+    // function to handle input change
+    const onChangeInput = (e) => {
+        const { name, value } = e.target;
+        setFormFileds(() => {
+            return {
+                ...formFileds,
+                [name]: value,
+            };
+        });
     };
 
 
@@ -21,10 +29,17 @@ const AddCategoryList = () => {
         <section className='p-5 bg-gray-50'>
             <form action="" className='form py-3 p-8'>
                 <div className=' max-h-[70vh] overflow-y-scroll pr-4'>
-                   <div className="grid grid-cols-4 mb-3">
+                    <div className="grid grid-cols-4 mb-3">
                         <div className="col">
                             <h3 className='text-[14px] font-[500] mb-1'>Product Name</h3>
-                            <input type="text" placeholder='Product Name' className='w-full h-[40px] rounded-[5px] focus:outline-none border border-[rgba(0,0,0,0.1)] focus:border-[rgba(0,0,0,0.4)] p-3' />
+                            <input
+                                type="text"
+                                placeholder='Product Name'
+                                className='w-full h-[40px] rounded-[5px] focus:outline-none border border-[rgba(0,0,0,0.1)] focus:border-[rgba(0,0,0,0.4)] p-3'
+                                name="name"
+                                value={formFileds.name}
+                                onChange={onChangeInput}
+                            />
                         </div>
                     </div>
 
@@ -36,8 +51,7 @@ const AddCategoryList = () => {
                                 ><IoMdClose className='text-white' size={16} />
                                 </span>
                                 <div className="uploadBox  rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%] cursor-pointer hover:bg-gray-200 flex flex-col items-center justify-center relative ">
-                                    <LazyLoadImage
-                                        // alt={image.alt}
+                                    <LazyLoadImage                                   
                                         className='w-[100%] h-[100%] object-cover'
                                         effect="blur"
                                         wrapperProps={{
@@ -47,16 +61,16 @@ const AddCategoryList = () => {
                                         src="https://images.unsplash.com/photo-1511485977113-f34c92461ad9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60" />
                                 </div>
                             </div>
-                            <UploadBox multiple={true} />
+                            <UploadBox name="image" apiUrl="/api/v1/category/create"  multiple={true} />
                         </div>
                     </div>
                 </div>
                 {/* <br /><hr /> */}
                 <div className='w-[250px]'>
                     <Button type="submit" className='!w-full !font-[600] !text-[16px] !bg-[#3872fa] !text-white !py-2 !rounded-[5px] !mt-5 !hover:bg-[#1a6df1]'>
-                    <MdCloudUpload size={25} className='mr-2' />
-                    Publish and View
-                </Button>
+                        <MdCloudUpload size={25} className='mr-2' />
+                        Publish and View
+                    </Button>
                 </div>
             </form>
         </section>
