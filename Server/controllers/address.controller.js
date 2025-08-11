@@ -153,3 +153,90 @@ export const selectAddressController = async (req, res) => {
     }
 };
 
+// update address controller
+export const updateAddressController = async (req, res) => {
+    try {
+        const addressId = req.params.id; // ✅ URL params se lo
+        const { address_line, city, state, country, pincode, mobile } = req.body;
+        const userId = req.user.id;
+
+        if (!addressId) {
+            return res.status(400).json({
+                message: "Address ID is required",
+                error: true,
+                success: false
+            });
+        }
+
+        const address = await AddressModel.findOne({ _id: addressId, userId });
+        if (!address) {
+            return res.status(404).json({
+                message: "Address not found for this user",
+                error: true,
+                success: false
+            });
+        }
+
+        const updatedAddress = await AddressModel.findOneAndUpdate(
+            { _id: addressId, userId },
+            { $set: { address_line, city, state, country, pincode, mobile } },
+            { new: true }
+        );
+
+        res.status(200).json({
+            message: "Address updated successfully",
+            error: false,
+            success: true,
+            data: updatedAddress
+        });
+    } catch (error) {
+        console.error("Error updating address:", error);
+        res.status(500).json({
+            message: "Error updating address",
+            error: true,
+            success: false
+        });
+    }
+};
+
+// delete address controller
+export const deleteAddressController = async (req, res) => {
+    try {
+        const addressId = req.params.id; // ✅ URL params se lo
+        const userId = req.user.id;
+
+        if (!addressId) {
+            return res.status(400).json({
+                message: "Address ID is required",
+                error: true,
+                success: false
+            });
+        }
+
+        const address = await AddressModel.findOne({ _id: addressId, userId });
+        if (!address) {
+            return res.status(404).json({
+                message: "Address not found for this user",
+                error: true,
+                success: false
+            });
+        }
+
+        await AddressModel.deleteOne({ _id: addressId, userId });
+
+        res.status(200).json({
+            message: "Address deleted successfully",
+            error: false,
+            success: true
+            
+        });
+    } catch (error) {
+        console.error("Error deleting address:", error);
+        res.status(500).json({
+            message: "Error deleting address",
+            error: true,
+            success: false
+        });
+    }
+};
+

@@ -1,12 +1,12 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { TextField, Button, FormControlLabel, Radio, RadioGroup, MenuItem, Select } from "@mui/material";
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
-import { postData } from "../../utils/api";
+import { postData, editUserData } from "../../utils/api";
 import { MyContext } from "../../App";
 
 
-const AddAddressForm = () => {
+const AddAddressForm = ({ editDataField, onClose }) => {
     const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(false);
     const context = useContext(MyContext);
@@ -21,6 +21,21 @@ const AddAddressForm = () => {
         status: false
     });
 
+    // ✅ Fill form if editData exists
+    useEffect(() => {
+        if (editDataField) {
+            setFormFileds({
+                address_line: editDataField.address_line || "",
+                city: editDataField.city || "",
+                state: editDataField.state || "",
+                country: editDataField.country || "",
+                pincode: editDataField.pincode || "",
+                mobile: editDataField.mobile || "",
+                status: editDataField.status || false
+            });
+        }
+    }, [editDataField]);
+
 
     const handleChange = (e) => {
         setFormFileds({ ...formFileds, [e.target.name]: e.target.value });
@@ -30,11 +45,57 @@ const AddAddressForm = () => {
         setFormFileds({ ...formFileds, phone: value });
     };
 
+    // const handleSubmit = (e) => {
+    //     e.preventDefault();
+    //     setLoading(true);
+
+    //     // ✅ Ensure user is logged in
+    //     if (!context?.userData?._id) {
+    //         context.alertBox("error", "User not logged in");
+    //         setLoading(false);
+    //         return;
+    //     }
+
+    //     const { address_line, city, state, country, pincode, mobile } = formFileds;
+
+    //     // ✅ Validation
+    //     if (!address_line || !city || !state || !country || !pincode || !mobile) {
+    //         context.alertBox("error", "Please fill all the fields");
+    //         setLoading(false);
+    //         return;
+    //     }
+
+    //     // ✅ Add userId before sending
+    //     const updatedForm = {
+    //         ...formFileds,
+    //         userId: context.userData._id
+    //     };
+
+    //     postData("/api/v1/address/add", updatedForm)
+    //         .then((res) => {
+    //             console.log("response", res);
+
+    //             if (res && res.error !== true) {
+    //                 context.alertBox("success", res?.message);
+    //                 context.setUserData(res?.data);
+    //                 setLoading(false);
+    //                 window.location.href = "/address";
+    //             } else {
+    //                 context.alertBox("error", res?.message || "Something went wrong");
+    //                 setLoading(false);
+    //             }
+    //         })
+    //         .catch((err) => {
+    //             console.error(err);
+    //             context.alertBox("error", "Something went wrong");
+    //             setLoading(false);
+    //         });
+    // };
+
     const handleSubmit = (e) => {
         e.preventDefault();
         setLoading(true);
 
-        // ✅ Ensure user is logged in
         if (!context?.userData?._id) {
             context.alertBox("error", "User not logged in");
             setLoading(false);
@@ -42,40 +103,55 @@ const AddAddressForm = () => {
         }
 
         const { address_line, city, state, country, pincode, mobile } = formFileds;
-
-        // ✅ Validation
         if (!address_line || !city || !state || !country || !pincode || !mobile) {
             context.alertBox("error", "Please fill all the fields");
             setLoading(false);
             return;
         }
 
-        // ✅ Add userId before sending
-        const updatedForm = {
-            ...formFileds,
-            userId: context.userData._id
-        };
+        if (editDataField) {
+            // ✅ Update API call
+            editUserData(`/api/v1/address/update/${editDataField._id}`, formFileds)
+                .then((res) => {
+                    if (res && !res.error) {
+                        context.alertBox("success", res?.message);
+                        onClose(); // close drawer
+                        context.setUserData(res?.data);
+                        onRefresh();
 
-        postData("/api/v1/address/add", updatedForm)
-            .then((res) => {
-                console.log("response", res);
+                    } else {
+                        context.alertBox("error", res?.message || "Something went wrong");
+                    }
+                    setLoading(false);
+                })
+                .catch(() => {
+                    context.alertBox("error", "Something went wrong");
+                    setLoading(false);
+                });
 
-                if (res && res.error !== true) {
-                    context.alertBox("success", res?.message);
-                    context.setUserData(res?.data);
-                    setLoading(false);
-                    window.location.href = "/address";
-                } else {
-                    context.alertBox("error", res?.message || "Something went wrong");
-                    setLoading(false);
-                }
+        } else {
+            // ✅ Add API call
+            postData("/api/v1/address/add", {
+                ...formFileds,
+                userId: context.userData._id
             })
-            .catch((err) => {
-                console.error(err);
-                context.alertBox("error", "Something went wrong");
-                setLoading(false);
-            });
+                .then((res) => {
+                    if (res && !res.error) {
+                        context.alertBox("success", res?.message || "Address added successfully");
+                        onClose();
+                        context.setUserData(res?.data);
+                        onRefresh();
+                    }
+                    setLoading(false);
+                })
+                .catch(() => {
+                    context.alertBox("error", "Something went wrong");
+                    setLoading(false);
+                });
+        }
     };
+
+
     return (
         <form
             onSubmit={handleSubmit}
@@ -172,18 +248,8 @@ const AddAddressForm = () => {
                 </RadioGroup>
             </div> */}
 
-            <Button
-                type="submit"
-                variant="contained"
-                fullWidth
-                sx={{
-                    backgroundColor: "#f44336",
-                    "&:hover": { backgroundColor: "#d32f2f" },
-                    paddingY: "10px",
-                    fontSize: "16px",
-                }}
-            >
-                SAVE
+            <Button type="submit" variant="contained" fullWidth disabled={loading}>
+                {editDataField ? "UPDATE" : "SAVE"}
             </Button>
         </form>
     );

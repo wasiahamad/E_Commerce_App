@@ -45,36 +45,6 @@ const Profile = () => {
     // radio button handler
     const [selectedValue, setSelectedValue] = useState('');
 
-    // const handleChange = (event) => {
-    //     setSelectedValue(event.target.value);
-    //     // address id v pas krna hai
-    //     if (event.target.checked === true) {
-    //         postData("/api/v1/address/select-address", { addressId: event.target.value }).then((res) => {
-    //             console.log(res)
-    //         })
-    //     } else {
-    //         postData("/api/v1/address/select-address", { addressId: "" }).then((res) => {
-    //             console.log(res)
-    //         })
-    //     }
-    //     console.log(event.target.value);
-    // };
-
-    // const handleChange = (event) => {
-    //     const value = event.target.value;
-    //     setSelectedValue(value);
-
-    //     postData("/api/v1/address/select-address", { addressId: value })
-    //         .then((res) => console.log(res));
-    // };
-
-    // // useEffect for select address
-    // useEffect(() => {
-    //     if (context?.userData?.address) {
-    //         setSelectedValue(context?.userData?.address);
-    //     }
-    // }, [context?.userData?.address]);
-
     const handleChange = (event) => {
         const value = event.target.value;
         setSelectedValue(value);

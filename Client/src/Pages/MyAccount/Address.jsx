@@ -1,10 +1,12 @@
 import React, { useContext, useEffect, useState } from 'react'
 import AccountSideBar from '../../components/AccountSideBar'
-import { Radio } from '@mui/material'
+import { Menu, MenuItem, Radio } from '@mui/material'
 import { MyContext } from '../../App';
 import { Drawer } from "@mui/material";
 import AddAddressForm from './AddAddress';
-import { getData, postData } from '../../utils/api';
+import { deleteData, getData, postData } from '../../utils/api';
+import { CiMenuKebab } from "react-icons/ci";
+import { Link } from 'react-router-dom';
 
 
 
@@ -13,32 +15,46 @@ const Address = () => {
     const context = useContext(MyContext);
     const [address, setAddress] = useState([]);
     const [open, setOpen] = useState(false);
+    const [editDataField, setEditDataField] = useState(null);
+    const [selectedAddress, setSelectedAddress] = useState(null); // ✅ stores the clicked address
 
-    // radio button handler
-    const [selectedValue, setSelectedValue] = useState('');
+    const [anchorEl, setAnchorEl] = React.useState(null);
+    const handleClick = (event, addressItem) => {
+        setAnchorEl(event.currentTarget);
+        setSelectedAddress(addressItem); // ✅ store this address
 
-    const handleChange = (event) => {
-        const value = event.target.value;
-        setSelectedValue(value);
-
-        // store in localStorage
-        localStorage.setItem("selected", value);
-
-        postData("/api/v1/address/select-address", { addressId: value })
-            .then((res) => console.log(res));
+    };
+    const handleClose = () => {
+        setAnchorEl(null);
     };
 
-    // useEffect for setting initial selected address
-    useEffect(() => {
-        // Try localStorage first
-        const savedAddress = localStorage.getItem("selected");
+    // // radio button handler
+    // const [selectedValue, setSelectedValue] = useState('');
 
-        if (savedAddress) {
-            setSelectedValue(savedAddress);
-        } else if (context?.userData?.address) {
-            setSelectedValue(context.userData.address);
-        }
-    }, [context?.userData?.address]);
+    // const handleChange = (event) => {
+    //     const value = event.target.value;
+    //     setSelectedValue(value);
+
+    //     // store in localStorage
+    //     localStorage.setItem("selected", value);
+
+    //     postData("/api/v1/address/select-address", { addressId: value })
+    //         .then((res) => console.log(res));
+    // };
+
+    // // useEffect for setting initial selected address
+    // useEffect(() => {
+    //     // Try localStorage first
+    //     const savedAddress = localStorage.getItem("selected");
+
+    //     if (savedAddress) {
+    //         setSelectedValue(savedAddress);
+    //     } else if (context?.userData?.address) {
+    //         setSelectedValue(context.userData.address);
+    //     }
+    // }, [context?.userData?.address]);
+
+    // 
 
     useEffect(() => {
         if (context?.userData) {
@@ -48,7 +64,43 @@ const Address = () => {
             });
         }
     }, [context?.userData]);
-       
+
+    // fetch addresses function
+    const fetchAddresses = () => {
+        if (context?.userData) {
+            getData(`/api/v1/address/get/${context.userData._id}`).then((res) => {
+                setAddress(res.data);
+            });
+        }
+    };
+
+    useEffect(() => {
+        fetchAddresses();
+    }, [context?.userData]);
+
+    // delete address function
+    const handleDelete = () => {
+        if (!selectedAddress?._id) return;
+
+        deleteData(`/api/v1/address/delete/${selectedAddress._id}`)
+            .then((res) => {
+                if (res && !res.error) {
+                    context.alertBox("success", res?.message || "Address deleted successfully");
+
+                    // ✅ Remove from local state without reload
+                    setAddress((prev) => prev.filter(addr => addr._id !== selectedAddress._id));
+                } else {
+                    context.alertBox("error", res?.message || "Failed to delete address");
+                }
+            })
+            .catch(() => {
+                context.alertBox("error", "Something went wrong");
+            })
+            .finally(() => {
+                handleClose();
+            });
+    };
+
     return (
         <section className='py-10 w-full'>
             <div className="container flex gap-5">
@@ -69,7 +121,10 @@ const Address = () => {
 
                         <div
                             className="flex items-center justify-center p-5 border border-dashed border-[rgba(0,0,0,0.2)] bg-[#f1faff] hover:bg-[#e7f3f9] cursor-pointer"
-                            onClick={() => setOpen(true)}
+                            onClick={() => {
+                                setOpen(true);
+                                setEditDataField(null);
+                            }}
                         >
                             <span className="text-[15px] font-[500] text-[#262424]">
                                 Add Address
@@ -80,7 +135,11 @@ const Address = () => {
                         <Drawer
                             anchor="right"
                             open={open}
-                            onClose={() => setOpen(false)}
+                            onClose={() => {
+                                setOpen(false);
+                                setEditDataField(null);
+                            }}
+
                             PaperProps={{
                                 sx: { width: 500, padding: 2 } // drawer width
                             }}
@@ -94,22 +153,47 @@ const Address = () => {
                             </div>
 
                             {/* Form */}
-                            <AddAddressForm />
+                            <AddAddressForm editDataField={editDataField}
+                                onClose={() => {
+                                    setOpen(false);
+                                    setEditDataField(null);
+                                }}
+                                onRefresh={fetchAddresses}
+                            />
                         </Drawer>
 
                         <div className="flex gap-4 flex-col ">
                             {
                                 address?.length > 0 && address.map((item, index) => {
                                     return (
-                                        <label key={index} className="addressBox w-full flex items-center justify-center bg-[#f1faff] border border-dashed border-[rgba(0,0,0,0.2)] hover:bg-[#e7f3f9] cursor-pointer p-5 mt-4">
-                                            <Radio
+                                        <label key={index} className="addressBox w-full flex items-center justify-between bg-[#fafafa] border border-dashed border-[rgba(0,0,0,0.2)] hover:bg-[#f1faff] cursor-pointer p-5 mt-4">
+                                            {/* <Radio
                                                 checked={selectedValue === item?._id}
                                                 onChange={handleChange}
                                                 value={item?._id}
                                                 name="radio-buttons"
                                                 inputProps={{ 'aria-label': 'A' }}
-                                            />
+                                            /> */}
                                             <span className="text-[15px] font-[500] ">{item?.address_line + ", " + item?.country + ", " + item?.city + ", " + item?.state + ", " + item?.pincode + ", " + item?.mobile}</span>
+
+                                            <span>
+                                                <CiMenuKebab size={25} onClick={(event) => handleClick(event, item)} />
+                                                <Menu
+                                                    anchorEl={anchorEl}
+                                                    open={Boolean(anchorEl)}
+                                                    onClose={handleClose}
+                                                >
+                                                    <MenuItem onClick={() => {
+                                                        // setEditDataField(item); // set the current address to edit
+                                                        setEditDataField(selectedAddress); // ✅ always correct address
+                                                        setOpen(true); // open drawer
+                                                        handleClose(); // close menu
+                                                    }}>
+                                                        Edit
+                                                    </MenuItem>
+                                                    <MenuItem onClick={handleDelete} >Delete</MenuItem>
+                                                </Menu>
+                                            </span>
                                         </label>
                                     )
                                 })
@@ -118,7 +202,7 @@ const Address = () => {
                     </div>
                 </div>
             </div>
-        </section>
+        </section >
     )
 }
 

@@ -67,7 +67,7 @@ export const getData = async (url) => {
     }
 }
 
-// Function to make a PUT request
+// Function to make a PUT request for image uploads
 export const editData = async (url, updateData) => {
     try {
         const params = {
@@ -78,6 +78,7 @@ export const editData = async (url, updateData) => {
         }
 
         let response;
+
         await axios.put(apiUrl + url, updateData, params)
             .then((res) => {
                 console.log("Response from editData:", res);
@@ -120,4 +121,19 @@ export const editUserData = async (url, updateData) => {
     }
 }
 
+// Function to make a DELETE request
+export const deleteData = async (url) => {
+    try {
+        const { data } = await axios.delete(apiUrl + url, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`, // Include the token in the headers
+                "Content-Type": "application/json",
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+}
 
