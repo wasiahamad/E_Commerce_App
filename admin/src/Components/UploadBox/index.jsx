@@ -5,20 +5,10 @@ import { createCategory } from '../../utils/api';
 import { MyContext } from "../../App";
 import { useContext } from "react";
 
-
 const UploadBox = (props) => {
     const context = useContext(MyContext);
     const [uploadedImage, setUploadedImage] = useState(false);
     const [previewImage, setPreviewImage] = useState(null);
-
-    // useEffect(() => {
-    //     // Fetch user avatar from local storage or API if needed
-    //     const userAvatar = localStorage.getItem("userAvatar");
-    //     if (userAvatar) {
-    //         setPreviewImage(userAvatar);
-    //     }
-    // }, [context?.userData]);
-
     let selectedImg = [];
     const formData = new FormData();
 
@@ -65,7 +55,8 @@ const UploadBox = (props) => {
         <div className="uploadBox p-3 rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%] cursor-pointer hover:bg-gray-200 flex flex-col items-center justify-center relative ">
             <FaImages size={40} className="text-[rgba(0,0,0,0.5)]" />
             <h4 className="text-[14px] text-[rgba(0,0,0,0.5)]">Image Upload</h4>
-            <input type="file"
+            <input 
+                type="file"
                 multiple={props.multiple !== undefined ? props.multiple : false}
                 className="absolute top-0 left-0 w-[100%] h-[100%] cursor-pointer opacity-0"
                 accept="image/*"

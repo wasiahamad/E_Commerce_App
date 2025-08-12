@@ -27,7 +27,7 @@ const AddCategoryList = () => {
 
     return (
         <section className='p-5 bg-gray-50'>
-            <form action="" className='form py-3 p-8'>
+            <form action=""  className='form py-3 p-8'>
                 <div className=' max-h-[70vh] overflow-y-scroll pr-4'>
                     <div className="grid grid-cols-4 mb-3">
                         <div className="col">
