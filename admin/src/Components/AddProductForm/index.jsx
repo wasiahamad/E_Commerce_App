@@ -46,9 +46,9 @@ const AddProductForm = () => {
                         onClick={handleClose}
                         aria-label="close"
                     >
-                        <IoMdClose size={25} className='!text-[#000] '/>
+                        <IoMdClose size={25} className='!text-[#000] ' />
                     </IconButton>
-                    <Typography  sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
+                    <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
                         <span className='!text-gray-800 !font-[600]'> {context.isOpenAddProductForm.model}</span>
                     </Typography>
                 </Toolbar>
@@ -67,21 +67,25 @@ const AddProductForm = () => {
             }
 
             {
-                context.isOpenAddProductForm?.model === "Add Sub Category" && <AddSubCategoryList  />
+                context.isOpenAddProductForm?.model === "Add Sub Category" && <AddSubCategoryList />
             }
 
             {
-                context.isOpenAddProductForm?.model === "Add Banner List-1" && <AddBannerV1  />
+                context.isOpenAddProductForm?.model === "Add Banner List-1" && <AddBannerV1 />
             }
 
             {
-                context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2  />
+                context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2 />
             }
 
-            {
-                context.isOpenAddProductForm?.model === "Add Address" && <AddAddress  />
-            }
-            
+            {context.isOpenAddProductForm?.isOpen && (
+                <AddCategoryList
+                    editData={context.isOpenAddProductForm.data || null}
+                    mode={context.isOpenAddProductForm.model}
+                />
+            )}
+
+
         </Dialog>
     )
 }

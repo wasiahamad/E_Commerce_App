@@ -131,7 +131,7 @@ export const createCategory = async (url, formData) => {
         }
 
         let response;
-        await axios.post(apiUrl + url, formData , params)
+        await axios.post(apiUrl + url, formData, params)
             .then((res) => {
                 console.log("Response from createCategory:", res);
                 response = res;
@@ -146,4 +146,33 @@ export const createCategory = async (url, formData) => {
         throw error;
     }
 };
+
+// delete request 
+export const deleteData = async (url) => {
+    try {
+        const params = {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        };
+
+        let response;
+        await axios.delete(apiUrl + url, params)
+            .then((res) => {
+                response = res;
+            })
+            .catch((err) => {
+                console.error(err);
+                response = { error: true, message: "Error deleting data" };
+            });
+
+        return response.data;
+    } catch (error) {
+        console.error(error);
+        throw error;
+    }
+};
+
+
 

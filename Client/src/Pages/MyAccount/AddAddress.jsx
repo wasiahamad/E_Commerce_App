@@ -7,7 +7,6 @@ import { MyContext } from "../../App";
 
 
 const AddAddressForm = ({ editDataField, onClose }) => {
-    const [phone, setPhone] = useState("");
     const [loading, setLoading] = useState(false);
     const context = useContext(MyContext);
     const [formFileds, setFormFileds] = useState({
