@@ -133,7 +133,6 @@ export const editCategoryData = async (url, updateData, files = []) => {
 };
 
 
-
 export const editUserData = async (url, updateData) => {
     try {
         const params = {
