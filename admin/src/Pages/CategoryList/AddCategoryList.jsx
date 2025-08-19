@@ -1,405 +1,111 @@
-// // // import { Button } from '@mui/material'
-// // // import UploadBox from '../../Components/UploadBox';
-// // // import { LazyLoadImage } from 'react-lazy-load-image-component';
-// // // import 'react-lazy-load-image-component/src/effects/blur.css';
-// // // import { IoMdClose } from "react-icons/io";
-// // // import { MdCloudUpload } from "react-icons/md";
-// // // import { useState } from 'react';
-
-
-// // // const AddCategoryList = () => {
-// // //     const [formFileds, setFormFileds] = useState({
-// // //         name: '',
-// // //         image: []
-// // //     });
-
-// // //     // function to handle input change
-// // //     const onChangeInput = (e) => {
-// // //         const { name, value } = e.target;
-// // //         setFormFileds(() => {
-// // //             return {
-// // //                 ...formFileds,
-// // //                 [name]: value,
-// // //             };
-// // //         });
-// // //     };
-
-
-// // //     return (
-// // //         <section className='p-5 bg-gray-50'>
-// // //             <form action=""  className='form py-3 p-8'>
-// // //                 <div className=' max-h-[70vh] overflow-y-scroll pr-4'>
-// // //                     <div className="grid grid-cols-4 mb-3">
-// // //                         <div className="col">
-// // //                             <h3 className='text-[14px] font-[500] mb-1'>Product Name</h3>
-// // //                             <input
-// // //                                 type="text"
-// // //                                 placeholder='Product Name'
-// // //                                 className='w-full h-[40px] rounded-[5px] focus:outline-none border border-[rgba(0,0,0,0.1)] focus:border-[rgba(0,0,0,0.4)] p-3'
-// // //                                 name="name"
-// // //                                 value={formFileds.name}
-// // //                                 onChange={onChangeInput}
-// // //                             />
-// // //                         </div>
-// // //                     </div>
-
-// // //                     <div className="col w-full p-5 px-0 ">
-// // //                         <h3 className='font-[700] text-[18px] mb-3'>Media & Images</h3>
-// // //                         <div className="grid grid-cols-7 gap-4 ">
-// // //                             <div className="uploadBoxWrapper relative">
-// // //                                 <span className='absolute z-50 bg-red-700 -top-[5px] -right-[5px] rounded-full flex items-center justify-center text-white w-[20px] h-[20px] cursor-pointer'
-// // //                                 ><IoMdClose className='text-white' size={16} />
-// // //                                 </span>
-// // //                                 <div className="uploadBox  rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%] cursor-pointer hover:bg-gray-200 flex flex-col items-center justify-center relative ">
-// // //                                     <LazyLoadImage                                   
-// // //                                         className='w-[100%] h-[100%] object-cover'
-// // //                                         effect="blur"
-// // //                                         wrapperProps={{
-// // //                                             // If you need to, you can tweak the effect transition using the wrapper style.
-// // //                                             style: { transitionDelay: "1s" },
-// // //                                         }}
-// // //                                         src="https://images.unsplash.com/photo-1511485977113-f34c92461ad9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60" />
-// // //                                 </div>
-// // //                             </div>
-// // //                             <UploadBox name="image" apiUrl="/api/v1/category/create"  multiple={true} />
-// // //                         </div>
-// // //                     </div>
-// // //                 </div>
-// // //                 {/* <br /><hr /> */}
-// // //                 <div className='w-[250px]'>
-// // //                     <Button type="submit" className='!w-full !font-[600] !text-[16px] !bg-[#3872fa] !text-white !py-2 !rounded-[5px] !mt-5 !hover:bg-[#1a6df1]'>
-// // //                         <MdCloudUpload size={25} className='mr-2' />
-// // //                         Publish and View
-// // //                     </Button>
-// // //                 </div>
-// // //             </form>
-// // //         </section>
-// // //     )
-// // // }
-
-// // // export default AddCategoryList
-
-
-
-
-
-// // // AddCategoryList.jsx
-// // import { Button } from '@mui/material';
-// // import UploadBox from '../../Components/UploadBox';
-// // import { MdCloudUpload } from "react-icons/md";
-// // import { useState, useContext } from 'react';
-// // import { createCategory } from '../../utils/api';
-// // import { MyContext } from "../../App";
-
-// // const AddCategoryList = () => {
-// //     const [formFields, setFormFields] = useState({
-// //         name: '',
-// //         image: []
-// //     });
-
-// //     const context = useContext(MyContext);
-
-// //     const onChangeInput = (e) => {
-// //         const { name, value } = e.target;
-// //         setFormFields({
-// //             ...formFields,
-// //             [name]: value
-// //         });
-// //     };
-
-// //     const handleFilesSelect = (files) => {
-// //         setFormFields({
-// //             ...formFields,
-// //             image: files
-// //         });
-// //     };
-
-// //     const handleSubmit = async (e) => {
-// //         e.preventDefault();
-// //         if (!formFields.name || formFields.image.length === 0) {
-// //             context.alertBox("error", "Please fill all fields");
-// //             return;
-// //         }
-
-// //         const formData = new FormData();
-// //         formData.append("name", formFields.name);
-// //         formFields.image.forEach((file) => {
-// //             formData.append("image", file);
-// //         });
-
-// //         const res = await createCategory("/api/v1/category/create", formData);
-// //         if (res?.success) {
-// //             context.alertBox("success", res?.message || "Category created successfully.");
-// //             setFormFields({ name: '', image: [] });
-// //         } else {
-// //             context.alertBox("error", res?.message || "Error creating category");
-// //         }
-// //     };
-
-// //     return (
-// //         <section className='p-5 bg-gray-50'>
-// //             <form onSubmit={handleSubmit} className='form py-3 p-8'>
-// //                 <div>
-// //                     <h3 className='text-[14px] font-[500] mb-1'>Category Name</h3>
-// //                     <input
-// //                         type="text"
-// //                         placeholder='Category Name'
-// //                         className='w-full h-[40px] rounded-[5px] border p-3'
-// //                         name="name"
-// //                         value={formFields.name}
-// //                         onChange={onChangeInput}
-// //                     />
-// //                 </div>
-
-// //                 <div className="mt-5">
-// //                     <h3 className='font-[700] text-[18px] mb-3'>Media & Images</h3>
-// //                     <UploadBox name="image" multiple={true} onFilesSelect={handleFilesSelect} />
-// //                 </div>
-
-// //                 <div className='w-[250px]'>
-// //                     <Button type="submit" className='!w-full !bg-[#3872fa] !text-white'>
-// //                         <MdCloudUpload size={25} className='mr-2' />
-// //                         Publish and View
-// //                     </Button>
-// //                 </div>
-// //             </form>
-// //         </section>
-// //     );
-// // };
-
-// // export default AddCategoryList;
-
-
-// import { Button } from '@mui/material';
-// import UploadBox from '../../Components/UploadBox';
-// import { MdCloudUpload } from "react-icons/md";
-// import { useState, useContext } from 'react';
-// import { createCategory } from '../../utils/api';
-// import { MyContext } from "../../App";
-// import { useEffect } from 'react';
-
-// const AddCategoryList = () => {
-//     const [formFields, setFormFields] = useState({
-//         name: '',
-//         image: []
-//     });
-//     const [resetUploadBox, setResetUploadBox] = useState(false); // 🔹 new state
-
-//     const context = useContext(MyContext);
-
-//     const onChangeInput = (e) => {
-//         const { name, value } = e.target;
-//         setFormFields({
-//             ...formFields,
-//             [name]: value
-//         });
-//     };
-
-//     const handleFilesSelect = (files) => {
-//         setFormFields({
-//             ...formFields,
-//             image: files
-//         });
-//     };
-
-//     // 
-//     useEffect(() => {
-//         if (context.isOpenAddProductForm?.model === "Edit Category" && context.isOpenAddProductForm?.data) {
-//             const categoryData = context.isOpenAddProductForm.data;
-//             setFormFields({
-//                 name: categoryData.name || '',
-//                 image: categoryData.image ? [categoryData.image] : []
-//             });
-//         }
-//     }, [context.isOpenAddProductForm]);
-
-
-//     // Handle to Edit and Create Category 
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         if (!formFields.name || formFields.image.length === 0) {
-//             context.alertBox("error", "Please fill all fields");
-//             return;
-//         }
-
-//         const formData = new FormData();
-//         formData.append("name", formFields.name);
-//         formFields.image.forEach((file) => {
-//             if (file instanceof File) {
-//                 formData.append("image", file);
-//             } else {
-//                 formData.append("image", file); // keep existing URL
-//             }
-//         });
-
-//         let res;
-//         if (context.isOpenAddProductForm?.model === "Edit Category") {
-//             const id = context.isOpenAddProductForm.data._id;
-//             res = await editData(`/api/v1/category/update/${id}`, formData);
-//         } else {
-//             res = await createCategory("/api/v1/category/create", formData);
-//         }
-
-//         if (res?.success) {
-//             context.alertBox("success", res?.message || "Category saved successfully.");
-//             setFormFields({ name: '', image: [] });
-//             setResetUploadBox(prev => !prev);
-//             context.setIsOpenAddProductForm({ isOpen: false });
-//         } else {
-//             context.alertBox("error", res?.message || "Error saving category.");
-//         }
-//     };
-
-//     // const handleSubmit = async (e) => {
-//     //     try {
-//     //         e.preventDefault();
-//     //         if (!formFields.name || formFields.image.length === 0) {
-//     //             context.alertBox("error", "Please fill all fields");
-//     //             return;
-//     //         }
-
-//     //         const formData = new FormData();
-//     //         formData.append("name", formFields.name);
-//     //         formFields.image.forEach((file) => {
-//     //             formData.append("image", file);
-//     //         });
-
-//     //         const res = await createCategory("/api/v1/category/create", formData);
-//     //         if (res?.success) {
-//     //             context.alertBox("success", res?.message || "Category created successfully.");
-//     //             setFormFields({ name: '', image: [] });
-//     //             setResetUploadBox(prev => !prev); // 🔹 toggle to reset child
-//     //         } else {
-//     //             context.alertBox("error", res?.message || "Error creating category");
-//     //         }
-//     //     } catch (error) {
-//     //         context.alertBox("error", "Something went wrong");
-//     //     }
-//     // };
-
-//     // useEffect for resetting the upload box
-//     useEffect(() => {
-//         setResetUploadBox(false);
-//     }, []);
-
-//     return (
-//         <section className='p-5 bg-gray-50'>
-//             <form onSubmit={handleSubmit} className='form py-3 p-8 col'>
-//                 <div className='grid grid-cols-4 gap-4'>
-//                     <div className="col">
-//                         <h3 className='text-[14px] font-[500] mb-2'>Category Name</h3>
-//                         <input
-//                             type="text"
-//                             placeholder='Category Name'
-//                             className='w-full h-[40px] rounded-[5px] border p-3'
-//                             name="name"
-//                             value={formFields.name}
-//                             onChange={onChangeInput}
-//                         />
-//                     </div>
-//                 </div>
-
-//                 <div className="mt-8 grid grid-cols-6 gap-4">
-//                     <div className="col">
-//                         <h3 className='font-[700] text-[18px] mb-5'>Media & Images</h3>
-//                         <UploadBox
-//                             name="image"
-//                             multiple={true}
-//                             onFilesSelect={handleFilesSelect}
-//                             resetTrigger={resetUploadBox} // 🔹 pass reset trigger
-//                             selectedFiles={images}
-//                             setSelectedFiles={setImages}
-//                             onClose={() => setShowUploadPanel(false)} // Upload ke baad panel band karne ke liye
-
-//                         />
-//                     </div>
-//                 </div>
-
-//                 <div className='w-[250px] mt-8'>
-//                     <Button type="submit" className='!w-full !bg-[#3872fa] !text-white' disabled={formFields.image.length === 0} >
-//                         <MdCloudUpload size={25} className='mr-2' />
-//                         Publish and View
-//                     </Button>
-//                 </div>
-//             </form>
-//         </section>
-//     );
-// };
-
-// export default AddCategoryList;
-
-
-
 import { Button } from '@mui/material';
 import UploadBox from '../../Components/UploadBox';
 import { MdCloudUpload } from "react-icons/md";
 import { useState, useContext, useEffect } from 'react';
-import { createCategory, editData } from '../../utils/api';
+import { createCategory, editCategoryData, editData } from '../../utils/api';
 import { MyContext } from "../../App";
 
 const AddCategoryList = () => {
-    const [formFields, setFormFields] = useState({
-        name: '',
-        image: []
-    });
+    const [formFields, setFormFields] = useState({ name: '', image: [] });
     const [resetUploadBox, setResetUploadBox] = useState(false);
-    const [images, setImages] = useState([]);
     const context = useContext(MyContext);
 
-    // // Fill form when editing
-    // useEffect(() => {
-    //     if (context.isOpenAddProductForm?.model === "Edit Category" && context.isOpenAddProductForm?.data) {
-    //         const categoryData = context.isOpenAddProductForm.data;
-    //         setFormFields({
-    //             name: categoryData.name || '',
-    //             image: categoryData.image ? [categoryData.image] : []
-    //         });
-    //         setImages(categoryData.image ? [categoryData.image] : []);
-    //     }
-    // }, [context.isOpenAddProductForm]);
+    // Handle file selection
+    const handleFilesSelect = (files) => {
+        setFormFields(prev => ({
+            ...prev,
+            image: files
+        }));
+    };
 
-    // useEffect(() => {
-    //     if (context.isOpenAddProductForm?.model === "Edit Category" && context.isOpenAddProductForm?.data) {
-    //         const categoryData = context.isOpenAddProductForm.data;
-    //         setFormFields({
-    //             name: categoryData.name || '',
-    //             image: categoryData.image ? [categoryData.image] : []
-    //         });
-    //     }
-    // }, [context.isOpenAddProductForm]);
-
+    // Fill form in Add/Edit mode
     useEffect(() => {
-        if (context.isOpenAddProductForm?.model === "Edit Category" && context.isOpenAddProductForm?.data) {
-            const categoryData = context.isOpenAddProductForm.data;
+        const model = context.isOpenAddProductForm?.model;
+        if (["Add Category", "Edit Category"].includes(model)) {
+            const data = context.isOpenAddProductForm?.data || {};
+            let images = [];
+            if (data.image) {
+                if (Array.isArray(data.image)) {
+                    images = data.image;
+                } else if (typeof data.image === "string") {
+                    images = data.image.split(",").map(url => url.trim());
+                }
+            }
+
             setFormFields({
-                name: categoryData.name || '',
-                image: categoryData.image ? [categoryData.image] : []
+                name: data.name || '',
+                image: images
             });
+
+            setResetUploadBox(prev => !prev);
         }
-        context.isOpenAddProductForm?.model,
-            context.isOpenAddProductForm?.data?._id // ✅ specific dependency
-    });
-
-
-
+    }, [context.isOpenAddProductForm]);
 
     const onChangeInput = (e) => {
         const { name, value } = e.target;
-        setFormFields({
-            ...formFields,
-            [name]: value
-        });
+        setFormFields(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleFilesSelect = (files) => {
-        setFormFields({
-            ...formFields,
-            image: files
-        });
-    };
+    // const handleSubmit = async (e) => {
+    //     e.preventDefault();
+    //     console.log("Form Fields Before Submit:", formFields); // Debugging line
+
+    //     // if (!formFields.name || formFields.image.length === 0) {
+    //     //     context.alertBox("error", "Please fill all fields");
+    //     //     return;
+    //     // }
+
+    //     // const formData = new FormData();
+    //     // formData.append("name", formFields.name);
+
+    //     // formFields.image.forEach(file => {
+    //     //     formData.append("image", file);
+    //     // });
+
+    //     const formData = new FormData();
+    //     formData.append("name", formFields.name);
+    //     formFields.image.forEach(file => {
+    //         if (file instanceof File) {
+    //             formData.append("image", file);
+    //         } else {
+    //             // For existing images, you might want to append them differently
+    //             formData.append("existingImages[]", file);
+    //         }
+    //     });
+    //     console.log("Form Data Before API Call:", formData); // Debugging line
+
+    //     if (context.isOpenAddProductForm?.model === "Edit Category") {
+    //         const categoryId = context.isOpenAddProductForm?.data?._id || context.isOpenAddProductForm?.data?.id;
+    //         editCategoryData(`/api/v1/category/update/${categoryId}`, formData, formFields.image)
+    //             .then((res) => {
+    //                 if (res?.success) {
+    //                     context.alertBox("success", res?.message);
+    //                     setFormFields({ name: '', image: [] });
+    //                     setResetUploadBox(prev => !prev);
+    //                     context.setIsOpenAddProductForm({ isOpen: false });
+    //                 } else {
+    //                     context.alertBox("error", res?.message || "Error saving category.");
+    //                 }
+    //             })
+    //     } else {
+    //         createCategory(`/api/v1/category/create`, formData)
+    //             .then((res) => {
+    //                 if (res?.success) {
+    //                     context.alertBox("success", res?.message || "Category saved successfully.");
+    //                     setFormFields({ name: '', image: [] });
+    //                     setResetUploadBox(prev => !prev);
+    //                     context.setIsOpenAddProductForm({ isOpen: false });
+    //                 } else {
+    //                     context.alertBox("error", res?.message || "Error saving category.");
+    //                 }
+    //             })
+    //     }
+    // }
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        console.log("Form Fields Before Submit:", formFields); // Debugging line
+
         if (!formFields.name || formFields.image.length === 0) {
             context.alertBox("error", "Please fill all fields");
             return;
@@ -408,32 +114,48 @@ const AddCategoryList = () => {
         const formData = new FormData();
         formData.append("name", formFields.name);
 
-        formFields.image.forEach((file) => {
+        // Append new image files and existing image URLs
+        formFields.image.forEach((file, index) => {
             if (file instanceof File) {
-                formData.append("image", file);
+                formData.append("image", file); // Append new file
             } else {
-                formData.append("image", file); // Existing URL
+                formData.append("existingImages[]", file); // Append existing image URL
             }
         });
 
-        let res;
-        if (context.isOpenAddProductForm?.model === "Edit Category") {
-            const id = context.isOpenAddProductForm.data._id;
-            res = await editData(`/api/v1/category/update/${id}`, formData);
-        } else {
-            res = await createCategory("/api/v1/category/create", formData);
+        // Log the FormData contents for debugging
+        for (let [key, value] of formData.entries()) {
+            console.log(key, value);
         }
 
-        if (res?.success) {
-            context.alertBox("success", res?.message || "Category saved successfully.");
-            setFormFields({ name: '', image: [] });
-            setImages([]);
-            setResetUploadBox(prev => !prev);
-            context.setIsOpenAddProductForm({ isOpen: false });
-        } else {
-            context.alertBox("error", res?.message || "Error saving category.");
+        try {
+            if (context.isOpenAddProductForm?.model === "Edit Category") {
+                const categoryId = context.isOpenAddProductForm?.data?._id;
+                const res = await editCategoryData(`/api/v1/category/update/${categoryId}`, formData);
+
+                if (res?.success) {
+                    context.alertBox("success", res?.message);
+                    context.setIsOpenAddProductForm({ isOpen: false });
+                    context.refreshData && context.refreshData();
+                } else {
+                    context.alertBox("error", res?.message || "Error updating category.");
+                }
+            } else {
+                const res = await createCategory(`/api/v1/category/create`, formData);
+                if (res?.success) {
+                    context.alertBox("success", res?.message || "Category created successfully.");
+                    context.setIsOpenAddProductForm({ isOpen: false });
+                    context.refreshData && context.refreshData();
+                } else {
+                    context.alertBox("error", res?.message || "Error creating category.");
+                }
+            }
+        } catch (error) {
+            context.alertBox("error", "Network error occurred");
+            console.error("Form submission error:", error);
         }
-    };
+    }
+
 
     return (
         <section className='p-5 bg-gray-50'>
@@ -460,7 +182,7 @@ const AddCategoryList = () => {
                             multiple={true}
                             onFilesSelect={handleFilesSelect}
                             resetTrigger={resetUploadBox}
-                            existingFiles={formFields.image} // ✅ direct pass
+                            existingFiles={formFields.image}
                         />
                     </div>
                 </div>
@@ -481,5 +203,3 @@ const AddCategoryList = () => {
 };
 
 export default AddCategoryList;
-
-

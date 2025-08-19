@@ -8,10 +8,10 @@ const categorySchema = new mongoose.Schema({
         minlength: [3, 'Category name must be at least 3 characters long'],
     },
     image: [{
-            type: String,
-            required: [true, 'Category image is required'],
-        }],
-        
+        type: String,
+        required: [true, 'Category image is required'],
+    }],
+
     parentCatName: {
         type: String,
         trim: true,

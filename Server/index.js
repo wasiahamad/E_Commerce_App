@@ -12,14 +12,15 @@ import cartRouter from './routes/cart.route.js'
 import myListRouter from './routes/myList.route.js'
 import addressRouter from './routes/address.route.js'
 
-const app = express()
-dotenv.config()
+const app = express();
+dotenv.config();
 // app.options('*', cors())
+// In your main app.js/server.js file:
+app.use(express.json()); // For JSON bodies
+app.use(express.urlencoded({ extended: true })); // For form data
+app.use(cors());
+app.use(cookieParser());
 app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cors())
-app.use(cookieParser())
-app.use(express.json())
 app.use(morgan("dev"));
 app.use(helmet(
     {

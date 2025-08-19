@@ -78,12 +78,15 @@ const AddProductForm = () => {
                 context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2 />
             }
 
-            {context.isOpenAddProductForm?.isOpen && (
+            {["Add Category", "Edit Category"].includes(context.isOpenAddProductForm?.model) && (
                 <AddCategoryList
-                    editData={context.isOpenAddProductForm.data || null}
-                    mode={context.isOpenAddProductForm.model}
+                    model={context.isOpenAddProductForm.model}
+                    data={context.isOpenAddProductForm.data}
                 />
             )}
+
+
+
 
 
         </Dialog>

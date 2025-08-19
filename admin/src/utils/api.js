@@ -94,6 +94,46 @@ export const editData = async (url, updateData) => {
     }
 }
 
+export const editCategoryData = async (url, updateData, files = []) => {
+    try {
+        const formData = new FormData();
+
+        // Append text fields
+        Object.keys(updateData).forEach(key => {
+            formData.append(key, updateData[key]);
+        });
+
+        // Append new image files (if any)
+        files.forEach(file => {
+            formData.append("image", file); // Ensure this matches the backend expectation
+        });
+
+        // If you have existing images, append them as well
+        if (updateData.existingImages) {
+            updateData.existingImages.forEach(image => {
+                formData.append("existingImages[]", image); // Use an array notation for existing images
+            });
+        }
+
+        const params = {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                // Remove Content-Type header
+                "Content-Type": "multipart/form-data",
+            },
+        };
+
+        const response = await axios.put(apiUrl + url, formData, params);
+        return response.data;
+
+    } catch (error) {
+        console.error("EditData error:", error.response?.data || error.message);
+        return { error: true, message: "Error updating data" };
+    }
+};
+
+
+
 export const editUserData = async (url, updateData) => {
     try {
         const params = {
