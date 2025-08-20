@@ -79,10 +79,7 @@ const AddProductForm = () => {
             }
 
             {["Add Category", "Edit Category"].includes(context.isOpenAddProductForm?.model) && (
-                <AddCategoryList
-                    model={context.isOpenAddProductForm.model}
-                    data={context.isOpenAddProductForm.data}
-                />
+                <AddCategoryList />
             )}
 
 

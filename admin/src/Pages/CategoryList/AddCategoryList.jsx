@@ -22,7 +22,7 @@ const AddCategoryList = () => {
     useEffect(() => {
         const model = context.isOpenAddProductForm?.model;
         if (["Add Category", "Edit Category"].includes(model)) {
-            const data = context.isOpenAddProductForm?.data || {};
+            const data = context.isOpenAddProductForm?.model || {};
             let images = [];
             if (data.image) {
                 if (Array.isArray(data.image)) {

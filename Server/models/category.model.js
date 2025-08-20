@@ -9,7 +9,10 @@ const categorySchema = new mongoose.Schema({
     },
     image: [{
         type: String,
-        required: [true, 'Category image is required'],
+        required: function () {
+            // agar iske parentCatId null hai (matlab ye root hai) to image required
+            return this.parentCatId === null;
+        }
     }],
 
     parentCatName: {

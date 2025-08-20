@@ -19,9 +19,10 @@ export const createCategory = async (req, res) => {
 
         // ✅ Handle req.files safely
         const image = req.files || [];
-        if (image.length === 0) {
+        // ✅ Agar root category (parentCatId null ya undefined) hai → Image required
+        if ((!req.body.parentCatId || req.body.parentCatId === "null") && image.length === 0) {
             return res.status(400).json({
-                message: "No image uploaded",
+                message: "Image is required for main category",
                 error: true,
                 success: false,
             });
@@ -264,7 +265,7 @@ export const deleteCategory = async (req, res) => {
         await CategoryModel.findByIdAndDelete(req.params.id);
 
         // Delete images from Cloudinary
-        if (category.image) {
+        if (category.image && category.image.length > 0) {
             const image = category.image.split("/").pop().split(".")[0]; // Extract image name from URL
             const result = await cloudinary.uploader.destroy(image, (error, result) => {
                 if (error) {
@@ -330,13 +331,14 @@ export const updateCategory = async (req, res) => {
         const updatedCategory = await CategoryModel.findByIdAndUpdate(
             categoryId,
             {
-                name: req.body.name,
-                image: updatedImage,
-                parentCatId: req.body.parentCatId,
-                parentCatName: req.body.parentCatName,
+                ...(req.body.name && { name: req.body.name }),
+                ...(req.body.image && { image: updatedImage }),
+                ...(req.body.parentCatId && { parentCatId: req.body.parentCatId }),
+                ...(req.body.parentCatName && { parentCatName: req.body.parentCatName }),
             },
             { new: true }
         );
+
 
         if (!updatedCategory) {
             return res.status(400).json({
@@ -364,274 +366,4 @@ export const updateCategory = async (req, res) => {
         });
     }
 };
-
-
-// export const updateCategory = async (req, res) => {
-//     try {
-//         const categoryId = req.params.id;
-//         const { name, description } = req.body;
-//         const image = req.files?.image?.[0];
-
-//         const category = await CategoryModel.findById(categoryId);
-//         if (!category) {
-//             return res.status(404).json({
-//                 message: "Category not found",
-//                 success: false,
-//                 error: true,
-//             });
-//         }
-
-//         // Delete old image from Cloudinary
-//         if (category.image?.public_id) {
-//             await cloudinary.uploader.destroy(category.image.public_id);
-//         }
-
-//         let uploadedImage = category.image;
-
-//         if (image) {
-//             const result = await cloudinary.uploader.upload(image.path, {
-//                 resource_type: "image",
-//             });
-
-//             uploadedImage = {
-//                 url: result.secure_url,
-//                 public_id: result.public_id,
-//             };
-
-//             // Delete temp image from local uploads folder
-//             fs.unlinkSync(image.path);
-//         }
-
-//         // Update the category
-//         category.name = name || category.name;
-//         category.description = description || category.description;
-//         category.image = uploadedImage;
-
-//         await category.save();
-
-//         res.status(200).json({
-//             message: "Category updated successfully",
-//             success: true,
-//             data: category,
-//         });
-//     } catch (error) {
-//         console.error("Update Error:", error);
-//         res.status(500).json({
-//             message: "Error updating category",
-//             success: false,
-//             error: true,
-//         });
-//     }
-// };
-
-
-// export const updateCategory = async (req, res) => {
-//     try {
-//         const categoryId = req.params.id;
-//         const existingCategory = await CategoryModel.findById(categoryId);
-
-
-//         if (!existingCategory) {
-//             return res.status(404).json({ message: "Category not found", error: true, success: false });
-//         }
-
-//         let updatedImage = existingCategory.image;
-
-//         // Agar nayi file upload hui ho
-//         if (req.files && req.files.length > 0) {
-//             // Purani image delete karo
-//             if (existingCategory.image && existingCategory.image[0]?.public_id) {
-//                 await cloudinary.uploader.destroy(existingCategory.image[0].public_id);
-//             }
-
-//             // Nayi uploaded files ka array
-//             updatedImage = req.files.map(file => ({
-//                 url: file.path || file.filename,
-//                 public_id: file.filename || file.originalname
-//             }));
-//         } else if (req.body.image) {
-//             // Agar frontend ne existing URL bheja
-//             updatedImage = req.body.image;
-//         }
-
-//         const updatedCategory = await CategoryModel.findByIdAndUpdate(
-//             categoryId,
-//             {
-//                 name: req.body.name,
-//                 image: updatedImage,
-//                 parentCatId: req.body.parentCatId,
-//                 parentCatName: req.body.parentCatName,
-//             },
-//             { new: true }
-//         );
-
-//         return res.status(200).json({
-//             message: "Category updated successfully",
-//             success: true,
-//             error: false,
-//             data: updatedCategory,
-//         });
-
-//     } catch (error) {
-//         console.error(error);
-//         return res.status(500).json({
-//             message: error.message || "Server error",
-//             error: true,
-//             success: false,
-//         });
-//     }
-// };
-
-
-
-
-// export const updateCategory = async (req, res) => {
-//     try {
-//         const categoryId = req.params.id;
-//         const { name, description } = req.body;
-//         const image = req.files?.image?.[0];
-
-//         const category = await CategoryModel.findById(categoryId);
-//         if (!category) {
-//             return res.status(404).json({
-//                 message: "Category not found",
-//                 success: false,
-//                 error: true,
-//             });
-//         }
-
-//         console.log("Before Update:", category);
-
-//         // Delete old image from Cloudinary
-//         if (category.image?.public_id) {
-//             await cloudinary.uploader.destroy(category.image.public_id);
-//         }
-
-//         let uploadedImage = category.image;
-
-//         if (image) {
-//             const result = await cloudinary.uploader.upload(image.path, {
-//                 resource_type: "image",
-//             });
-
-//             uploadedImage = {
-//                 url: result.secure_url,
-//                 public_id: result.public_id,
-//             };
-
-//             // Delete temp image from local uploads folder
-//             fs.unlinkSync(image.path);
-//         }
-
-//         // Update the category
-//         category.name = name || category.name;
-//         category.description = description || category.description;
-//         category.image = uploadedImage;
-
-//         await category.save();
-
-//         console.log("After Update:", category);
-
-//         res.status(200).json({
-//             message: "Category updated successfully",
-//             success: true,
-//             data: category,
-//         });
-//     } catch (error) {
-//         console.error("Update Error:", error);
-//         res.status(500).json({
-//             message: "Error updating category",
-//             success: false,
-//             error: true,
-//         });
-//     }
-// };
-
-
-
-// export const updateCategory = async (req, res) => {
-//     try {
-//         const categoryId = req.params.id;
-//         const { name, existingImages } = req.body; // Ensure you're getting the right fields
-//         const files = req.files?.image;
-//         console.log("Request Body:", req.body);
-//         console.log("Uploaded Files:", req.files);
-
-//         const category = await CategoryModel.findById(categoryId);
-//         if (!category) {
-//             return res.status(404).json({ message: "Category not found", success: false });
-//         }
-
-//         // Update category fields
-//         if (name) {
-//             category.name = name; // Update name if provided
-//         }
-
-//         // Handle existing images
-//         if (existingImages && existingImages.length > 0) {
-//             category.image = existingImages; // Assuming image is an array
-//         }
-
-//         // Handle new image uploads
-//         if (files && files.length > 0) {
-//             const uploadedImages = await Promise.all(files.map(async (file) => {
-//                 const result = await cloudinary.uploader.upload(file.path);
-//                 return { url: result.secure_url, public_id: result.public_id };
-//             }));
-//             category.image = [...category.image, ...uploadedImages]; // Append new images
-//         }
-
-//         // Save the updated category
-//         await category.save();
-
-//         return res.status(200).json({ message: "Category updated successfully", success: true, data: category });
-//     } catch (error) {
-//         console.error("Update Error:", error);
-//         return res.status(500).json({ message: "Error updating category", success: false });
-//     }
-// };
-
-// export const updateCategory = async (req, res) => {
-//     try {
-//         const categoryId = req.params.id;
-//         const { name, existingImages } = req.body; // Ensure you're getting the right fields
-//         const files = req.files?.image;
-//         console.log("Request Body:", req.body);
-//         console.log("Uploaded Files:", req.files);
-
-
-//         const category = await CategoryModel.findById(categoryId);
-//         if (!category) {
-//             return res.status(404).json({ message: "Category not found", success: false });
-//         }
-
-//         // Update category fields
-//         if (name) {
-//             category.name = name; // Update name if provided
-//         }
-
-//         // Handle existing images
-//         if (existingImages && existingImages.length > 0) {
-//             category.image = existingImages; // Assuming image is an array
-//         }
-
-//         // Handle new image uploads
-//         if (files && files.length > 0) {
-//             const uploadedImages = await Promise.all(files.map(async (file) => {
-//                 const result = await cloudinary.uploader.upload(file.path);
-//                 return { url: result.secure_url, public_id: result.public_id };
-//             }));
-//             category.image = [...category.image, ...uploadedImages]; // Append new images
-//         }
-
-//         // Save the updated category
-//         await category.save();
-
-//         return res.status(200).json({ message: "Category updated successfully", success: true, data: category });
-//     } catch (error) {
-//         console.error("Update Error:", error);
-//         return res.status(500).json({ message: "Error updating category", success: false });
-//     }
-// };
-
 
