@@ -66,7 +66,7 @@ const SubCategoryList = () => {
     const handleSubSave = async (subId) => {
         console.log("Sending update:", {
             name: editSubName,
-            parentCatId: editCategory?.id, // ✅ ID pass hogi, // yahan ID bhejni hai
+            parentCatId: editCategory?.id, // yahan ID bhejni hai
             parentCatName: editCategory
         });
         const token = localStorage.getItem("accessToken");
@@ -74,7 +74,7 @@ const SubCategoryList = () => {
         try {
             const res = await axios.put(`${API_URL}/update/${subId}`, {
                 name: editSubName,
-                parentCatId: editCategory?.id, // ✅ ID pass hogi, // yahan ID bhejni hai
+                parentCatId: editCategory?.id, // yahan ID bhejni hai
                 parentCatName: editCategory
             },
                 {
@@ -86,10 +86,12 @@ const SubCategoryList = () => {
             );
 
             console.log("Updated successfully:", res.data);
+            context.alertBox("success", "SubCategory Updated Successfully");
             fetchCategories(); // reload list
             setEditSubIndex(null);
         } catch (err) {
             console.error("Error updating subcategory:", err);
+            context.alertBox("error", "Failed to update SubCategory");
         }
     };
 
@@ -99,7 +101,6 @@ const SubCategoryList = () => {
         setEditItemParent(parentName);
         setEditItemName(item.name); // item is object from DB
     };
-
 
     const handleItemSave = async (id) => {
         console.log("Sending update:", {
@@ -125,11 +126,13 @@ const SubCategoryList = () => {
                     },
                 }
             );
+            context.alertBox("success", "Third SubCategory Updated Successfully");
             console.log("Updated successfully:", res.data);
             fetchCategories(); // reload list
             setEditItemIndex({ subIdx: null, itemIdx: null });
         } catch (error) {
             console.error("Error updating item:", error);
+            context.alertBox("error", "Failed to update Third SubCategory");
         }
     };
 
@@ -143,12 +146,13 @@ const SubCategoryList = () => {
                     "Content-Type": "application/json",
                 },
             });
+            context.alertBox("success", "Deleted Successfully");
             fetchCategories();
         } catch (err) {
             console.error("Error deleting:", err);
+            context.alertBox("error", "Error deleting");
         }
     };
-
 
     const handleCancel = () => {
         setEditSubIndex(null);

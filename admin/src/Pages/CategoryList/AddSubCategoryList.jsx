@@ -3,6 +3,7 @@ import { Button, MenuItem, Select } from '@mui/material';
 import { MdCloudUpload } from "react-icons/md";
 import axios from "axios";
 import { MyContext } from '../../App';
+import { useNavigate } from 'react-router-dom';
 
 const AddSubCategoryList = () => {
     const [categories, setCategories] = useState([]);
@@ -10,6 +11,7 @@ const AddSubCategoryList = () => {
     const [productCategory2, setProductCategory2] = useState('');
     const [subCategoryName, setSubCategoryName] = useState('');
     const [thirdSubCategoryName, setThirdSubCategoryName] = useState('');
+    const [refresh, setRefresh] = useState(false);
     const context = useContext(MyContext);
 
     // ✅ Categories fetch
@@ -20,7 +22,7 @@ const AddSubCategoryList = () => {
                 setCategories(res.data.data || []);
             })
             .catch(err => console.error(err));
-    }, []);
+    }, [refresh]);
 
     // ✅ Add SubCategory
     const handleAddSubCategory = async (e) => {
@@ -41,6 +43,9 @@ const AddSubCategoryList = () => {
             context.alertBox("success", "Subcategory Created Successfully");
             setSubCategoryName('');
             setProductCategory1('');
+            setRefresh(prev => !prev);
+            // ✅ Redirect after success
+            window.location.href = "/subCategory/list";
         } catch (error) {
             console.error(error);
             context.alertBox("error", "Failed to add Subcategory");
@@ -66,6 +71,10 @@ const AddSubCategoryList = () => {
             context.alertBox("success", "Third Subcategory added successfully");
             setThirdSubCategoryName('');
             setProductCategory2('');
+            setRefresh(prev => !prev);
+
+            // ✅ Redirect after success
+            window.location.href = "/subCategory/list";
         } catch (error) {
             console.error(error);
             context.alertBox("error", "Failed to add Third Subcategory");
