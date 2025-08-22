@@ -46,62 +46,6 @@ const AddCategoryList = () => {
         setFormFields(prev => ({ ...prev, [name]: value }));
     };
 
-    // const handleSubmit = async (e) => {
-    //     e.preventDefault();
-    //     console.log("Form Fields Before Submit:", formFields); // Debugging line
-
-    //     // if (!formFields.name || formFields.image.length === 0) {
-    //     //     context.alertBox("error", "Please fill all fields");
-    //     //     return;
-    //     // }
-
-    //     // const formData = new FormData();
-    //     // formData.append("name", formFields.name);
-
-    //     // formFields.image.forEach(file => {
-    //     //     formData.append("image", file);
-    //     // });
-
-    //     const formData = new FormData();
-    //     formData.append("name", formFields.name);
-    //     formFields.image.forEach(file => {
-    //         if (file instanceof File) {
-    //             formData.append("image", file);
-    //         } else {
-    //             // For existing images, you might want to append them differently
-    //             formData.append("existingImages[]", file);
-    //         }
-    //     });
-    //     console.log("Form Data Before API Call:", formData); // Debugging line
-
-    //     if (context.isOpenAddProductForm?.model === "Edit Category") {
-    //         const categoryId = context.isOpenAddProductForm?.data?._id || context.isOpenAddProductForm?.data?.id;
-    //         editCategoryData(`/api/v1/category/update/${categoryId}`, formData, formFields.image)
-    //             .then((res) => {
-    //                 if (res?.success) {
-    //                     context.alertBox("success", res?.message);
-    //                     setFormFields({ name: '', image: [] });
-    //                     setResetUploadBox(prev => !prev);
-    //                     context.setIsOpenAddProductForm({ isOpen: false });
-    //                 } else {
-    //                     context.alertBox("error", res?.message || "Error saving category.");
-    //                 }
-    //             })
-    //     } else {
-    //         createCategory(`/api/v1/category/create`, formData)
-    //             .then((res) => {
-    //                 if (res?.success) {
-    //                     context.alertBox("success", res?.message || "Category saved successfully.");
-    //                     setFormFields({ name: '', image: [] });
-    //                     setResetUploadBox(prev => !prev);
-    //                     context.setIsOpenAddProductForm({ isOpen: false });
-    //                 } else {
-    //                     context.alertBox("error", res?.message || "Error saving category.");
-    //                 }
-    //             })
-    //     }
-    // }
-
     const handleSubmit = async (e) => {
         e.preventDefault();
         console.log("Form Fields Before Submit:", formFields); // Debugging line

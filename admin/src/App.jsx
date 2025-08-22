@@ -23,6 +23,7 @@ import { getData } from './utils/api'
 import { useEffect } from 'react'
 import Profile from './Pages/Profile'
 import ProtectedRoute from './ProtectedRoute'
+import axios from 'axios'
 
 const alertBox = (status, msg) => {
   if (status === "success") {
@@ -42,6 +43,18 @@ function App() {
     isOpen: false,
     model: '',
   });
+  const [categories, setCategories] = useState([]);
+  const [refresh, setRefresh] = useState(false);
+
+  // ✅ Categories fetch
+  useEffect(() => {
+    axios.get("http://localhost:8000/api/v1/category")
+      .then(res => {
+        console.log(res.data); // check karo kya aa raha
+        setCategories(res.data.data || []);
+      })
+      .catch(err => console.error(err));
+  }, [refresh]);
 
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
@@ -340,6 +353,10 @@ function App() {
     alertBox,
     userData,
     setUserData,
+    categories,
+    setCategories,
+    refresh,
+    setRefresh
   }
 
 

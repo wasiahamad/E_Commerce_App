@@ -26,11 +26,11 @@ const UploadBox = ({ name, multiple, onFilesSelect, resetTrigger, existingFiles 
         console.log("Updated Files:", updatedFiles); // Debugging line
     };
 
-    useEffect(() => {
-        const filesArray = Array.isArray(existingFiles) ? existingFiles : [existingFiles];
-        setSelectedFiles(filesArray);
-        console.log("Existing Files Updated:", filesArray); // Debugging line
-    }, [resetTrigger, existingFiles]);
+    // useEffect(() => {
+    //     const filesArray = Array.isArray(existingFiles) ? existingFiles : [existingFiles];
+    //     setSelectedFiles(filesArray);
+    //     console.log("Existing Files Updated:", filesArray); // Debugging line
+    // }, [resetTrigger, existingFiles]);
 
     return (
         <div className="w-full">
