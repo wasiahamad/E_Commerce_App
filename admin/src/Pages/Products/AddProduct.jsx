@@ -1,5 +1,5 @@
 import { Button, MenuItem, Select } from '@mui/material'
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Rating from '@mui/material/Rating';
 import UploadBox from '../../Components/UploadBox';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
@@ -7,6 +7,7 @@ import 'react-lazy-load-image-component/src/effects/blur.css';
 import { IoMdClose } from "react-icons/io";
 import { MdCloudUpload } from "react-icons/md";
 import { MyContext } from '../../App';
+import { createCategory } from '../../utils/api';
 
 const AddProduct = () => {
     const [productCat, setProductCat] = useState('');
@@ -16,6 +17,7 @@ const AddProduct = () => {
     const [productSize, setProductSize] = useState([]);
     const [productRams, setProductRams] = useState([]);
     const [productWeight, setProductWeight] = useState([]);
+    const [resetUploadBox, setResetUploadBox] = useState(false);
 
     const context = useContext(MyContext)
 
@@ -55,7 +57,6 @@ const AddProduct = () => {
         }));
     };
 
-
     // Product Sub Category
     const handleChangeProductSubCat = (event) => {
         const selectedId = event.target.value;
@@ -73,7 +74,6 @@ const AddProduct = () => {
             subCatName: selectedSubCat ? selectedSubCat.name : ""
         }));
     };
-
 
     // Third Sub Category
     const handleChangeProductThirdSubCat = (event) => {
@@ -95,13 +95,11 @@ const AddProduct = () => {
         }));
     };
 
-
     // Featured
     const handleChangeProductFeatured = (event) => {
         setProductFeatured(event.target.value);
         setFormFields(prev => ({ ...prev, isFeatured: event.target.value }));
     }
-
 
     // Product Size
     const handleChangeProductSize = (event) => {
@@ -158,11 +156,113 @@ const AddProduct = () => {
         setFormFields(prev => ({ ...prev, rating: newValue }));
     };
 
+    // uploading image ************* /
+    // Fill form in Add/Edit mode
+    useEffect(() => {
+        const model = context.isOpenAddProductForm?.model;
+        if (["Add Category", "Edit Category"].includes(model)) {
+            const data = context.isOpenAddProductForm?.model || {};
+            let images = [];
+            if (data.image) {
+                if (Array.isArray(data.image)) {
+                    images = data.image;
+                } else if (typeof data.image === "string") {
+                    images = data.image.split(",").map(url => url.trim());
+                }
+            }
+
+            setFormFields({
+                name: data.name || '',
+                image: images
+            });
+
+            setResetUploadBox(prev => !prev);
+        }
+    }, [context.isOpenAddProductForm]);
+
+    // Handle file selection
+    const handleFilesSelect = (files) => {
+        setFormFields(prev => ({
+            ...prev,
+            image: files
+        }));
+    };
+
+
+
     // form submit handler
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(formFields);
-    }
+
+        const formData = new FormData();
+
+        // normal fields
+        formData.append("name", formFields.name);
+        formData.append("description", formFields.description);
+        formData.append("brand", formFields.brand);
+        formData.append("price", Number(formFields.price));
+        formData.append("oldPrice", Number(formFields.oldPrice));
+        formData.append("discount", Number(formFields.discount));
+        formData.append("countInStock", Number(formFields.countInStock));
+        formData.append("isFeatured", formFields.isFeatured);
+        formData.append("rating", formFields.rating || 0);
+
+        // category related
+        formData.append("catId", formFields.catId);
+        formData.append("catName", formFields.catName);
+        formData.append("subCatId", formFields.subCatId);
+        formData.append("subCatName", formFields.subCatName);
+        formData.append("thirdSubCatId", formFields.thirdSubCatId);
+        formData.append("thirdSubCat", formFields.thirdSubCat);
+
+        // most important 👇 backend validation ke liye
+        formData.append("category", formFields.catId);
+
+        // arrays
+        formFields.productRam.forEach(r => formData.append("productRam[]", r));
+        formFields.size.forEach(s => formData.append("size[]", s));
+        formFields.productWeight.forEach(w => formData.append("productWeight[]", w));
+
+        // images
+        formFields.image.forEach(file => {
+            if (file instanceof File) {
+                formData.append("image", file);
+            }
+        });
+
+        for (let [k, v] of formData.entries()) {
+            console.log(k, v);
+        }
+
+        try {
+            if (context.isOpenAddProductForm?.model === "Edit Product") {
+                const productId = context.isOpenAddProductForm?.data?._id;
+                const res = await editCategoryData(`/api/v1/product/update/${productId}`, formData);
+
+                if (res?.success) {
+                    context.alertBox("success", res?.message || "Product Updated Successfully");
+                    context.setIsOpenAddProductForm({ isOpen: false });
+                    context.refreshData && context.refreshData();
+                } else {
+                    context.alertBox("error", res?.message || "Error updating Product.");
+                }
+            } else {
+                const res = await createCategory(`/api/v1/product/create`, formData);
+                if (res?.success) {
+                    context.alertBox("success", res?.message || "Product created successfully.");
+                    context.setIsOpenAddProductForm({ isOpen: false });
+                    context.refreshData && context.refreshData();
+                } else {
+                    context.alertBox("error", res?.message || "Error creating Product.");
+                }
+            }
+        } catch (error) {
+            context.alertBox("error", "Network error occurred");
+            console.error("Form submission error:", error);
+        }
+    };
+
+
 
     return (
         <section className='p-5 bg-gray-50'>
@@ -468,7 +568,13 @@ const AddProduct = () => {
                                         src="https://images.unsplash.com/photo-1511485977113-f34c92461ad9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60" />
                                 </div>
                             </div>
-                            <UploadBox multiple={true} />
+                            <UploadBox
+                                name="image"
+                                multiple={true}
+                                onFilesSelect={handleFilesSelect}
+                                resetTrigger={resetUploadBox}
+                                existingFiles={formFields.image}
+                            />
                         </div>
                     </div>
                 </div>
