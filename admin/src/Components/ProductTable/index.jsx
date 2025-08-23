@@ -1,10 +1,6 @@
-import React, { useContext, useState } from "react";
+import { useContext, useState, useEffect } from "react";
 import {
-    Button,
-    Checkbox,
-    LinearProgress,
-    Rating,
-    Tooltip,
+    Button, Checkbox, LinearProgress, Rating, Tooltip
 } from "@mui/material";
 import { FaPlus } from "react-icons/fa6";
 import Table from "@mui/material/Table";
@@ -18,56 +14,44 @@ import { Link } from "react-router-dom";
 import { AiOutlineEdit } from "react-icons/ai";
 import { FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
-import Select from "@mui/material/Select";
-import MenuItem from "@mui/material/MenuItem";
-import SearchBox from "../SearchBox";
 import { MyContext } from "../../App";
+import { deleteProduct, getProducts } from "../../utils/api";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
+
 const columns = [
     { id: "name", label: "PRODUCT", minWidth: 170 },
     { id: "code", label: "CATEGORY", minWidth: 150 },
-    {
-        id: "subCategory",
-        label: "SUB CATEGORY",
-        minWidth: 150,
-        align: "left",
-    },
-    {
-        id: "prize",
-        label: "PRICE",
-        minWidth: 150,
-        align: "left",
-    },
-    {
-        id: "sale",
-        label: "SALES",
-        minWidth: 150,
-        align: "left",
-    },
-    {
-        id: "stock",
-        label: "STOCK",
-        minWidth: 150,
-        align: "left",
-    },
-    {
-        id: "rating",
-        label: "RATING",
-        minWidth: 150,
-        align: "left",
-    },
-    {
-        id: "action",
-        label: "ACTIONS",
-        minWidth: 150,
-        align: "left",
-    },
+    { id: "subCategory", label: "SUB CATEGORY", minWidth: 150, align: "left" },
+    { id: "prize", label: "PRICE", minWidth: 150, align: "left" },
+    { id: "sale", label: "SALES", minWidth: 150, align: "left" },
+    { id: "stock", label: "STOCK", minWidth: 150, align: "left" },
+    { id: "rating", label: "RATING", minWidth: 150, align: "left" },
+    { id: "action", label: "ACTIONS", minWidth: 150, align: "left" },
 ];
 
-const ProductTable = (props) => {
-    const [page, setPage] = React.useState(0);
-    const [rowsPerPage, setRowsPerPage] = React.useState(10);
+const ProductTable = () => {
+    const [page, setPage] = useState(0);
+    const [rowsPerPage, setRowsPerPage] = useState(10);
+    const [products, setProducts] = useState([]);
+    const [total, setTotal] = useState(0);
+    const [editProduct, setEditProduct] = useState(null); // for selected product
+
+
+    const context = useContext(MyContext);
+
+    // Fetch products
+    const fetchProducts = async () => {
+        const res = await getProducts(page + 1, rowsPerPage); // backend me page 1-based hai
+        if (!res.error) {
+            setProducts(res.data);
+            setTotal(res.totalPost);
+        }
+    };
+
+    useEffect(() => {
+        fetchProducts();
+    }, [page, rowsPerPage]);
 
     const handleChangePage = (event, newPage) => {
         setPage(newPage);
@@ -78,15 +62,24 @@ const ProductTable = (props) => {
         setPage(0);
     };
 
-    // slected row
+    // inside ProductTable component
+    const handleDelete = async (id) => {
+        if (!window.confirm("Are you sure you want to delete this product?")) return;
 
-    const [age, setAge] = useState("");
-
-    const handleChange = (event) => {
-        setAge(event.target.value);
+        const res = await deleteProduct(id);
+        if (!res.error) {
+            context.alertBox("success", "Product deleted successfully");
+            fetchProducts(); // 🔄 refresh list
+        } else {
+            context.alertBox("error", "Error deleting product");
+        }
     };
 
-    const context = useContext(MyContext);
+    // products edit handler
+    const handleEdit = (product) => {
+        setEditProduct(product); // pass product data to form
+        context.setIsOpenAddProductForm({ isOpen: true, model: "Edit Product" });
+    };
 
     return (
         <div className="w-full flex flex-col gap-4 ">
@@ -96,290 +89,127 @@ const ProductTable = (props) => {
                 </h2>
                 <div className="flex items-center gap-2">
                     <Button className="btn-red !mt-5 !capitalize">
-                        <FaPlus className="mr-1 text-[18px]" />
-                        Delete
+                        <FaPlus className="mr-1 text-[18px]" /> Delete
                     </Button>
                     <Button
                         className="btn-blue !mt-5 !capitalize "
-                        onClick={() => context.setIsOpenAddProductForm({ isOpen: true , model: "Add Product"})}
+                        onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: "Add Product" })}
                     >
-                        <FaPlus className="mr-1 text-[18px]" />
-                        Add Products
+                        <FaPlus className="mr-1 text-[18px]" /> Add Products
                     </Button>
                 </div>
             </div>
+
             <div className="w-full bg-white pt-5 border border-[rgba(0,0,0,0.1)] shadow-md sm:rounded-lg ">
-                <div className="flex items-center justify-between w-full pl-6 gap-2">
-                    <div className="col1 w-[25%] ">
-                        <h3 className="font-[600] text-[14px]">Category By</h3>
-                        <Select
-                            labelId="demo-simple-select-helper-label"
-                            id="demo-simple-select-helper"
-                            value={age}
-                            size="small"
-                            className="w-full mt-2 mb-6"
-                            label="Age"
-                            onChange={handleChange}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </div>
-
-                    <div className="col1 w-[25%] ">
-                        <h3 className="font-[600] text-[14px]">Sub Category By</h3>
-                        <Select
-                            labelId="demo-simple-select-helper-label"
-                            id="demo-simple-select-helper"
-                            value={age}
-                            size="small"
-                            className="w-full mt-2 mb-6"
-                            label="Age"
-                            onChange={handleChange}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </div>
-
-                    <div className="col1 w-[25%] ">
-                        <h3 className="font-[600] text-[14px]">Third Level Sub Category By</h3>
-                        <Select
-                            labelId="demo-simple-select-helper-label"
-                            id="demo-simple-select-helper"
-                            value={age}
-                            size="small"
-                            className="w-full mt-2 mb-6"
-                            label="Age"
-                            onChange={handleChange}
-                        >
-                            <MenuItem value="">
-                                <em>None</em>
-                            </MenuItem>
-                            <MenuItem value={10}>Ten</MenuItem>
-                            <MenuItem value={20}>Twenty</MenuItem>
-                            <MenuItem value={30}>Thirty</MenuItem>
-                        </Select>
-                    </div>
-
-                    <div className="col2 w-[25%] ml-auto mr-5">
-                        <SearchBox />
-                    </div>
-                </div>
                 <TableContainer sx={{ maxHeight: 440 }}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
                             <TableRow>
-                                <TableCell>
-                                    <Checkbox {...label} size="small" />
-                                </TableCell>
+                                <TableCell><Checkbox {...label} size="small" /></TableCell>
                                 {columns.map((column) => (
-                                    <TableCell
-                                        key={column.id}
-                                        align={column.align}
-                                        style={{ minWidth: column.minWidth }}
-                                    >
+                                    <TableCell key={column.id} align={column.align} style={{ minWidth: column.minWidth }}>
                                         {column.label}
                                     </TableCell>
                                 ))}
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            <TableRow>
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <Checkbox {...label} size="small" />
-                                </TableCell>
+                            {products.map((product) => (
+                                <TableRow key={product._id}>
+                                    <TableCell><Checkbox {...label} size="small" /></TableCell>
 
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex items-center gap-4 w-[300px] ">
-                                        <div className="img w-[65px] h-[65px] rounded-md overflow-hidden group">
-                                            <Link to="/product/455" data-discover="true">
-                                                <img
-                                                    src="https://serviceapi.spicezgold.com/download/1742463096955_hbhb1.jpg"
-                                                    alt=""
-                                                    className="w-full transition-all duration-150 group-hover:scale-105"
-                                                />
-                                            </Link>
+                                    <TableCell>
+                                        <div className="flex items-center gap-4 w-[300px] ">
+                                            <div className="img w-[65px] h-[65px] rounded-md overflow-hidden group">
+                                                <Link to={`/product/${product._id}`} data-discover="true">
+                                                    <img
+                                                        src={product.image?.[0] || "https://via.placeholder.com/65"}
+                                                        alt={product.name}
+                                                        className="w-full transition-all duration-150 group-hover:scale-105"
+                                                    />
+                                                </Link>
+                                            </div>
+                                            <div className="info w-[75%]">
+                                                <h3 className="font-[600] text-[12px] leading-4 hover:text-[#3872fa] ">
+                                                    {product.name}
+                                                </h3>
+                                                <span className="text-[12px]">{product.brand}</span>
+                                            </div>
                                         </div>
-                                        <div className="info w-[75%]">
-                                            <h3 className="font-[600] text-[12px] leading-4 hover:text-[#3872fa] ">
-                                                <a href="/product/455" data-discover="true">
-                                                    New Clean & Clear Pimple Clearing Face Wash With
-                                                    Salicylic Acid 80 gm
-                                                </a>
-                                            </h3>
-                                            <span className="text-[12px]">Shirt</span>
+                                    </TableCell>
+
+                                    <TableCell>{product.catName || "-"}</TableCell>
+                                    <TableCell>{product.subCatName || "-"}</TableCell>
+
+                                    <TableCell>
+                                        <div className="flex gap-1 flex-col">
+                                            {product.oldPrice && (
+                                                <span className="text-[14px] font-[500] line-through leading-3 text-gray-500 ">
+                                                    ₹ {product.oldPrice}
+                                                </span>
+                                            )}
+                                            <span className="font-[600] text-[14px] text-[#3872fa] ">
+                                                ₹ {product.price}
+                                            </span>
                                         </div>
-                                    </div>
-                                </TableCell>
+                                    </TableCell>
 
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    Fashion
-                                </TableCell>
+                                    <TableCell>
+                                        <p className="text-[14px] w-[100px] ">
+                                            <span className="font-[600]">{product.sales || 0}</span> sale
+                                        </p>
+                                        <LinearProgress
+                                            className="w-[60px]"
+                                            color="success"
+                                            variant="determinate"
+                                            value={40}
+                                        />
+                                    </TableCell>
 
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    Men
-                                </TableCell>
+                                    <TableCell>{product.countInStock}</TableCell>
+                                    <TableCell><Rating value={product.rating || 0} readOnly size="small" /></TableCell>
 
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex gap-1 flex-col">
-                                        <span className="text-[14px] font-[500] line-through leading-3 text-gray-500 ">
-                                            ₹ 2222.00
-                                        </span>
-                                        <span className="font-[600] text-[14px] text-[#3872fa] ">
-                                            ₹ 1000.00
-                                        </span>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <p className="text-[14px] w-[100px] ">
-                                        <span className="font-[600]">253</span> sale
-                                    </p>
-                                    <LinearProgress
-                                        className="w-[60px]"
-                                        color="success"
-                                        variant="determinate"
-                                        value={40}
-                                    />
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    4698
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <Rating defaultValue={2.5} readOnly size="small" />
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex items-center gap-1">
-                                        <Tooltip title="Edit" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-
-                                        <Tooltip title="eyes" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <FaRegEye className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-
-                                        <Tooltip title="delete" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
-
-                            <TableRow>
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <Checkbox {...label} size="small" />
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex items-center gap-4 w-[300px] ">
-                                        <div className="img w-[65px] h-[65px] rounded-md overflow-hidden group">
-                                            <Link to="/product/455" data-discover="true">
-                                                <img
-                                                    src="https://serviceapi.spicezgold.com/download/1742463096955_hbhb1.jpg"
-                                                    alt=""
-                                                    className="w-full transition-all duration-150 group-hover:scale-105"
-                                                />
-                                            </Link>
+                                    <TableCell>
+                                        <div className="flex items-center gap-1">
+                                            <Tooltip title="Edit" placement="top">
+                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
+                                                    <AiOutlineEdit
+                                                        className="text-[rgba(0,0,0,0.8)] text-[20px]"
+                                                        onClick={() =>
+                                                            context.setIsOpenAddProductForm({
+                                                                isOpen: true,
+                                                                model: "Edit Product",
+                                                                data: product,   // 🔑 yaha se pura product bhejna
+                                                            })
+                                                        }
+                                                    />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="View" placement="top">
+                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
+                                                    <FaRegEye className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                </Button>
+                                            </Tooltip>
+                                            <Tooltip title="Delete" placement="top">
+                                                <Button
+                                                    className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] "
+                                                    onClick={() => handleDelete(product._id)}
+                                                >
+                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                </Button>
+                                            </Tooltip>
                                         </div>
-                                        <div className="info w-[75%]">
-                                            <h3 className="font-[600] text-[12px] leading-4 hover:text-[#3872fa] ">
-                                                <a href="/product/455" data-discover="true">
-                                                    New Clean & Clear Pimple Clearing Face Wash With
-                                                    Salicylic Acid 80 gm
-                                                </a>
-                                            </h3>
-                                            <span className="text-[12px]">Shirt</span>
-                                        </div>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    Fashion
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    Men
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex gap-1 flex-col">
-                                        <span className="text-[14px] font-[500] line-through leading-3 text-gray-500 ">
-                                            ₹ 2222.00
-                                        </span>
-                                        <span className="font-[600] text-[14px] text-[#3872fa] ">
-                                            ₹ 1000.00
-                                        </span>
-                                    </div>
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <p className="text-[14px] w-[100px] ">
-                                        <span className="font-[600]">253</span> sale
-                                    </p>
-                                    <LinearProgress
-                                        className="w-[60px]"
-                                        color="success"
-                                        variant="determinate"
-                                        value={40}
-                                    />
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    4698
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <Rating defaultValue={2.5} readOnly size="small" />
-                                </TableCell>
-
-                                <TableCell style={{ minWidth: columns.minWidth }}>
-                                    <div className="flex items-center gap-1">
-                                        <Tooltip title="Edit" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-
-                                        <Tooltip title="eyes" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <FaRegEye className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-
-                                        <Tooltip title="delete" placement="top">
-                                            <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                            </Button>
-                                        </Tooltip>
-                                    </div>
-                                </TableCell>
-                            </TableRow>
+                                    </TableCell>
+                                </TableRow>
+                            ))}
                         </TableBody>
                     </Table>
                 </TableContainer>
+
                 <TablePagination
                     rowsPerPageOptions={[10, 25, 100]}
                     component="div"
-                    // count={rows.length}
-                    count={100}
+                    count={total}
                     rowsPerPage={rowsPerPage}
                     page={page}
                     onPageChange={handleChangePage}
@@ -391,3 +221,4 @@ const ProductTable = (props) => {
 };
 
 export default ProductTable;
+

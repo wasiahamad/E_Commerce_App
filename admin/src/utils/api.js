@@ -213,5 +213,55 @@ export const deleteData = async (url) => {
     }
 };
 
+// get all products
+export const getProducts = async (page = 1, perPage = 10) => {
+    try {
+        const res = await axios.get(`${apiUrl}/api/v1/product?page=${page}&perPage=${perPage}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json", // Specify the content type as JSON
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return { error: true, data: [] };
+    }
+};
+
+
+
+// delete product
+export const deleteProduct = async (id) => {
+    try {
+        const res = await axios.delete(`${apiUrl}/api/v1/product/delete/${id}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error deleting product:", error);
+        return { error: true, message: "Error deleting product" };
+    }
+};
+
+
+// update product
+export const updateProduct = async (id, formData) => {
+    try {
+        const res = await axios.put(`${apiUrl}/api/v1/product/update/${id}`, formData, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error updating product:", error);
+        return { error: true, message: "Error updating product" };
+    }
+};
+
 
 

@@ -54,9 +54,12 @@ const AddProductForm = () => {
                 </Toolbar>
             </AppBar>
             {
-                context.isOpenAddProductForm?.model === "Add Product" && <AddProduct />
-
+                context.isOpenAddProductForm?.isOpen && (
+                    <AddProduct product={context.isOpenAddProductForm?.data || null} />
+                )
             }
+
+
             {
                 context.isOpenAddProductForm?.model === "Add Home Slider" && <AddHomeSlider />
 
@@ -81,10 +84,6 @@ const AddProductForm = () => {
             {["Add Category", "Edit Category"].includes(context.isOpenAddProductForm?.model) && (
                 <AddCategoryList />
             )}
-
-
-
-
 
         </Dialog>
     )

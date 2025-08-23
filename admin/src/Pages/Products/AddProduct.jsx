@@ -9,7 +9,7 @@ import { MdCloudUpload } from "react-icons/md";
 import { MyContext } from '../../App';
 import { createCategory } from '../../utils/api';
 
-const AddProduct = () => {
+const AddProduct = ({ product }) => {
     const [productCat, setProductCat] = useState('');
     const [productSubCat, setProductSubCat] = useState('');
     const [productThirdSubCat, setProductThirdSubCat] = useState('');
@@ -18,6 +18,7 @@ const AddProduct = () => {
     const [productRams, setProductRams] = useState([]);
     const [productWeight, setProductWeight] = useState([]);
     const [resetUploadBox, setResetUploadBox] = useState(false);
+    const [previewImages, setPreviewImages] = useState([]);
 
     const context = useContext(MyContext)
 
@@ -186,8 +187,42 @@ const AddProduct = () => {
             ...prev,
             image: files
         }));
+
+        // for preview
+        const previews = files.map((file) => URL.createObjectURL(file));
+        setPreviewImages(previews);
     };
 
+
+    // Fill form in Add/Edit mode
+    // Fill form in Add/Edit mode
+    useEffect(() => {
+        if (product) {
+            setFormFields({
+                ...formFields,
+                ...product,
+            });
+
+            // ✅ dropdown & select states update
+            setProductCat(product.catId || "");
+            setProductSubCat(product.subCatId || "");
+            setProductThirdSubCat(product.thirdSubCatId || "");
+            setProductFeatured(product.isFeatured || false);
+
+            setProductRams(product.productRam || []);
+            setProductSize(product.size || []);
+            setProductWeight(product.productWeight || []);
+
+            // ✅ preview for images (string urls bhi support karega)
+            if (Array.isArray(product.image)) {
+                setPreviewImages(product.image);
+            } else if (typeof product.image === "string") {
+                setPreviewImages(product.image.split(","));
+            } else {
+                setPreviewImages([]);
+            }
+        }
+    }, [product]);
 
 
     // form submit handler
@@ -226,9 +261,12 @@ const AddProduct = () => {
         // images
         formFields.image.forEach(file => {
             if (file instanceof File) {
-                formData.append("image", file);
+                formData.append("image", file); // new upload
+            } else {
+                formData.append("existingImages[]", file); // already uploaded (urls)
             }
         });
+
 
         for (let [k, v] of formData.entries()) {
             console.log(k, v);
@@ -261,8 +299,6 @@ const AddProduct = () => {
             console.error("Form submission error:", error);
         }
     };
-
-
 
     return (
         <section className='p-5 bg-gray-50'>
@@ -552,7 +588,7 @@ const AddProduct = () => {
                     <div className="col w-full p-5 px-0 ">
                         <h3 className='font-[700] text-[18px] mb-3'>Media & Images</h3>
                         <div className="grid grid-cols-7 gap-4 ">
-                            <div className="uploadBoxWrapper relative">
+                            {/* <div className="uploadBoxWrapper relative">
                                 <span className='absolute z-50 bg-red-700 -top-[5px] -right-[5px] rounded-full flex items-center justify-center text-white w-[20px] h-[20px] cursor-pointer'
                                 ><IoMdClose className='text-white' size={16} />
                                 </span>
@@ -567,13 +603,40 @@ const AddProduct = () => {
                                         }}
                                         src="https://images.unsplash.com/photo-1511485977113-f34c92461ad9?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=crop&w=800&q=60" />
                                 </div>
-                            </div>
+                            </div> */}
+
+                            {/* ✅ Show existing + new images */}
+                            {previewImages.map((img, idx) => (
+                                <div key={idx} className="uploadBoxWrapper relative">
+                                    <span
+                                        onClick={() => {
+                                            // remove from preview + formFields.image
+                                            setPreviewImages(previewImages.filter((_, i) => i !== idx));
+                                            setFormFields(prev => ({
+                                                ...prev,
+                                                image: prev.image.filter((_, i) => i !== idx),
+                                            }));
+                                        }}
+                                        className='absolute z-50 bg-red-700 -top-[5px] -right-[5px] rounded-full flex items-center justify-center text-white w-[20px] h-[20px] cursor-pointer'
+                                    >
+                                        <IoMdClose size={16} />
+                                    </span>
+                                    <div className="uploadBox rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%]">
+                                        <LazyLoadImage
+                                            src={img}
+                                            className="w-full h-full object-cover"
+                                            effect="blur"
+                                        />
+                                    </div>
+                                </div>
+                            ))}
                             <UploadBox
                                 name="image"
                                 multiple={true}
                                 onFilesSelect={handleFilesSelect}
                                 resetTrigger={resetUploadBox}
                                 existingFiles={formFields.image}
+
                             />
                         </div>
                     </div>
