@@ -193,8 +193,6 @@ const AddProduct = ({ product }) => {
         setPreviewImages(previews);
     };
 
-
-    // Fill form in Add/Edit mode
     // Fill form in Add/Edit mode
     useEffect(() => {
         if (product) {
