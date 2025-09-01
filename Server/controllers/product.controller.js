@@ -670,7 +670,6 @@ export const getAllProductsByFeatured = async (req, res) => {
 };
 
 // delete product controller also delete images from cloudnary
-
 export const deleteProduct = async (req, res) => {
     try {
         const product = await ProductModel.findById(req.params.id);
@@ -755,7 +754,6 @@ export const getSingleProduct = async (req, res) => {
 
 // update products and images by id
 // Assuming cloudinary is already configured
-
 export const updateProduct = async (req, res) => {
     try {
         const product = await ProductModel.findById(req.params.id);

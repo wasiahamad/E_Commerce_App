@@ -229,8 +229,6 @@ export const getProducts = async (page = 1, perPage = 10) => {
     }
 };
 
-
-
 // delete product
 export const deleteProduct = async (id) => {
     try {
@@ -245,7 +243,6 @@ export const deleteProduct = async (id) => {
         return { error: true, message: "Error deleting product" };
     }
 };
-
 
 // update product
 export const updateProduct = async (id, formData) => {
