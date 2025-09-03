@@ -724,6 +724,75 @@ export const deleteProduct = async (req, res) => {
     }
 };
 
+// multiple delete product controller also delete images from cloudnary
+export const deleteMultipleProducts = async (req, res) => {
+    try {
+        const ids = req.body.ids; // Expecting an array of IDs in the request body
+
+        if (!Array.isArray(ids) || ids.length === 0) {
+            return res.status(400).json({
+                message: "Invalid request",
+                success: false,
+                error: true,
+            });
+        }
+
+        // Find products by IDs
+        const products = await ProductModel.find({ _id: { $in: ids } });
+
+        if (products.length === 0) {
+            return res.status(404).json({
+                message: "No products found",
+                success: false,
+                error: true,
+            });
+        }
+
+        // --- 🧹 Delete Cloudinary Images ---
+        for (const product of products) {
+            if (product.image) {
+                try {
+                    // If image is a string (single URL)
+                    if (typeof product.image === "string") {
+                        const publicId = product.image.split("/").pop().split(".")[0];
+                        await cloudinary.uploader.destroy(publicId);
+                    }
+                    // If image is an array of URLs
+                    else if (Array.isArray(product.image)) {
+                        for (const img of product.image) {
+                            const publicId = img.split("/").pop().split(".")[0];
+                            await cloudinary.uploader.destroy(publicId);
+                        }
+                    }
+                    // If image is an object with public_id
+                    else if (product.image.public_id) {
+                        await cloudinary.uploader.destroy(product.image.public_id);
+                    }
+                } catch (imgErr) {
+                    console.error("Cloudinary image delete error:", imgErr);
+                }
+            }
+        }
+
+        // --- 🗑️ Delete Products from MongoDB ---
+        await ProductModel.deleteMany({ _id: { $in: ids } });
+
+        return res.status(200).json({
+            message: "Products deleted successfully",
+            success: true,
+            error: false,
+        });
+
+    } catch (error) {
+        console.error("Delete error:", error);
+        return res.status(500).json({
+            message: "Internal Server Error",
+            success: false,
+            error: true,
+        });
+    }
+};
+
 // get single,k products by id
 export const getSingleProduct = async (req, res) => {
     try {

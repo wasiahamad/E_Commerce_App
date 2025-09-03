@@ -229,6 +229,22 @@ export const getProducts = async (page = 1, perPage = 10) => {
     }
 };
 
+// get all products by category ID
+export const getAllProductsByCatId = async (catId, page = 1, perPage = 10) => {
+    try {
+        const res = await axios.get(`${apiUrl}/api/v1/product/category/${catId}?page=${page}&perPage=${perPage}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json", // Specify the content type as JSON
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching products:", error);
+        return { error: true, data: [] };
+    }
+};
+
 // delete product
 export const deleteProduct = async (id) => {
     try {

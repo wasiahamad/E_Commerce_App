@@ -1,6 +1,6 @@
 import { useContext, useState, useEffect } from "react";
 import {
-    Button, Checkbox, LinearProgress, Rating, Tooltip
+    Button, Checkbox, LinearProgress, MenuItem, Rating, Select, Tooltip
 } from "@mui/material";
 import { FaPlus } from "react-icons/fa6";
 import Table from "@mui/material/Table";
@@ -15,7 +15,7 @@ import { AiOutlineEdit } from "react-icons/ai";
 import { FaRegEye } from "react-icons/fa";
 import { MdDeleteOutline } from "react-icons/md";
 import { MyContext } from "../../App";
-import { deleteProduct, getProducts } from "../../utils/api";
+import { deleteProduct, getAllProductsByCatId, getProducts } from "../../utils/api";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -36,8 +36,31 @@ const ProductTable = () => {
     const [products, setProducts] = useState([]);
     const [total, setTotal] = useState(0);
     const [editProduct, setEditProduct] = useState(null); // for selected product
+    const [productCat, setProductCat] = useState('');
+    const [productSubCat, setProductSubCat] = useState('');
+    const [productThirdSubCat, setProductThirdSubCat] = useState('');
 
-
+    const [formFields, setFormFields] = useState({
+        name: '',
+        description: '',
+        catName: '',
+        subCatName: '',
+        subCatId: '',
+        catId: '',
+        thirdSubCat: '',
+        thirdSubCatId: '',
+        countInStock: '',
+        rating: '',
+        isFeatured: false,
+        discount: '',
+        brand: '',
+        price: '',
+        oldPrice: '',
+        productRam: [],
+        size: [],
+        productWeight: [],
+        image: []
+    });
     const context = useContext(MyContext);
 
     // Fetch products
@@ -60,6 +83,18 @@ const ProductTable = () => {
     const handleChangeRowsPerPage = (event) => {
         setRowsPerPage(+event.target.value);
         setPage(0);
+    };
+
+    // getAll Products by catId
+    const fetchProductsByCatId = async (event) => {
+        const catId = event.target.value;
+        const res = await getAllProductsByCatId(catId, page + 1, rowsPerPage)
+            .then((res) => {
+                if (!res.error) {
+                    setProducts(res.data);
+                    setProductCat(catId);
+                }
+            });
     };
 
     // inside ProductTable component
@@ -101,6 +136,112 @@ const ProductTable = () => {
             </div>
 
             <div className="w-full bg-white pt-5 border border-[rgba(0,0,0,0.1)] shadow-md sm:rounded-lg ">
+                <div className="grid grid-cols-4 gap-4 mb-3">
+                    <div className="col">
+                        <h3 className='text-[14px] font-[500] mb-1'>Product Category</h3>
+
+                        <Select
+                            labelId="demo-simple-select-helper-label"
+                            id="demo-simple-select-helper"
+                            value={productCat}
+                            size="small"
+                            className="w-full mt-2 mb-6"
+                            label="Product Category"
+                            onChange={fetchProductsByCatId}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {context?.categories?.map((cat, idx) => {
+                                return (
+                                    <MenuItem value={cat?._id} onClick={() => formFields.catName = cat?.name}>
+                                        {cat?.name}
+                                    </MenuItem>
+                                )
+                            })}
+                        </Select>
+                    </div>
+
+                    <div className="col">
+                        <h3 className='text-[14px] font-[500] mb-1'>Product Sub Category</h3>
+
+                        <Select
+                            labelId="demo-simple-select-helper-label"
+                            id="demo-simple-select-helper"
+                            value={productSubCat}
+                            size="small"
+                            className="w-full mt-2 mb-6"
+                            label="Sub Category"
+                        // onChange={handleChangeProductSubCat}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {/* for subcategory category ka hi children array h */}
+                            {
+                                context?.categories?.map((cat, idx) => {
+                                    return (
+                                        cat?.children?.map((subCat, idx) => {
+                                            return (
+                                                <MenuItem value={subCat?._id}>
+                                                    {subCat?.name}
+                                                </MenuItem>
+                                            )
+                                        })
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+
+                    <div className="col">
+                        <h3 className='text-[14px] font-[500] mb-1'>Product Third Lavel Category</h3>
+
+                        <Select
+                            labelId="demo-simple-select-helper-label"
+                            id="demo-simple-select-helper"
+                            value={productThirdSubCat}
+                            size="small"
+                            className="w-full mt-2 mb-6"
+                            label="Age"
+                        // onChange={handleChangeProductThirdSubCat}
+                        >
+                            <MenuItem value="">
+                                <em>None</em>
+                            </MenuItem>
+                            {/* for third subcategory subcategory ka hi children array h */}
+                            {
+                                context?.categories?.map((cat, idx) => {
+                                    return (
+                                        cat?.children?.map((subCat, idx) => {
+                                            return (
+                                                subCat?.children?.map((thirdCat, idx) => {
+                                                    return (
+                                                        <MenuItem value={thirdCat?._id}>
+                                                            {thirdCat?.name}
+                                                        </MenuItem>
+                                                    )
+                                                })
+                                            )
+                                        })
+                                    )
+                                })
+                            }
+                        </Select>
+                    </div>
+
+                    <div className="col">
+                        <h3 className='text-[14px] font-[500] mb-1'>Search Products</h3>
+                        <input
+                            type="text"
+                            placeholder='search products here'
+                            className='w-full mt-2 h-[40px] rounded-[5px] focus:outline-none border border-[rgba(0,0,0,0.2)] focus:border-[rgba(0,0,0,0.5)] p-3'
+                            name='search'
+                        // value={formFields.search}
+                        // onChange={onChangeInput}
+                        />
+                    </div>
+                </div>
                 <TableContainer sx={{ maxHeight: 440 }}>
                     <Table stickyHeader aria-label="sticky table">
                         <TableHead>
@@ -185,10 +326,13 @@ const ProductTable = () => {
                                                     />
                                                 </Button>
                                             </Tooltip>
+
                                             <Tooltip title="View" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <FaRegEye className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
+                                                <Link to={`/product/${product._id}`} data-discover="true">
+                                                    <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
+                                                        <FaRegEye className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                    </Button>
+                                                </Link>
                                             </Tooltip>
                                             <Tooltip title="Delete" placement="top">
                                                 <Button

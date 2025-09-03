@@ -24,6 +24,7 @@ import { useEffect } from 'react'
 import Profile from './Pages/Profile'
 import ProtectedRoute from './ProtectedRoute'
 import axios from 'axios'
+import ProductDetails from './Pages/Products/ProductDetails'
 
 const alertBox = (status, msg) => {
   if (status === "success") {
@@ -335,6 +336,26 @@ function App() {
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
               <Profile />
+              {/* </div> */}
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
+
+    {
+      path: "/product/:id",
+      // excat: true,
+      element: (
+        <ProtectedRoute>
+          <section className='main'>
+            <Header />
+            <div className="containerMain flex">
+              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+                <Sidebar />
+              </div>
+              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
+              <ProductDetails />
               {/* </div> */}
             </div>
           </section>
