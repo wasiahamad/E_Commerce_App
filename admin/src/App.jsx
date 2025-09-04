@@ -343,25 +343,54 @@ function App() {
       )
     },
 
+    // {
+    //   path: "/product/:id",
+    //   // excat: true,
+    //   element: (
+    //     <ProtectedRoute>
+    //       <section className='main'>
+    //         <Header />
+    //         <div className="containerMain flex">
+    //           <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+    //             <Sidebar />
+    //           </div>
+    //           {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
+    //           <ProductDetails />
+    //           {/* </div> */}
+    //         </div>
+    //       </section>
+    //     </ProtectedRoute>
+    //   )
+    // },
+
     {
       path: "/product/:id",
-      // excat: true,
       element: (
         <ProtectedRoute>
-          <section className='main'>
+          <section className="main">
             <Header />
             <div className="containerMain flex">
-              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+              {/* Sidebar Wrapper */}
+              <div
+                className={`sideBarWrapper transition-all duration-300 ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"
+                  }`}
+              >
                 <Sidebar />
               </div>
-              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
-              <ProductDetails />
-              {/* </div> */}
+
+              {/* Content Area */}
+              <div
+                className={`contentRight py-6 px-8 bg-gray-50 min-h-screen transition-all duration-300 ${isSidebarOpen ? "w-[80%]" : "w-full"
+                  }`}
+              >
+                <ProductDetails />
+              </div>
             </div>
           </section>
         </ProtectedRoute>
       )
-    },
+    }
+
   ]);
 
   const value = {
