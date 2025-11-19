@@ -1,4 +1,4 @@
-import React, { use, useContext, useState } from 'react'
+import React, { useEffect, useContext, useState } from 'react'
 import DashboardBox from '../../Components/DashboardBox'
 import { FaAngleDown, FaAngleUp, FaPlus } from "react-icons/fa6";
 import { Button } from '@mui/material';
@@ -6,11 +6,50 @@ import Badge from '../../Components/Badge';
 import ProductTable from '../../Components/ProductTable';
 import { MyContext } from '../../App';
 import SaleChart from '../../Components/SaleChart';
+import { getData, postData } from '../../utils/api';
 
 
 const Dashboard = () => {
 
     const [isOpenOrderedProducts, setIsOpenOrderedProducts] = useState(null);
+    const [orders, setOrders] = useState([]);
+    const [loadingOrders, setLoadingOrders] = useState(false);
+
+    useEffect(() => {
+        const fetchRecent = async () => {
+            setLoadingOrders(true);
+            try {
+                const res = await getData('/api/v1/order?page=1&perPage=5');
+                const fetched = res?.data || [];
+                setOrders(fetched);
+                // fetch shipping estimates for any order missing shippingCharge
+                fetchMissingShippingCharges(fetched);
+            } catch (err) {
+                console.error('Failed to load recent orders', err);
+            } finally {
+                setLoadingOrders(false);
+            }
+        };
+        fetchRecent();
+    }, []);
+
+    const fetchMissingShippingCharges = async (ordersList = []) => {
+        if (!Array.isArray(ordersList)) return;
+        ordersList.forEach(async (o) => {
+            try {
+                if (o.shippingCharge !== undefined && o.shippingCharge !== null) return;
+                const items = Array.isArray(o.items) ? o.items : [];
+                const subtotal = Number(o.subTotalAmount ?? items.reduce((s, it) => s + (Number(it.price || 0) * Number(it.quantity || 1)), 0));
+                const address = o.delivery_address || null;
+                const json = await postData('/api/v1/order/estimate', { subtotal, items, address });
+                if (json && json.data) {
+                    setOrders(prev => prev.map(p => p._id === o._id ? { ...p, shippingCharge: json.data.shippingCharge, totalAmount: json.data.totalAmount ?? p.totalAmount } : p));
+                }
+            } catch (err) {
+                console.error('Failed to fetch shipping for order', o._id, err);
+            }
+        });
+    };
 
     const isShowOrderedProducts = (idx) => {
         if (isOpenOrderedProducts === idx) {
@@ -75,6 +114,9 @@ const Dashboard = () => {
                                         Total Amount
                                     </th>
                                     <th scope="col" className="px-4 py-3 whitespace-nowrap">
+                                        Shipping
+                                    </th>
+                                    <th scope="col" className="px-4 py-3 whitespace-nowrap">
                                         Email
                                     </th>
                                     <th scope="col" className="px-4 py-3 whitespace-nowrap">
@@ -89,271 +131,79 @@ const Dashboard = () => {
                                 </tr>
                             </thead>
                             <tbody className='text-[13px]'>
-                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                    <td className='px-4 py-4'>
-                                        <Button className='!min-w-[35px] !w-[35px] !h-[35px] !text-[rgba(0,0,0,0.5)] !rounded-full !bg-[#f1f1f1] 
-                                                ' onClick={() => { isShowOrderedProducts(0) }}>
-                                            {isOpenOrderedProducts === 0 ? <FaAngleUp className='text-[18px] ' /> : <FaAngleDown className='text-[18px] ' />}
-                                        </Button>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>682b89b4228db479bb420460</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>CASH ON DELIVERY</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        friday
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        918520025896
-                                    </td>
-                                    <td className='px-4 py-4'>
-                                        <span className='block w-[400px]'>
-                                            xfcgfhjkl, Jaipur Near Suresh Gyan vihar University rajsthan indis
-
-                                        </span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        852025
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        6784
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        random@gmail.com
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>68297a91228db479bb40a88f</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <Badge status="pending" />
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        12-03-2025
-                                    </td>
-
-                                </tr>
-
-                                {isOpenOrderedProducts === 0 &&
+                                {loadingOrders ? (
                                     <tr>
-                                        <td className='pl-7' colSpan='6'>
-                                            <div className="relative overflow-x-auto">
-                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                                    <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                                        <tr>
-
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Product Id
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Product Title
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Image
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Quantity
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Price
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Sub Total
-                                                            </th>
-
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className='text-[13px]'>
-                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                <span>682b89b4228db479bb420460</span>
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                Men Pure Cotton Striped Casual Shirt
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                <img src="https://serviceapi.spicezgold.com/download/1744509970781_fash.png" alt="" className='w-[40px] h-[40px] object-cover' />
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                2
-                                                            </td>
-                                                            <td className='px-4 py-4'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                ₹1,999.00
-                                                            </td>
-
-
-                                                        </tr>
-
-                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                682b89b4228db479bb420460
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                Men Pure Cotton Striped Casual Shirt
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                <img src="https://serviceapi.spicezgold.com/download/1744509970781_fash.png" alt="" className='w-[40px] h-[40px] object-cover' />
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                2
-                                                            </td>
-                                                            <td className='px-4 py-4'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </td>
+                                        <td colSpan={12} className="text-center py-6">Loading...</td>
                                     </tr>
-                                }
-
-                            </tbody>
-
-                            <tbody className='text-[13px]'>
-                                <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-                                    <td className='px-4 py-4'>
-                                        <Button className='!min-w-[35px] !w-[35px] !h-[35px] !text-[rgba(0,0,0,0.5)] !rounded-full !bg-[#f1f1f1] 
-                                                ' onClick={() => { isShowOrderedProducts(1) }}>
-                                            {isOpenOrderedProducts === 1 ? <FaAngleUp className='text-[18px] ' /> : <FaAngleDown className='text-[18px] ' />}
-                                        </Button>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>682b89b4228db479bb420460</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>CASH ON DELIVERY</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        friday
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        918520025896
-                                    </td>
-                                    <td className='px-4 py-4'>
-                                        <span className='block w-[400px]'>
-                                            xfcgfhjkl, Jaipur Near Suresh Gyan vihar University rajsthan indis
-
-                                        </span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        852025
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        6784
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        random@gmail.com
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <span className='text-[#3872fa]'>68297a91228db479bb40a88f</span>
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        <Badge status="pending" />
-                                    </td>
-                                    <td className='px-4 py-4 whitespace-nowrap'>
-                                        12-03-2025
-                                    </td>
-
-                                </tr>
-
-                                {isOpenOrderedProducts === 1 &&
+                                ) : orders.length === 0 ? (
                                     <tr>
-                                        <td className='pl-7' colSpan='6'>
-                                            <div className="relative overflow-x-auto">
-                                                <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
-                                                    <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
-                                                        <tr>
-
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Product Id
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Product Title
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Image
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Quantity
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Price
-                                                            </th>
-                                                            <th scope="col" className="px-4 py-3">
-                                                                Sub Total
-                                                            </th>
-
-                                                        </tr>
-                                                    </thead>
-                                                    <tbody className='text-[13px]'>
-                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                682b89b4228db479bb420460
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                Men Pure Cotton Striped Casual Shirt
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                <img src="https://serviceapi.spicezgold.com/download/1744509970781_fash.png" alt="" className='w-[40px] h-[40px] object-cover' />
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                2
-                                                            </td>
-                                                            <td className='px-4 py-4'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                ₹1,999.00
-                                                            </td>
-
-
-                                                        </tr>
-
-                                                        <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
-
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                682b89b4228db479bb420460
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                Men Pure Cotton Striped Casual Shirt
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                <img src="https://serviceapi.spicezgold.com/download/1744509970781_fash.png" alt="" className='w-[40px] h-[40px] object-cover' />
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                2
-                                                            </td>
-                                                            <td className='px-4 py-4'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                            <td className='px-4 py-4 whitespace-nowrap'>
-                                                                ₹1,999.00
-                                                            </td>
-                                                        </tr>
-                                                    </tbody>
-                                                </table>
-                                            </div>
-                                        </td>
+                                        <td colSpan={12} className="text-center py-6">No recent orders</td>
                                     </tr>
-                                }
+                                ) : (
+                                    orders.map((o, idx) => (
+                                        <React.Fragment key={o._id}>
+                                            <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                <td className='px-4 py-4'>
+                                                    <Button className='!min-w-[35px] !w-[35px] !h-[35px] !text-[rgba(0,0,0,0.5)] !rounded-full !bg-[#f1f1f1]' onClick={() => { isShowOrderedProducts(idx) }}>
+                                                        {isOpenOrderedProducts === idx ? <FaAngleUp className='text-[18px]' /> : <FaAngleDown className='text-[18px]' />}
+                                                    </Button>
+                                                </td>
+                                                <td className='px-4 py-4 whitespace-nowrap'><span className='text-[#3872fa]'>{o.orderId}</span></td>
+                                                <td className='px-4 py-4 whitespace-nowrap'><span className='text-[#3872fa]'>{o.paymentMethod || o.paymentId || 'CASH ON DELIVERY'}</span></td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{o.userId?.name || o.userId?.email}</td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{o.userId?.mobile}</td>
+                                                <td className='px-4 py-4'><span className='block w-[400px]'>{o.delivery_address?.address_line || o.delivery_address?.address || ''}</span></td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{o.delivery_address?.pincode || ''}</td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{o.totalAmount}</td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{typeof o.shippingCharge === 'number' ? (o.shippingCharge === 0 ? 'Free' : `₹ ${Number(o.shippingCharge).toFixed(2)}`) : '—'}</td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{o.userId?.email}</td>
+                                                <td className='px-4 py-4 whitespace-nowrap'><span className='text-[#3872fa]'>{o.userId?._id}</span></td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>
+                                                    <Badge status={o.status} />
+                                                </td>
+                                                <td className='px-4 py-4 whitespace-nowrap'>{new Date(o.createdAt).toLocaleDateString()}</td>
+                                            </tr>
 
+                                            {isOpenOrderedProducts === idx && (
+                                                <tr>
+                                                    <td className='pl-7' colSpan='6'>
+                                                        <div className="relative overflow-x-auto">
+                                                            <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+                                                                <thead className="text-[13px] text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
+                                                                    <tr>
+                                                                        <th className="px-4 py-3">Product Id</th>
+                                                                        <th className="px-4 py-3">Product Title</th>
+                                                                        <th className="px-4 py-3">Image</th>
+                                                                        <th className="px-4 py-3">Quantity</th>
+                                                                        <th className="px-4 py-3">Price</th>
+                                                                        <th className="px-4 py-3">Sub Total</th>
+                                                                    </tr>
+                                                                </thead>
+                                                                <tbody className='text-[13px]'>
+                                                                    {o.items.map(it => (
+                                                                        <tr key={it.productId} className="bg-white border-b dark:bg-gray-800 dark:border-gray-700 border-gray-200">
+                                                                            <td className='px-4 py-4 whitespace-nowrap'>{it.productId}</td>
+                                                                            <td className='px-4 py-4 whitespace-nowrap'>{it.title}</td>
+                                                                            <td className='px-4 py-4 whitespace-nowrap'><img src={it.image} alt="" className='w-[40px] h-[40px] object-cover' /></td>
+                                                                            <td className='px-4 py-4 whitespace-nowrap'>{it.quantity}</td>
+                                                                            <td className='px-4 py-4'>₹{it.price}</td>
+                                                                            <td className='px-4 py-4 whitespace-nowrap'>₹{it.subTotal}</td>
+                                                                        </tr>
+                                                                    ))}
+                                                                </tbody>
+                                                            </table>
+                                                        </div>
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </React.Fragment>
+                                    ))
+                                )}
                             </tbody>
                         </table>
                     </div>
 
                 </div>
-
                 <div className="card my-5 shadow-md sm:rounded-lg bg-white">
 
                     <div className="flex items-center gap-5 py-4 px-5 pb-0">

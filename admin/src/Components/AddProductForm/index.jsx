@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react'
 import Button from '@mui/material/Button';
 import Dialog from '@mui/material/Dialog';
-import AppBar from '@mui/material/AppBar';
+import AppBar from '@mui/material/AppBar'; 
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
@@ -53,33 +53,23 @@ const AddProductForm = () => {
                     </Typography>
                 </Toolbar>
             </AppBar>
-            {
-                context.isOpenAddProductForm?.isOpen && (
-                    <AddProduct product={context.isOpenAddProductForm?.data || null} />
-                )
-            }
+            {/* Render the correct form based on the selected model to avoid showing multiple forms */}
+            {context.isOpenAddProductForm?.model === "Add Product" && (
+                <AddProduct product={context.isOpenAddProductForm?.data || null} />
+            )}
 
+            {context.isOpenAddProductForm?.model === "Edit Product" && (
+                <AddProduct product={context.isOpenAddProductForm?.data || null} />
+            )}
 
-            {
-                context.isOpenAddProductForm?.model === "Add Home Slider" && <AddHomeSlider />
+            {context.isOpenAddProductForm?.model === "Add Home Slider" && <AddHomeSlider />}
+            {context.isOpenAddProductForm?.model === "Edit Home Slider" && <AddHomeSlider homeSlider={context.isOpenAddProductForm?.data || null} />}
 
-            }
+            {context.isOpenAddProductForm?.model === "Add Sub Category" && <AddSubCategoryList />}
 
-            {
-                context.isOpenAddProductForm?.model === "Add Category" && <AddCategoryList />
-            }
+            {context.isOpenAddProductForm?.model === "Add Banner List-1" && <AddBannerV1 />}
 
-            {
-                context.isOpenAddProductForm?.model === "Add Sub Category" && <AddSubCategoryList />
-            }
-
-            {
-                context.isOpenAddProductForm?.model === "Add Banner List-1" && <AddBannerV1 />
-            }
-
-            {
-                context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2 />
-            }
+            {context.isOpenAddProductForm?.model === "Add Banner List-2" && <AddBannerV2 />}
 
             {["Add Category", "Edit Category"].includes(context.isOpenAddProductForm?.model) && (
                 <AddCategoryList />

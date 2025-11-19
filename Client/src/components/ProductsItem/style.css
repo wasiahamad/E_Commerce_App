@@ -1,3 +1,13 @@
 .produtcsItem .title {
     line-height: 20px;
+    /* clamp to single line with ellipsis */
+    display: -webkit-box;
+    -webkit-line-clamp: 1;
+    /* standard property for broader compatibility */
+    line-clamp: 1;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: normal;
 }
+

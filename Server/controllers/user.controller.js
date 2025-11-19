@@ -19,6 +19,81 @@ const cloudinaryConfig = {
     api_secret: process.env.CLOUDNARY_API_SECRET, // Replace with your Cloudinary API secret
     secure: true, // Use secure URLs
 };
+
+// search users by name or email (admin)
+export const searchUsers = async (req, res) => {
+    try {
+        const { query = "", page = 1, perPage = 10 } = req.query;
+        console.log("[searchUsers] incoming query:", { query, page, perPage, path: req.path, user: req.user?.id });
+        const q = String(query || "").trim();
+
+        // normalize pagination
+        const pageNum = Number.isFinite(Number(page)) ? Math.max(1, parseInt(page, 10)) : 1;
+        const perPageNum = Number.isFinite(Number(perPage)) ? Math.max(1, Math.min(200, parseInt(perPage, 10))) : 10;
+        const skip = (pageNum - 1) * perPageNum;
+
+        // If no query provided, return paginated users the fast way
+        if (!q) {
+            const [users, total] = await Promise.all([
+                UserModel.find({})
+                    .select("-password -refresh_token")
+                    .skip(skip)
+                    .limit(perPageNum)
+                    .sort({ createdAt: -1 })
+                    .lean(),
+                UserModel.countDocuments({}),
+            ]);
+
+            return res.status(200).json({
+                message: "Users search results",
+                error: false,
+                success: true,
+                data: users,
+                count: total,
+                currentPage: pageNum,
+                perPage: perPageNum,
+            });
+        }
+
+        // When a query exists, we need to safely search string fields and also match mobile numbers.
+        // The mobile field is stored as Number in the model, so doing a $regex directly on it causes a CastError.
+        // Use an aggregation pipeline that adds a string field for mobile and performs regex against it.
+        const regex = { $regex: q, $options: "i" };
+        const match = {
+            $or: [{ name: regex }, { email: regex }, { mobileStr: regex }],
+        };
+
+        const pipeline = [
+            // create a string version of mobile so regex can be applied without casting errors
+            { $addFields: { mobileStr: { $toString: "$mobile" } } },
+            { $match: match },
+            { $sort: { createdAt: -1 } },
+            {
+                $facet: {
+                    data: [{ $skip: skip }, { $limit: perPageNum }],
+                    total: [{ $count: "count" }],
+                },
+            },
+        ];
+
+        const aggRes = await UserModel.aggregate(pipeline).exec();
+        const users = (aggRes && aggRes[0] && aggRes[0].data) || [];
+        const total = (aggRes && aggRes[0] && aggRes[0].total && aggRes[0].total[0] && aggRes[0].total[0].count) || 0;
+
+        return res.status(200).json({
+            message: "Users search results",
+            error: false,
+            success: true,
+            data: users,
+            count: total,
+            currentPage: pageNum,
+            perPage: perPageNum,
+        });
+    } catch (error) {
+        console.error('[searchUsers] error:', error && error.stack ? error.stack : error);
+        return res.status(500).json({ message: error.message || "Server error", error: true, success: false });
+    }
+};
 cloudinary.config(cloudinaryConfig);
 
 // User registration controller write the same code but order the code in a better way
@@ -26,6 +101,10 @@ export const registerUser = async (req, res) => {
     try {
         let user;
         const { name, email, password } = req.body;
+        // Prevent creating admin users via this endpoint
+        if (req.body.role && req.body.role === 'admin') {
+            return res.status(403).json({ message: 'Admin registration is not allowed', success: false, error: true });
+        }
 
         // validate input
         if (!name || !email || !password) {
@@ -803,6 +882,51 @@ export const userDetails = async (req, res) => {
     }
 }
 
+// get user by id (admin)
+export const getUserById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        if (!userId) {
+            return res.status(400).json({ message: "User id is required", error: true, success: false });
+        }
+
+        const user = await UserModel.findById(userId)
+            .select("-password -refresh_token")
+            .populate("address_details")
+            .populate({ path: "orderHistory", options: { sort: { createdAt: -1 }, limit: 10 } });
+
+        if (!user) {
+            return res.status(404).json({ message: "User not found", error: true, success: false });
+        }
+
+        return res.status(200).json({ message: "User fetched successfully", error: false, success: true, data: user });
+    } catch (error) {
+        return res.status(500).json({ message: error.message || "Server error", error: true, success: false });
+    }
+}
+
+// get all users controller
+export const getAllUsers = async (req, res) => {
+    try {
+        let { page, perPage } = req.query;
+        const users = await UserModel.find().populate().select("-password -refresh_token")
+            .skip((page - 1) * perPage)
+            .limit(perPage)
+            .sort({ createdAt: -1 });
+        return res.status(200).json({
+            message: "Users fetched successfully",
+            error: false,
+            success: true,
+            data: users
+        });
+    } catch (error) {
+        return res.status(500).json({
+            message: error.message || "Server error",
+            error: true,
+            success: false,
+        });
+    }
+}
 
 
 

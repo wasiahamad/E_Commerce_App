@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Box from '@mui/material/Box';
 import Drawer from '@mui/material/Drawer';
 import Button from '@mui/material/Button';
@@ -6,6 +6,7 @@ import { IoCloseOutline } from "react-icons/io5";
 import { GoPlusCircle } from "react-icons/go";
 import './style.css';
 import { Link } from 'react-router-dom';
+import { getData } from '../../../utils/api';
 import { FiMinusCircle } from "react-icons/fi";
 
 
@@ -14,6 +15,19 @@ const CategoryPanel = (props) => {
 
     const [submenuIndex, setSubmenuIndex] = useState(null);
     const [innerSubmenuIndex, setInnerSubmenuIndex] = useState(null);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await getData('/api/v1/category');
+                if (res && res.data) setCategories(res.data || []);
+            } catch (err) {
+                console.error('Failed to load categories for panel', err);
+            }
+        };
+        load();
+    }, []);
 
     const toggleDrawer = (open) => () => {
         props.setIsOpenCatPanel(open);
@@ -45,137 +59,60 @@ const CategoryPanel = (props) => {
 
             <div className="scroll">
                 <ul className="w-full">
-                    <li className="list-none flex items-center relative flex-col">
-                        <Link to="/fashion" className='w-full'>
-                            <Button className='w-full !justify-start !px-3 !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>
-                                Fashion
-                            </Button>
-                        </Link>
-                        {
-                            submenuIndex === 0 ?
-                                <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer '
-                                    onClick={() => openSubMenu(0)} /> :
-                                <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                    onClick={() => openSubMenu(0)} />
-                        }
+                    {categories.map((cat, i) => (
+                        <li key={cat._id} className="list-none flex items-center relative flex-col">
+                            <Link to={`/productListing?categoryId=${cat._id}`} className='w-full'>
+                                <Button className='w-full !justify-start !px-3 !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>
+                                    {cat.name}
+                                </Button>
+                            </Link>
+                            {
+                                submenuIndex === i ?
+                                    <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer '
+                                        onClick={() => openSubMenu(i)} /> :
+                                    <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
+                                        onClick={() => openSubMenu(i)} />
+                            }
 
-                        {
-                            submenuIndex === 0 && (
-                                <ul className='submenu !w-full pl-3'>
-                                    <li className="list-none relative">
-                                        <Link to="/fashion" className='w-full' >
-                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start !px-3'>
-                                                Apparel
-                                            </Button>
-                                        </Link>
+                            {
+                                submenuIndex === i && Array.isArray(cat.children) && (
+                                    <ul className='submenu !w-full pl-3'>
+                                        {cat.children.map((sub, j) => (
+                                            <li key={sub._id} className="list-none relative">
+                                                <Link to={`/productListing?subCatId=${sub._id}`} className='w-full' >
+                                                    <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start !px-3'>
+                                                        {sub.name}
+                                                    </Button>
+                                                </Link>
 
-                                        {
-                                            innerSubmenuIndex === 0 ?
-                                                <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                                    onClick={() => openInnerSubMenu(0)} /> :
-                                                <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                                    onClick={() => openInnerSubMenu(0)} />
-                                        }
+                                                {
+                                                    innerSubmenuIndex === `${i}-${j}` ?
+                                                        <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
+                                                            onClick={() => openInnerSubMenu(`${i}-${j}`)} /> :
+                                                        <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
+                                                            onClick={() => openInnerSubMenu(`${i}-${j}`)} />
+                                                }
 
-                                        {
-                                            innerSubmenuIndex === 0 && (
-                                                <ul className='inner_submenu w-full '>
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Smart Tablet</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Crepe T-shirt</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Leather Watch</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Rolling Diamond</Button>
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            )}
-                                    </li>
-                                </ul>
-                            )
-                        }
-                    </li>
-
-                    <li className="list-none flex items-center relative flex-col">
-                        <Link to="/fashion" className='w-full'>
-                            <Button className='w-full !justify-start !px-3 !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>
-                                Fashion
-                            </Button>
-                        </Link>
-                        {
-                            submenuIndex === 1 ?
-                                <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer '
-                                    onClick={() => openSubMenu(1)} /> :
-                                <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                    onClick={() => openSubMenu(1)} />
-                        }
-
-                        {
-                            submenuIndex === 1 && (
-                                <ul className='submenu  !w-full pl-3'>
-                                    <li className="list-none relative">
-                                        <Link to="/fashion" className='w-full' >
-                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start !px-3'>
-                                                Apparel
-                                            </Button>
-                                        </Link>
-
-                                        {
-                                            innerSubmenuIndex === 1 ?
-                                                <FiMinusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                                    onClick={() => openInnerSubMenu(1)} /> :
-                                                <GoPlusCircle size={20} className='absolute top-[10px] right-[15px] cursor-pointer'
-                                                    onClick={() => openInnerSubMenu(1)} />
-                                        }
-
-                                        {
-                                            innerSubmenuIndex === 1 && (
-                                                <ul className='inner_submenu w-full '>
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Smart Tablet</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Crepe T-shirt</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Leather Watch</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className="list-none relative">
-                                                        <Link to="/fashion" className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
-                                                            <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >Rolling Diamond</Button>
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            )}
-                                    </li>
-                                </ul>
-                            )
-                        }
-                    </li>
+                                                {
+                                                    innerSubmenuIndex === `${i}-${j}` && Array.isArray(sub.children) && (
+                                                        <ul className='inner_submenu w-full '>
+                                                            {sub.children.map((third) => (
+                                                                <li key={third._id} className="list-none relative">
+                                                                    {/* use thirdSubCatId for third-level categories */}
+                                                                    <Link to={`/productListing?thirdSubCatId=${third._id}`} className='link hover:!text-[#ff5252] !w-full !justify-start !px-3 transition ease-in duration-200 text-[14px]'>
+                                                                        <Button className='!text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252] !w-full !justify-start' >{third.name}</Button>
+                                                                    </Link>
+                                                                </li>
+                                                            ))}
+                                                        </ul>
+                                                    )}
+                                            </li>
+                                        ))}
+                                    </ul>
+                                )
+                            }
+                        </li>
+                    ))}
                 </ul>
             </div>
         </Box>

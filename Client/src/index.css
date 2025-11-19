@@ -81,6 +81,10 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #ff5252 !important;
 } */
 
+ .header {
+  box-shadow: 0 1px 5px #0000001a;
+ }
+
 
 nav ul button {
   text-transform: capitalize !important;

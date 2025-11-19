@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import HomeSlider from '../../components/HomeSlider'
 import HomeCatSlider from '../../components/HomeCatSlider'
 import { FaShippingFast } from "react-icons/fa";
@@ -7,6 +7,8 @@ import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
 import Box from '@mui/material/Box';
 import ProductsSlider from '../../components/ProductsSlider';
+import { getData } from '../../utils/api';
+import { useNavigate } from 'react-router-dom';
 import { Swiper, SwiperSlide } from 'swiper/react';
 
 // Import Swiper styles
@@ -19,23 +21,52 @@ import BlogItem from '../../components/BlogItem';
 import Footer from '../../components/Footer';
 import HomeSliderV2 from '../../components/HomeSliderV2';
 import BannerBoxV2 from '../../components/BannerBoxV2';
-
-
+import ManagedBanner from '../../components/ManagedBanner';
+import ProductLoader from '../../components/ProductLoader';
 
 
 const Home = () => {
 
   const [value, setValue] = useState(0);
+  const [categories, setCategories] = useState([]);
+  const [selectedCategoryId, setSelectedCategoryId] = useState(null);
+  const [showLoader, setShowLoader] = useState(true);
+  const navigate = useNavigate();
 
   const handleChange = (event, newValue) => {
     setValue(newValue);
+    // When a tab is selected, set the selected category id so the ProductsSlider
+    // can fetch category-specific products. We intentionally stay on Home route.
+    if (categories && categories[newValue]) {
+      setSelectedCategoryId(categories[newValue]._id);
+    } else {
+      setSelectedCategoryId(null);
+    }
   };
+
+  useEffect(() => {
+    const loadCats = async () => {
+      try {
+        const res = await getData('/api/v1/category');
+        if (res && res.data) setCategories(res.data || []);
+      } catch (err) {
+        console.error('Failed to load categories', err);
+      }
+    };
+    loadCats();
+  }, []);
+
+  // Show product loader for at least 2 seconds on initial mount
+  useEffect(() => {
+    const t = setTimeout(() => setShowLoader(false), 2000);
+    return () => clearTimeout(t);
+  }, []);
 
   return (
     <>
       <HomeSlider />
       <HomeCatSlider />
-     
+
 
       <section className="bg-white py-8">
         <div className="container">
@@ -57,19 +88,30 @@ const Home = () => {
                 scrollButtons="auto"
                 aria-label="scrollable auto tabs example"
               >
-                <Tab label="Fashion" />
-                <Tab label="Electronics" />
-                <Tab label="Bags" />
-                <Tab label="Footwear" />
-                <Tab label="Grocery" />
-                <Tab label="Beauty" />
-                <Tab label="Wellness" />
-                <Tab label="Jewellery" />
+                {categories.length > 0 ? (
+                  categories.map((c, idx) => <Tab key={c._id} label={c.name} />)
+                ) : (
+                  <>
+                    <Tab label="Fashion" />
+                    <Tab label="Electronics" />
+                    <Tab label="Bags" />
+                    <Tab label="Footwear" />
+                    <Tab label="Grocery" />
+                    <Tab label="Beauty" />
+                    <Tab label="Wellness" />
+                    <Tab label="Jewellery" />
+                  </>
+                )}
               </Tabs>
             </div>
           </div>
 
-          <ProductsSlider items={6} />
+          {/* Loading skeleton shown for 2 seconds, then show real products */}
+          {showLoader ? (
+            <ProductLoader />
+          ) : (
+            <ProductsSlider items={6} categoryId={selectedCategoryId} />
+          )}
         </div>
       </section>
 
@@ -126,6 +168,13 @@ const Home = () => {
         </div>
       </div>
 
+      {/* Managed banners (admin editable) placed after Featured Products */}
+      <section className="py-5 bg-white">
+        <div className="container">
+          <ManagedBanner />
+        </div>
+      </section>
+
       <section className="py-5 bg-white pt-0 blogSection">
         <div className="container">
           <h2 className="text-[20px] font-[600] mb-4">From the Blog</h2>
@@ -156,7 +205,7 @@ const Home = () => {
         </div>
       </section>
 
-      
+
 
     </>
   )

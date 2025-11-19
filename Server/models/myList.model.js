@@ -2,24 +2,23 @@ import mongoose from "mongoose";
 
 const myListSchema = new mongoose.Schema({
     productId: {
-        type: String,
-        required: [true, 'Product ID is required'],
-        unique: true
+        type: mongoose.Schema.ObjectId,
+        ref: 'Product',
+        required: [true, 'Product ID is required']
     },
     userId: {
-        type: String,
-        required: [true, 'User ID is required'],
-        unique: true
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        required: [true, 'User ID is required']
     },
     image: {
         type: String,
-        required: [true, 'Product image is required'],
+        default: ''
     },
     productTitle: {
         type: String,
-        required: [true, 'Product name is required'],
         trim: true,
-        minlength: [3, 'Product name must be at least 3 characters long'],
+        default: ''
     },
     price: {
         type: Number,
@@ -31,19 +30,22 @@ const myListSchema = new mongoose.Schema({
     },
     rating: {
         type: Number,
-        require : [true, 'Product rating is required'],
+        default: 0
     },
-    discount : {
+    discount: {
         type: Number,
-        required: [true, 'Product discount is required'],
+        default: 0
     },
     brand: {
         type: String,
-        require : [true, 'Product brand is required'],
+        default: ''
     },
 }, {
     timestamps: true
 });
+
+// ensure a user cannot add the same product multiple times
+myListSchema.index({ userId: 1, productId: 1 }, { unique: true });
 
 const MyListModel = mongoose.model('MyList', myListSchema);
 

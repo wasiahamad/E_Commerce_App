@@ -8,15 +8,13 @@ import { deleteData, getData, postData } from '../../utils/api';
 import { CiMenuKebab } from "react-icons/ci";
 import { Link } from 'react-router-dom';
 
-
-
-
 const Address = () => {
     const context = useContext(MyContext);
     const [address, setAddress] = useState([]);
     const [open, setOpen] = useState(false);
     const [editDataField, setEditDataField] = useState(null);
     const [selectedAddress, setSelectedAddress] = useState(null); // ✅ stores the clicked address
+    const [selectedValue, setSelectedValue] = useState(''); // currently selected address id
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const handleClick = (event, addressItem) => {
@@ -28,31 +26,33 @@ const Address = () => {
         setAnchorEl(null);
     };
 
-    // // radio button handler
-    // const [selectedValue, setSelectedValue] = useState('');
+    // radio button handler
+    const handleChange = (event) => {
+        const value = event.target.value;
+        setSelectedValue(value);
 
-    // const handleChange = (event) => {
-    //     const value = event.target.value;
-    //     setSelectedValue(value);
+        // store in localStorage
+        localStorage.setItem("selectedAddress", value);
 
-    //     // store in localStorage
-    //     localStorage.setItem("selected", value);
+        // notify server about selected address
+        postData("/api/v1/address/select-address", { addressId: value })
+            .then((res) => {
+                if (res && !res.error) {
+                    // update local address state to reflect selection
+                    setAddress((prev) => prev.map(a => ({ ...a, selected: a._id === value })));
+                    context.alertBox("success", "Address selected");
+                }
+            })
+            .catch((err) => console.error(err));
+    };
 
-    //     postData("/api/v1/address/select-address", { addressId: value })
-    //         .then((res) => console.log(res));
-    // };
-
-    // // useEffect for setting initial selected address
-    // useEffect(() => {
-    //     // Try localStorage first
-    //     const savedAddress = localStorage.getItem("selected");
-
-    //     if (savedAddress) {
-    //         setSelectedValue(savedAddress);
-    //     } else if (context?.userData?.address) {
-    //         setSelectedValue(context.userData.address);
-    //     }
-    // }, [context?.userData?.address]);
+    // useEffect for setting initial selected address after addresses load
+    useEffect(() => {
+        const saved = localStorage.getItem("selectedAddress");
+        if (saved) {
+            setSelectedValue(saved);
+        }
+    }, []);
 
     // 
 
@@ -61,6 +61,11 @@ const Address = () => {
             getData(`/api/v1/address/get/${context.userData._id}`).then((res) => {
                 console.log("response", res);
                 setAddress(res.data);
+                try {
+                    localStorage.setItem('addresses_cache', JSON.stringify(res.data || []));
+                } catch (err) {
+                    console.error('Failed to cache addresses', err);
+                }
             });
         }
     }, [context?.userData]);
@@ -167,13 +172,13 @@ const Address = () => {
                                 address?.length > 0 && address.map((item, index) => {
                                     return (
                                         <label key={index} className="addressBox w-full flex items-center justify-between bg-[#fafafa] border border-dashed border-[rgba(0,0,0,0.2)] hover:bg-[#f1faff] cursor-pointer p-5 mt-4">
-                                            {/* <Radio
+                                            <Radio
                                                 checked={selectedValue === item?._id}
                                                 onChange={handleChange}
                                                 value={item?._id}
-                                                name="radio-buttons"
-                                                inputProps={{ 'aria-label': 'A' }}
-                                            /> */}
+                                                name="selected-address"
+                                                inputProps={{ 'aria-label': 'Select address' }}
+                                            />
                                             <span className="text-[15px] font-[500] ">{item?.address_line + ", " + item?.country + ", " + item?.city + ", " + item?.state + ", " + item?.pincode + ", " + item?.mobile}</span>
 
                                             <span>

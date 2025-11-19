@@ -44,8 +44,8 @@ const LogIn = () => {
         e.preventDefault();
         setLoading(true);
 
-        // API call
-        postData("/api/v1/user/login", formData, { withCredentials: true })
+        // API call - use admin login endpoint
+        postData("/api/v1/admin/login", formData, { withCredentials: true })
             .then((res) => {
                 console.log("response", res);
                 if (res?.error !== true) {
@@ -55,8 +55,9 @@ const LogIn = () => {
                         password: "",
                     });
                     setLoading(false);
-                    localStorage.setItem("accessToken", res?.accessToken);
-                    localStorage.setItem("refreshToken", res?.refreshToken);
+                    // admin login returns accessToken in res.accessToken
+                    localStorage.setItem("accessToken", res?.accessToken || res?.data?.accessToken);
+                    // no refresh token for admins by default
                     console.log("username", res?.data?.name);
                     context.setIsLoggedIn(true);
                     navigate("/");
@@ -128,12 +129,7 @@ const LogIn = () => {
                     </NavLink>
 
 
-                    <Link to="/signup">
-                        <Button
-                            className=' !text-black !rounded-full !py-2 !px-4'>
-                            <FaRegUser size={15} className='mr-1' /> Sign Up
-                        </Button>
-                    </Link>
+                    {/* Sign up disabled for admin panel — admins must be seeded and only allowed to login */}
                 </div>
             </header>
             <img src="https://ecommerce-admin-view.netlify.app/patern.webp" alt="" className='w-full fixed top-0 left-0 opacity-5' />
@@ -209,13 +205,7 @@ const LogIn = () => {
                         </Link>
                     </div>
 
-                    <div className="form-group mb-5 w-full flex items-center justify-between ">
-                        <span className='text-[15px] font-[500] text-[#8a8a8a]'>Don't have an account?</span>
-
-                        <Link to="/signup" className='text-[15px] font-[600] text-[#3838ff] hover:underline hover:text-[#000]'>
-                            Sign Up
-                        </Link>
-                    </div>
+                    {/* Admin signup disabled — use seeded admin only. */}
 
                     <Button
                         type='submit'

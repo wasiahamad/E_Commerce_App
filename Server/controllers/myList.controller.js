@@ -1,29 +1,51 @@
 import mongoose from "mongoose";
 import UserModel from "../models/user.model.js";
 import MyListModel from "../models/myList.model.js";
+import ProductModel from "../models/product.model.js";
 
 
 // add to mylist controller
 export const addToMyList = async (req, res) => {
     try {
         const userId = req.user.id;
-        const { 
-            productId, 
-            productTitle, 
-            price, 
-            oldPrice, 
-            image, 
-            rating, 
-            brand, 
-            discount  
+        const {
+            productId,
+            productTitle,
+            price,
+            oldPrice,
+            image,
+            rating,
+            brand,
+            discount
         } = req.body;
 
-        const items = await MyListModel.findOne({
-            userId: userId,
-            productId: productId
-        });
+        // if client only passed productId, fetch product details to populate required fields
+        let productData = null;
+        if (productId && (!image || !productTitle || discount === undefined || rating === undefined || !brand)) {
+            productData = await ProductModel.findById(productId).lean();
+        }
 
-        if (items) {
+        // Use an atomic upsert to avoid duplicate inserts in race conditions
+        const docToInsert = {
+            productId: productId,
+            userId: userId,
+            image: image || (productData && (Array.isArray(productData.image) ? productData.image[0] : productData.image)) || "",
+            productTitle: productTitle || (productData && (productData.name || productData.title)) || "",
+            price: price ?? (productData && productData.price) ?? 0,
+            oldPrice: oldPrice ?? (productData && productData.oldPrice) ?? 0,
+            rating: rating ?? (productData && productData.rating) ?? 0,
+            brand: brand || (productData && productData.brand) || "",
+            discount: discount ?? (productData && productData.discount) ?? 0
+        };
+
+        const raw = await MyListModel.findOneAndUpdate(
+            { userId: userId, productId: productId },
+            { $setOnInsert: docToInsert },
+            { upsert: true, new: true, rawResult: true }
+        );
+
+        // raw.lastErrorObject.updatedExisting === true means it was already present
+        if (raw && raw.lastErrorObject && raw.lastErrorObject.updatedExisting) {
             return res.status(400).json({
                 message: "Product already in mylist",
                 error: true,
@@ -31,29 +53,24 @@ export const addToMyList = async (req, res) => {
             });
         }
 
-        const myList = new MyListModel({
-            productId: productId,
-            userId: userId,
-            image: image,
-            productTitle: productTitle,
-            price: price,
-            oldPrice: oldPrice,
-            rating: rating,
-            brand: brand,
-            discount: discount
-        });
-
-        const result = await myList.save();
-
+        // Otherwise, the document was inserted and the value is in raw.value
         res.status(200).json({
             message: "Product added to mylist successfully",
             error: false,
             success: true,
-            data: result
+            data: raw.value
         })
 
     } catch (error) {
         console.error("Error adding product to cart:", error);
+        // Handle duplicate key error (E11000) gracefully
+        if (error && error.code === 11000) {
+            return res.status(400).json({
+                message: "Product already in mylist",
+                error: true,
+                success: false
+            });
+        }
         res.status(500).json({
             message: "Error adding product to cart",
             error: true,

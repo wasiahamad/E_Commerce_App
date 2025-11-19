@@ -25,6 +25,13 @@ import Profile from './Pages/Profile'
 import ProtectedRoute from './ProtectedRoute'
 import axios from 'axios'
 import ProductDetails from './Pages/Products/ProductDetails'
+import Scanner from './Pages/Scanner'
+import UserProfile from './Pages/UserProfile'
+import AddRam from './Pages/Products/AddRam'
+import AddSize from './Pages/Products/AddSize'
+import AddWeight from './Pages/Products/AddWeight'
+import NotifyRequests from './Pages/Products/NotifyRequests'
+
 
 const alertBox = (status, msg) => {
   if (status === "success") {
@@ -49,41 +56,58 @@ function App() {
 
   // ✅ Categories fetch
   useEffect(() => {
-    axios.get("http://localhost:8000/api/v1/category")
+    // Use centralized api helper so the base URL and headers are consistent
+    getData('/api/v1/category')
       .then(res => {
-        console.log(res.data); // check karo kya aa raha
-        setCategories(res.data.data || []);
+        console.log('Categories fetch', res);
+        setCategories(res.data || res || []);
       })
-      .catch(err => console.error(err));
+      .catch(err => console.error('Categories fetch error', err));
   }, [refresh]);
 
+  // Run once on mount to check auth and fetch admin details if token exists.
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
-    if (token !== null && token !== undefined && token !== "") {
-      setIsLoggedIn(true);
-      getData("/api/v1/user/details")
-        .then((res) => {
-          alertBox("success", "User data fetched successfully");
-          setUserData(res?.data);
-          console.log("user data", res?.data);
-        })
-        .catch((err) => {
-          const message = err?.response?.data?.message || err?.message;
 
-          if (message === "Invalid token") {
-            alertBox("error", "Session expired. Please login again.");
-            localStorage.removeItem("accessToken");
-            localStorage.removeItem("refreshToken");
-            setIsLoggedIn(false);
-            window.location.href = "/login"; // force redirect
-          } else {
-            alertBox("error", "Something went wrong while fetching user.");
-          }
-        });
-    } else {
-      setIsLoggedIn(false);
+    if (!token) {
+      // ensure logged-out state if no token
+      if (isLoggedIn) setIsLoggedIn(false);
+      return;
     }
-  }, [isLoggedIn]);
+
+    // Only call fetch when we have a token. Avoid repeatedly toggling isLoggedIn
+    // which can cause effect re-runs when used as a dependency.
+    const fetchAdmin = async () => {
+      try {
+        // optimistically mark logged in
+        if (!isLoggedIn) setIsLoggedIn(true);
+        const res = await getData("/api/v1/admin/details");
+        alertBox("success", "Admin data fetched successfully");
+        setUserData(res?.data);
+        console.log("admin data", res?.data);
+      } catch (err) {
+        const message = err?.response?.data?.message || err?.message;
+
+        if (message === "Invalid token") {
+          alertBox("error", "Session expired. Please login again.");
+          localStorage.removeItem("accessToken");
+          localStorage.removeItem("refreshToken");
+          setIsLoggedIn(false);
+          window.location.href = "/login"; // force redirect
+        } else if (message === 'Admin not found' || message === 'Forbidden') {
+          alertBox('error', 'Admin access required. Please login as admin.');
+          localStorage.removeItem('accessToken');
+          setIsLoggedIn(false);
+          window.location.href = '/login';
+        } else {
+          alertBox("error", "Something went wrong while fetching admin data.");
+        }
+      }
+    }
+
+    fetchAdmin();
+    // Empty dependency array: run once on mount
+  }, []); 
 
 
   const router = createBrowserRouter([
@@ -177,6 +201,22 @@ function App() {
         </ProtectedRoute>
       )
     },
+    {
+      path: "/scan",
+      element: (
+        <ProtectedRoute>
+          <section className='main'>
+            <Header />
+            <div className="containerMain flex">
+              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+                <Sidebar />
+              </div>
+              <Scanner />
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
 
     {
       path: "/homeslider/list",
@@ -195,7 +235,7 @@ function App() {
             </div>
           </section>
 
-        </ProtectedRoute>
+        </ProtectedRoute >
       )
     },
 
@@ -254,6 +294,27 @@ function App() {
               </div>
               {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
               <Users />
+              {/* </div> */}
+            </div>
+          </section>
+
+        </ProtectedRoute>
+      )
+    },
+
+    {
+      path: "/user/:userId",
+      // excat: true,
+      element: (
+        <ProtectedRoute>
+          <section className='main'>
+            <Header />
+            <div className="containerMain flex">
+              <div className={`sideBarWrapper ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"} transition-all duration-300`}>
+                <Sidebar />
+              </div>
+              {/* <div className={`contentRight py-4 px-7 ${isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}> */}
+              <UserProfile />
               {/* </div> */}
             </div>
           </section>
@@ -389,9 +450,119 @@ function App() {
           </section>
         </ProtectedRoute>
       )
-    }
+    },
+    {
+      path: "/product/add-ram",
+      element: (
+        <ProtectedRoute>
+          <section className="main">
+            <Header />
+            <div className="containerMain flex">
+              {/* Sidebar Wrapper */}
+              <div
+                className={`sideBarWrapper transition-all duration-300 ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"
+                  }`}
+              >
+                <Sidebar />
+              </div>
 
+              {/* Content Area */}
+              <div
+                className={`contentRight py-6 px-8 bg-gray-50 min-h-screen transition-all duration-300 ${isSidebarOpen ? "w-[80%]" : "w-full"
+                  }`}
+              >
+                <AddRam />
+              </div>
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: "/product/add-size",
+      element: (
+        <ProtectedRoute>
+          <section className="main">
+            <Header />
+            <div className="containerMain flex">
+              {/* Sidebar Wrapper */}
+              <div
+                className={`sideBarWrapper transition-all duration-300 ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"
+                  }`}
+              >
+                <Sidebar />
+              </div>
+
+              {/* Content Area */}
+              <div
+                className={`contentRight py-6 px-8 bg-gray-50 min-h-screen transition-all duration-300 ${isSidebarOpen ? "w-[80%]" : "w-full"
+                  }`}
+              >
+                <AddSize />
+              </div>
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: "/product/add-weight",
+      element: (
+        <ProtectedRoute>
+          <section className="main">
+            <Header />
+            <div className="containerMain flex">
+              {/* Sidebar Wrapper */}
+              <div
+                className={`sideBarWrapper transition-all duration-300 ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"
+                  }`}
+              >
+                <Sidebar />
+              </div>
+
+              {/* Content Area */}
+              <div
+                className={`contentRight py-6 px-8 bg-gray-50 min-h-screen transition-all duration-300 ${isSidebarOpen ? "w-[80%]" : "w-full"
+                  }`}
+              >
+                <AddWeight />
+              </div>
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
+    {
+      path: "/product/notify-requests",
+      element: (
+        <ProtectedRoute>
+          <section className="main">
+            <Header />
+            <div className="containerMain flex">
+              {/* Sidebar Wrapper */}
+              <div
+                className={`sideBarWrapper transition-all duration-300 ${isSidebarOpen ? "w-[20%]" : "w-0 opacity-0"
+                  }`}
+              >
+                <Sidebar />
+              </div>
+
+              {/* Content Area */}
+              <div
+                className={`contentRight py-6 px-8 bg-gray-50 min-h-screen transition-all duration-300 ${isSidebarOpen ? "w-[80%]" : "w-full"
+                  }`}
+              >
+                <NotifyRequests />
+              </div>
+            </div>
+          </section>
+        </ProtectedRoute>
+      )
+    },
   ]);
+
+
+
 
   const value = {
     isSidebarOpen,
@@ -407,8 +578,7 @@ function App() {
     setCategories,
     refresh,
     setRefresh
-  }
-
+  };
 
   return (
     <>
@@ -418,7 +588,7 @@ function App() {
         <Toaster />
       </MyContext.Provider>
     </>
-  )
+  );
 }
 
 export default App;

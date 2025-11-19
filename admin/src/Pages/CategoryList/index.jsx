@@ -299,22 +299,17 @@ const CategoryList = () => {
                             </TableRow>
                         )}
                     </TableBody>
-
-                    <TableFooter>
-                        <TableRow>
-                            <TablePagination
-                                rowsPerPageOptions={[10, 25, 100]}
-                                count={categories.length}
-                                rowsPerPage={rowsPerPage}
-                                page={page}
-                                onPageChange={handleChangePage}
-                                onRowsPerPageChange={handleChangeRowsPerPage}
-                                colSpan={3} // ✅ column span add karo
-                            />
-                        </TableRow>
-                    </TableFooter>
                 </Table>
             </TableContainer>
+
+            <TablePagination
+                rowsPerPageOptions={[10, 25, 100]}
+                count={categories.length}
+                rowsPerPage={rowsPerPage}
+                page={page}
+                onPageChange={handleChangePage}
+                onRowsPerPageChange={handleChangeRowsPerPage}
+            />
         </div>
     );
 };

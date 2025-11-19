@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "start": "node index.js",
-    "dev": "nodemon index.js"
+    "dev": "nodemon index.js",
+    "reset-admin": "node scripts/reset-admin-password.mjs"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +26,9 @@
     "morgan": "^1.10.1",
     "multer": "^2.0.2",
     "nodemailer": "^7.0.5", 
-    "nodemon": "^3.1.10"
+    "nodemon": "^3.1.10",
+    "qrcode": "^1.5.1",
+    "uuid": "^9.0.0",
+    "node-fetch": "^3.3.2"
   }
 }

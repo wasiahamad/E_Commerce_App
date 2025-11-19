@@ -4,6 +4,8 @@ import Typography from '@mui/material/Typography';
 import Breadcrumbs from '@mui/material/Breadcrumbs';
 import Link from '@mui/material/Link';
 import ProductsItem from '../../components/ProductsItem';
+import { getData } from '../../utils/api';
+import { useLocation } from 'react-router-dom';
 import ProductsItemList from '../../components/ProductsItemListView';
 import { Button } from '@mui/material';
 import { IoGrid } from "react-icons/io5";
@@ -24,6 +26,125 @@ const ProductListing = () => {
         setAnchorEl(null);
     };
 
+    const [products, setProducts] = React.useState([]);
+    const [pageNum, setPageNum] = React.useState(1);
+    const [perPage, setPerPage] = React.useState(12);
+    const [totalPageCount, setTotalPageCount] = React.useState(0);
+    const [sortOption, setSortOption] = React.useState('default');
+    const [categoryName, setCategoryName] = React.useState('Products');
+
+    const location = useLocation();
+
+    React.useEffect(() => {
+        // read query params for category filter
+        const q = new URLSearchParams(location.search);
+    const categoryId = q.get('categoryId');
+    const subCatId = q.get('subCatId');
+    const thirdSubCatId = q.get('thirdSubCatId');
+
+        // scroll to top when filters change
+        try {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        } catch (e) {}
+
+        const fetchProducts = async () => {
+            try {
+                // fetch category name if available for breadcrumb
+                const searchQuery = q.get('query');
+                if (searchQuery) {
+                    const res = await getData(`/api/v1/product/public-search?query=${encodeURIComponent(searchQuery)}&page=${pageNum}&perPage=${perPage}`);
+                    if (res && res.data) {
+                        setProducts(res.data);
+                        setTotalPageCount(res.totalPage || res.count || 1);
+                    }
+                    return;
+                }
+
+                // if a third-level category is present, prefer it
+                if (thirdSubCatId) {
+                    try {
+                        const thirdRes = await getData(`/api/v1/category/${thirdSubCatId}`);
+                        if (thirdRes && thirdRes.data) setCategoryName(thirdRes.data.name || 'Products');
+                    } catch (e) {
+                        setCategoryName('Products');
+                    }
+                    const res = await getData(`/api/v1/product/thirdSubCategoryById/${thirdSubCatId}?page=${pageNum}&perPage=${perPage}`);
+                    if (res && res.data) {
+                        setProducts(res.data);
+                        setTotalPageCount(res.totalPage || res.count || 0);
+                    }
+                    return;
+                }
+
+                if (categoryId) {
+                    try {
+                        const catRes = await getData(`/api/v1/category/${categoryId}`);
+                        if (catRes && catRes.data) setCategoryName(catRes.data.name || 'Products');
+                    } catch (e) {
+                        setCategoryName('Products');
+                    }
+                } else if (subCatId) {
+                    // attempt to fetch subcategory name too
+                    try {
+                        const subRes = await getData(`/api/v1/category/${subCatId}`);
+                        if (subRes && subRes.data) setCategoryName(subRes.data.name || 'Products');
+                    } catch (e) {
+                        setCategoryName('Products');
+                    }
+                } else {
+                    setCategoryName('Products');
+                }
+                if (subCatId) {
+                    const res = await getData(`/api/v1/product/subCategoryById/${subCatId}?page=${pageNum}&perPage=${perPage}`);
+                    if (res && res.data) {
+                        setProducts(res.data);
+                        setTotalPageCount(res.totalPage || 0);
+                    }
+                    return;
+                }
+                if (categoryId) {
+                    const res = await getData(`/api/v1/product/category/${categoryId}?page=${pageNum}&perPage=${perPage}`);
+                    if (res && res.data) {
+                        setProducts(res.data);
+                        setTotalPageCount(res.totalPage || 0);
+                    }
+                    return;
+                }
+
+                // default: fetch all products
+                const res = await getData(`/api/v1/product?page=${pageNum}&perPage=${perPage}`);
+                if (res && res.data) {
+                    setProducts(res.data);
+                    setTotalPageCount(res.totalPage || 0);
+                }
+            } catch (err) {
+                console.error(err);
+            }
+        };
+
+        fetchProducts();
+    // refetch when location.search, pageNum or perPage change
+    }, [location.search, pageNum, perPage]);
+
+    // reset page number to 1 when filters/query change
+    React.useEffect(() => {
+        setPageNum(1);
+    }, [location.search]);
+
+    // apply sorting whenever products or sortOption change
+    React.useEffect(() => {
+        if (!products || !Array.isArray(products)) return;
+        let sorted = [...products];
+        if (sortOption === 'price-asc') {
+            sorted.sort((a,b) => (a.price || 0) - (b.price || 0));
+        } else if (sortOption === 'price-desc') {
+            sorted.sort((a,b) => (b.price || 0) - (a.price || 0));
+        } else if (sortOption === 'rating-desc') {
+            sorted.sort((a,b) => (b.rating || b.avgRating || 0) - (a.rating || a.avgRating || 0));
+        }
+        setProducts(sorted);
+    }, [sortOption]);
+
     return (
         <section className='py-5'>
             <div className="container">
@@ -37,7 +158,7 @@ const ProductListing = () => {
                         href="/"
                         className='link transition'
                     >
-                        Fashion
+                        {categoryName}
                     </Link>
 
                 </Breadcrumbs>
@@ -66,75 +187,52 @@ const ProductListing = () => {
                                     <IoGrid className='text-[rgba(0,0,0,0.6)] text-[18px] ' />
                                 </Button>
 
-                                <span className='text-[rgba(0,0,0,0.6)] text-[14px] ml-4'>Showing 1-9 of 12 results</span>
+                                <span className='text-[rgba(0,0,0,0.6)] text-[14px] ml-4'>Showing {products.length} results</span>
                             </div>
 
                             <div className="col1 flex items-center">
                                 <span className='font-[500] text-[14px] mr-4'>Sort By  </span>
-                                <Button
-                                    id="basic-button"
-                                    aria-controls={open ? 'basic-menu' : undefined}
-                                    aria-haspopup="true"
-                                    aria-expanded={open ? 'true' : undefined}
-                                    onClick={handleClick}
-                                    className='!text-[12px] !text-[#000] !border-2 !border-[#000]  !bg-white !capitalize'
+                                <select
+                                    value={sortOption}
+                                    onChange={(e) => setSortOption(e.target.value)}
+                                    className='!text-[12px] !text-[#000] !border-2 !border-[#000]  !bg-white !capitalize p-2 rounded'
                                 >
-                                    <span className='text-[rgba(0,0,0,0.6)] text-[14px]'>Default Sorting</span>
-                                    <span className='text-[rgba(0,0,0,0.6)] text-[14px]'>&#9662;</span>
-                                </Button>
-                                <Menu
-                                    id="basic-menu"
-                                    anchorEl={anchorEl}
-                                    open={open}
-                                    onClose={handleClose}
-                                    MenuListProps={{
-                                        'aria-labelledby': 'basic-button',
-                                    }}
-                                >
-                                    <MenuItem onClick={handleClose} className='!text-[12px] !text-[#000] !border-2 !border-[#000] !capitalize'>Name, A to Z</MenuItem>
-                                    <MenuItem onClick={handleClose} className='!text-[12px] !text-[#000] !border-2 !border-[#000] !capitalize'>Name, Z to A</MenuItem>
-                                    <MenuItem onClick={handleClose} className='!text-[12px] !text-[#000] !border-2 !border-[#000] !capitalize'>Price, low to high</MenuItem>
-                                    <MenuItem onClick={handleClose} className='!text-[12px] !text-[#000] !border-2 !border-[#000] !capitalize'>Price, high to low</MenuItem>
-                                </Menu>
+                                    <option value='default'>Default Sorting</option>
+                                    <option value='price-asc'>Price: low to high</option>
+                                    <option value='price-desc'>Price: high to low</option>
+                                    <option value='rating-desc'>Rating: high to low</option>
+                                </select>
                             </div>
                         </div>
-
 
                         <div className={`grid ${itemView === "grid" ? "grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4" : "grid-cols-1 gap-4"} `}>
                             {itemView === "grid" ? (
                                 <>
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
-                                    <ProductsItem />
+                                    {(products || []).map((p) => (
+                                        <ProductsItem key={p._id} {...p} />
+                                    ))}
                                 </>
                             ) : (
                                 <>
-                                <ProductsItemList   />
-                                <ProductsItemList   />  
-                                <ProductsItemList   />  
-                                <ProductsItemList   />  
-                                <ProductsItemList   />  
-                                <ProductsItemList   />
+                                    {(products || []).map((p) => (
+                                        <ProductsItemList key={p._id} product={p} onAddToCart={(id) => {
+                                            // forward to existing ProductsItem add-to-cart flow via window event or central handler
+                                            // simplest: call the API directly here to add
+                                            import('../../utils/api').then(mod => {
+                                                mod.postData('/api/v1/cart/add', { productId: id }).then(res => {
+                                                    // optional: toast available via global context in callers
+                                                    console.log('added', res)
+                                                }).catch(err => console.error(err))
+                                            })
+                                        }} />
+                                    ))}
                                 </>
                             )}
                            
                         </div>
                         <div className="pagination flex items-center justify-center mt-10">
                             {/* <Pagination count={10} variant="outlined" shape="rounded" /> */}
-                            <Pagination count={10} showFirstButton showLastButton />
+                            <Pagination count={Math.max(1, totalPageCount || 1)} page={pageNum} onChange={(e, v) => setPageNum(v)} showFirstButton showLastButton />
                         </div>
 
                     </div>

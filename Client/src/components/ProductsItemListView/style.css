@@ -1,3 +1,17 @@
-.produtcsItem .title {
-    line-height: 20px;
+.product-list-item .product-list-title {
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
 }
+
+.product-list-item .product-list-desc {
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.product-list-item .price-row .text-primary { color: #ff5252; }

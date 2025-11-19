@@ -13,7 +13,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { FaRegUser } from "react-icons/fa";
 import { PiSignOutBold } from "react-icons/pi";
 import { MyContext } from "../../App";
-import { postData } from "../../utils/api";
+import { postData, getData, putData } from "../../utils/api";
 
 
 const StyledBadge = styled(Badge)(({ theme }) => ({
@@ -29,6 +29,9 @@ const Header = () => {
 
   const [anchorMyAcc, setAnchorMyAcc] = useState(null);
   const [anchorEl, setAnchorEl] = useState(null);
+  const [anchorNotif, setAnchorNotif] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [unreadCount, setUnreadCount] = useState(0);
   const openMyAcc = Boolean(anchorMyAcc);
   const handleClickMyAcc = (event) => {
     setAnchorMyAcc(event.currentTarget);
@@ -37,8 +40,95 @@ const Header = () => {
     setAnchorMyAcc(null);
   };
 
+  const openNotif = Boolean(anchorNotif);
+  const handleOpenNotif = (event) => {
+    setAnchorNotif(event.currentTarget);
+    // fetch latest notifications when opening
+    fetchNotifications();
+  };
+  const handleCloseNotif = () => {
+    setAnchorNotif(null);
+  };
+
   const context = useContext(MyContext);
   const navigate =  useNavigate();
+
+  // fetch unread count periodically
+  useEffect(() => {
+    let mounted = true;
+    let intervalId = null;
+
+    const fetchCount = async () => {
+      try {
+        const res = await getData('/api/v1/notify/count');
+        if (!mounted) return;
+        if (res && res.data) setUnreadCount(res.data.count || 0);
+      } catch (err) {
+        // ignore network errors
+      }
+    };
+
+    // start polling only when page is visible to avoid extra background requests
+    const startPolling = () => {
+      // initial fetch
+      fetchCount();
+      // poll every 60s (reduce frequency to avoid frequent server hits)
+      intervalId = setInterval(fetchCount, 60000);
+    };
+
+    const stopPolling = () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+        intervalId = null;
+      }
+    };
+
+    // Visibility change handler
+    const handleVisibility = () => {
+      if (document.visibilityState === 'visible') startPolling();
+      else stopPolling();
+    };
+
+    // start or stop depending on current visibility
+    if (document.visibilityState === 'visible') startPolling();
+
+    document.addEventListener('visibilitychange', handleVisibility);
+
+    return () => {
+      mounted = false;
+      stopPolling();
+      document.removeEventListener('visibilitychange', handleVisibility);
+    };
+  }, []);
+
+  // fetch notifications list (shows latest 10)
+  const fetchNotifications = async () => {
+    try {
+      const res = await getData('/api/v1/notify?unread=true');
+      if (res && res.data) {
+        setNotifications(res.data.slice(0, 10));
+        // update unread count as well
+        const cntRes = await getData('/api/v1/notify/count');
+        if (cntRes && cntRes.data) setUnreadCount(cntRes.data.count || 0);
+      }
+    } catch (err) {
+      console.error('Error fetching notifications', err);
+    }
+  };
+
+  const handleNotificationClick = async (n) => {
+    try {
+      // mark as read in backend
+      await putData(`/api/v1/notify/${n._id}/read`, {});
+      // optimistic UI update
+      setNotifications((prev) => prev.map(item => item._id === n._id ? { ...item, read: true } : item));
+      setUnreadCount((c) => Math.max(0, c - 1));
+      // navigate to notify requests page to view details
+      navigate('/product/notify-requests');
+    } catch (err) {
+      console.error('Error marking notification read', err);
+    }
+  };
 
   // const logout = () => {
   //   setAnchorEl(null);
@@ -100,11 +190,53 @@ const Header = () => {
       {/* part2 */}
 
       <div className="part2 w-[40%] flex items-center justify-end gap-5">
-        <IconButton aria-label="cart">
-          <StyledBadge badgeContent={3} color="secondary">
-            <FaRegBell className="text-[22px] text-[rgba(0,0,0,0.5)]" />
-          </StyledBadge>
-        </IconButton>
+        <div>
+          <IconButton aria-label="notifications" onClick={handleOpenNotif}>
+            <StyledBadge badgeContent={unreadCount} color="secondary">
+              <FaRegBell className="text-[22px] text-[rgba(0,0,0,0.5)]" />
+            </StyledBadge>
+          </IconButton>
+
+          <Menu
+            anchorEl={anchorNotif}
+            id="notif-menu"
+            open={openNotif}
+            onClose={handleCloseNotif}
+            onClick={handleCloseNotif}
+            slotProps={{
+              paper: {
+                elevation: 0,
+                sx: {
+                  overflow: 'visible',
+                  filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+                  mt: 1.5,
+                },
+              },
+            }}
+            transformOrigin={{ horizontal: 'right', vertical: 'top' }}
+            anchorOrigin={{ horizontal: 'right', vertical: 'bottom' }}
+          >
+            <div className="px-4 py-2 w-[360px]">
+              <h3 className="text-sm font-semibold">Notifications</h3>
+              <div className="mt-2 max-h-[360px] overflow-auto">
+                {notifications && notifications.length > 0 ? (
+                  notifications.map((n) => (
+                    <MenuItem key={n._id} onClick={() => handleNotificationClick(n)} className="flex flex-col items-start">
+                      <div className="text-[13px] font-medium">{n.productName || 'Product'}</div>
+                      <div className="text-[12px] text-gray-600">Requested by {n.userName || n.userEmail}</div>
+                      <div className="text-[11px] text-gray-400 mt-1">{new Date(n.createdAt).toLocaleString()}</div>
+                    </MenuItem>
+                  ))
+                ) : (
+                  <div className="text-[13px] text-gray-500 p-3">No notifications</div>
+                )}
+              </div>
+              <div className="mt-2 text-right">
+                <Link to="/product/notify-requests" className="text-sm text-blue-600">View all</Link>
+              </div>
+            </div>
+          </Menu>
+        </div>
         {context.isLoggedIn === true ?
           <div className="relative">
             <div className="rounded-full w-[35px] h-[35px] overflow-hidden cursor-pointer " onClick={handleClickMyAcc}>

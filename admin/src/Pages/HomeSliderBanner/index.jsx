@@ -1,4 +1,4 @@
-import React, { useContext } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import {
     Button,
     Checkbox,
@@ -22,6 +22,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
 import { MyContext } from "../../App";
+import { getData, deleteData } from '../../utils/api';
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 const columns = [
@@ -52,6 +53,22 @@ const HomeSliderBanner = (props) => {
     };
 
     const context = useContext(MyContext);
+    const [banners, setBanners] = useState([]);
+
+    useEffect(() => {
+        let mounted = true;
+        const load = async () => {
+            try {
+                const res = await getData('/api/v1/homeSlider/admin/all');
+                if (!mounted) return;
+                if (res && res.success) setBanners(res.data || []);
+            } catch (err) {
+                console.error('Error loading banners', err);
+            }
+        }
+        load();
+        return () => { mounted = false };
+    }, [context.refresh]);
 
     return (
         <div className={`contentRight py-4 px-5 ${context.isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}>
@@ -88,37 +105,52 @@ const HomeSliderBanner = (props) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-4 w-[300px] ">
-                                            <div className="img w-[300px] h-[90px] rounded-md overflow-hidden group">
-                                                <Link to="/product/455" data-discover="true">
-                                                    <img
-                                                        src="https://serviceapi.spicezgold.com/download/1745503990603_NewProject(13).jpg"
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </TableCell>
+                                {banners && banners.length > 0 ? (
+                                    banners.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((b) => (
+                                        <TableRow key={b._id} hover role="checkbox" tabIndex={-1}>
+                                            <TableCell style={{ minWidth: columns.minWidth }}>
+                                                <div className="flex items-center gap-4 w-[300px] ">
+                                                    <div className="img w-[300px] h-[90px] rounded-md overflow-hidden group">
+                                                        {b.link ? (
+                                                            <Link to={b.link} data-discover="true">
+                                                                <img src={b.img} alt={b.title || ''} className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105" />
+                                                            </Link>
+                                                        ) : (
+                                                            <img src={b.img} alt={b.title || ''} className="w-full h-full object-cover" />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell style={{ minWidth: columns.minWidth }}>
+                                                <div className="flex items-center gap-1">
+                                                    <Tooltip title="Edit" placement="top" >
+                                                        <Button  onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: 'Edit Home Slider', data: b })} className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
+                                                            <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                        </Button>
+                                                    </Tooltip>
 
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-1">
-                                            <Tooltip title="Edit" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-
-                                            <Tooltip title="delete" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
+                                                    <Tooltip title="delete" placement="top">
+                                                        <Button onClick={async () => {
+                                                            if (!window.confirm('Delete this banner?')) return;
+                                                            try {
+                                                                await deleteData(`/api/v1/homeSlider/delete/${b._id}`);
+                                                                context.setRefresh(!context.refresh);
+                                                            } catch (err) {
+                                                                console.error('Delete banner error', err);
+                                                            }
+                                                        }} className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
+                                                            <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                        </Button>
+                                                    </Tooltip>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                ) : (
+                                    <TableRow>
+                                        <TableCell colSpan={2} className="text-center py-8">No banners found</TableCell>
+                                    </TableRow>
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>

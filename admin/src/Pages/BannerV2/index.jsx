@@ -22,6 +22,7 @@ import Select from "@mui/material/Select";
 import MenuItem from "@mui/material/MenuItem";
 
 import { MyContext } from "../../App";
+import { getData, deleteData } from '../../utils/api';
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 const columns = [
@@ -53,12 +54,40 @@ const BannerV1 = (props) => {
 
     const context = useContext(MyContext);
 
+    const [banners, setBanners] = React.useState([]);
+    const [loading, setLoading] = React.useState(false);
+
+    const load = async () => {
+        setLoading(true);
+        try {
+            const res = await getData('/api/v1/banner/admin/all');
+            if (res && res.data) {
+                // only show banners created for Banner List-2 (listType === 'banner2')
+                const list2 = res.data.filter(b => (b.listType || '').toString() === 'banner2');
+                setBanners(list2);
+            }
+        } catch (err) {
+            console.error('Failed to load banners', err);
+        }
+        setLoading(false);
+    };
+
+    React.useEffect(() => { load(); }, []);
+
+    const handleDelete = async (id) => {
+        if (!confirm('Delete this banner?')) return;
+        try {
+            await deleteData(`/api/v1/banner/delete/${id}`);
+            load();
+        } catch (err) { console.error(err); }
+    };
+
     return (
         <div className={`contentRight py-4 px-5 ${context.isSidebarOpen ? "w-[80%]" : "w-[100%]"} transition-all duration-300`}>
             <div className="w-full flex flex-col gap-4 ">
                 <div className="flex items-center justify-between">
                     <h2 className="text-[20px] font-[600] text-[rgba(0,0,0,0.8)] pl-2 pt-5">
-                        Add Home Banner List-2
+                        Home Banner List-2
                     </h2>
                     <div className="flex items-center gap-2">
                         <Button
@@ -88,133 +117,40 @@ const BannerV1 = (props) => {
                                 </TableRow>
                             </TableHead>
                             <TableBody>
-                                <TableRow>
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-4 w-[300px] ">
-                                            <div className="img w-[220px] h-[125px] rounded-md overflow-hidden group">
-                                                <Link to="/product/455" data-discover="true">
-                                                    <img
-                                                        src="https://serviceapi.spicezgold.com/download/1741669012402_banner1.webp"
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </TableCell>
+                                {loading ? (
+                                    <TableRow>
+                                        <TableCell colSpan={2}><LinearProgress /></TableCell>
+                                    </TableRow>
+                                ) : (
+                                    banners.map(b => (
+                                        <TableRow key={b._id}>
+                                            <TableCell style={{ minWidth: columns.minWidth }}>
+                                                <div className="flex items-center gap-4 w-[300px] ">
+                                                    <div className="img w-[220px] h-[125px] rounded-md overflow-hidden group">
+                                                        <Link to="#">
+                                                            <img src={b.img} alt="" className="w-full h-full object-cover" />
+                                                        </Link>
+                                                    </div>
+                                                </div>
+                                            </TableCell>
+                                            <TableCell style={{ minWidth: columns.minWidth }}>
+                                                <div className="flex items-center gap-1">
+                                                    <Tooltip title="Edit" placement="top">
+                                                        <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] " onClick={() => context.setIsOpenAddProductForm({ isOpen: true, model: 'Edit Banner', data: b })}>
+                                                            <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                        </Button>
+                                                    </Tooltip>
 
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-1">
-                                            <Tooltip title="Edit" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-
-                                            <Tooltip title="delete" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-4 w-[300px] ">
-                                            <div className="img w-[220px] h-[125px] rounded-md overflow-hidden group">
-                                                <Link to="/product/455" data-discover="true">
-                                                    <img
-                                                        src="https://serviceapi.spicezgold.com/download/1741669037986_banner2.webp"
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-1">
-                                            <Tooltip title="Edit" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-
-                                            <Tooltip title="delete" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-4 w-[300px] ">
-                                            <div className="img w-[220px] h-[125px] rounded-md overflow-hidden group">
-                                                <Link to="/product/455" data-discover="true">
-                                                    <img
-                                                        src="https://serviceapi.spicezgold.com/download/1741669057847_banner5.webp"
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-1">
-                                            <Tooltip title="Edit" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-
-                                            <Tooltip title="delete" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-
-                                <TableRow>
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-4 w-[300px] ">
-                                            <div className="img w-[220px] h-[125px] rounded-md overflow-hidden group">
-                                                <Link to="/product/455" data-discover="true">
-                                                    <img
-                                                        src="https://serviceapi.spicezgold.com/download/1742453755529_1741669087880_banner6.webp"
-                                                        alt=""
-                                                        className="w-full h-full object-cover transition-all duration-150 group-hover:scale-105"
-                                                    />
-                                                </Link>
-                                            </div>
-                                        </div>
-                                    </TableCell>
-
-                                    <TableCell style={{ minWidth: columns.minWidth }}>
-                                        <div className="flex items-center gap-1">
-                                            <Tooltip title="Edit" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <AiOutlineEdit className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-
-                                            <Tooltip title="delete" placement="top">
-                                                <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] ">
-                                                    <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
-                                                </Button>
-                                            </Tooltip>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
+                                                    <Tooltip title="delete" placement="top">
+                                                        <Button className="!w-[35px] !h-[35px] bg-[#f1f1f1] !border !border-[rgba(0,0,0,0.1)] !rounded-full hover:!bg-[#f1f1f1] !min-w-[35px] " onClick={() => handleDelete(b._id)}>
+                                                            <MdDeleteOutline className="text-[rgba(0,0,0,0.8)] text-[20px]" />
+                                                        </Button>
+                                                    </Tooltip>
+                                                </div>
+                                            </TableCell>
+                                        </TableRow>
+                                    ))
+                                )}
                             </TableBody>
                         </Table>
                     </TableContainer>
@@ -222,7 +158,7 @@ const BannerV1 = (props) => {
                         rowsPerPageOptions={[10, 25, 100]}
                         component="div"
                         // count={rows.length}
-                        count={100}
+                        count={banners.length || 0}
                         rowsPerPage={rowsPerPage}
                         page={page}
                         onPageChange={handleChangePage}

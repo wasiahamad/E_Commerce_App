@@ -1,16 +1,30 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import Button from '@mui/material/Button';
 import { RiMenu2Fill } from "react-icons/ri";
 import { TfiAngleDown } from "react-icons/tfi";
 import { IoRocket } from "react-icons/io5";
 import CategoryPanel from './CategoryPanel';
+import { getData } from '../../../utils/api';
 import './style.css';
 
 
 const Navigation = () => {
 
     const [isOpenCatPanel, setIsOpenCatPanel] = useState(false);
+    const [categories, setCategories] = useState([]);
+
+    useEffect(() => {
+        const load = async () => {
+            try {
+                const res = await getData('/api/v1/category');
+                if (res && res.data) setCategories(res.data || []);
+            } catch (err) {
+                console.error('Failed to load categories for navigation', err);
+            }
+        };
+        load();
+    }, []);
 
     const openCategoryPanel = () => {
         setIsOpenCatPanel(true);
@@ -33,110 +47,43 @@ const Navigation = () => {
                                 </Link>
                             </li>
 
-                            <li className=' list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/fashion">
-                                    <Button className='link transition !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Fashion</Button>
-                                </Link>
+                            {/* dynamically render categories */}
+                            {categories.map((cat) => (
+                                <li key={cat._id} className=' list-none relative'>
+                                    <Link className='link transition ease-in duration-200 ' to={`/productListing?categoryId=${cat._id}`}>
+                                            <Button className='link transition !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>{cat.name}</Button>
+                                        </Link>
 
-                                <div className="submenu absolute top-[95%] left-[28%] min-w-[150px] bg-white shadow-md opacity-0 transition-all duration-300 ease-in-out ">
-                                    <ul>
-                                        <li className='list-none w-full relative inner-submenu'>
-                                            <Link className='w-full' to="/fashion/men">
-                                                <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Men</Button>
-                                            </Link>
-
-                                            <div className="submenu absolute top-[0%] left-[100%] min-w-[150px] bg-white shadow-md opacity-0 transition-all duration-300 ease-in-out ">
-                                                <ul>
-                                                    <li className='list-none w-full'>
-                                                        <Link className='w-full' to="/fashion/men">
-                                                            <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>T-shirts</Button>
+                                    {Array.isArray(cat.children) && cat.children.length > 0 && (
+                                        <div className="submenu absolute top-[95%] left-0 min-w-[200px] bg-white shadow-md opacity-0 transition-all duration-300 ease-in-out ">
+                                            <ul>
+                                                {cat.children.map((sub) => (
+                                                    <li key={sub._id} className='list-none w-full relative inner-submenu'>
+                                                        <Link className='w-full' to={`/productListing?subCatId=${sub._id}`}>
+                                                            <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>{sub.name}</Button>
                                                         </Link>
+
+                                                        {Array.isArray(sub.children) && sub.children.length > 0 && (
+                                                            <div className="submenu absolute top-[0%] left-[100%] min-w-[180px] bg-white shadow-md opacity-0 transition-all duration-300 ease-in-out ">
+                                                                <ul>
+                                                                    {sub.children.map((third) => (
+                                                                        <li key={third._id} className='list-none w-full'>
+                                                                            {/* third-level categories use thirdSubCatId */}
+                                                                            <Link className='w-full' to={`/productListing?thirdSubCatId=${third._id}`}>
+                                                                                <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>{third.name}</Button>
+                                                                            </Link>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                        )}
                                                     </li>
-
-                                                    <li className=' list-none w-full'>
-                                                        <Link className='w-full' to="/fashion/women">
-                                                            <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Casual Shirts</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className='list-none w-full'>
-                                                        <Link className=' w-full' to="/fashion/kids">
-                                                            <Button className='!text-left !justify-start w-full transition !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Blazers and Coats</Button>
-                                                        </Link>
-                                                    </li>
-
-                                                    <li className='list-none w-full'>
-                                                        <Link className=' w-full' to="/fashion/kids">
-                                                            <Button className='!text-left !justify-start w-full !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Jeans</Button>
-                                                        </Link>
-                                                    </li>
-                                                </ul>
-                                            </div>
-
-                                        </li>
-
-                                        <li className='list-none w-full'>
-                                            <Link className='w-full' to="/fashion/women">
-                                                <Button className='w-full !text-left !justify-start !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Women</Button>
-                                            </Link>
-                                        </li>
-
-                                        <li className='list-none w-full'>
-                                            <Link className='w-full' to="/fashion/kids">
-                                                <Button className='!text-left !justify-start w-full  !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Kids</Button>
-                                            </Link>
-                                        </li>
-
-                                        <li className=' list-none w-full '>
-                                            <Link className=' w-full ' to="/fashion/kids">
-                                                <Button className='!text-left !justify-start w-full !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Girls</Button>
-                                            </Link>
-                                        </li>
-                                    </ul>
-                                </div>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/electronics">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Electronics</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/bags">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Bags</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/footwear">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Footwear</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/beauty">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Beauty</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/grocery">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Grocery</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/wellness">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Wellness</Button>
-                                </Link>
-                            </li>
-
-                            <li className='text-[14px] font-[500] list-none'>
-                                <Link className='link transition ease-in duration-200 ' to="/jewellery">
-                                    <Button className='link transition !font-[500] !text-[rgba(0,0,0,0.8)] hover:!text-[#ff5252]'>Jewellery</Button>
-                                </Link>
-                            </li>
+                                                ))}
+                                            </ul>
+                                        </div>
+                                    )}
+                                </li>
+                            ))}
                         </ul>
                     </div>
 

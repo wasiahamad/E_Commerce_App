@@ -95,6 +95,39 @@ export const editData = async (url, updateData) => {
     }
 }
 
+// Generic PUT with JSON body
+export const putData = async (url, body) => {
+    try {
+        const { data } = await axios.put(apiUrl + url, body, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error("putData error:", error);
+        throw error;
+    }
+}
+
+// get orders (optionally filter by userId)
+export const getOrders = async (page = 1, perPage = 10, userId = null) => {
+    try {
+        const url = userId ? `${apiUrl}/api/v1/order?page=${page}&perPage=${perPage}&userId=${userId}` : `${apiUrl}/api/v1/order?page=${page}&perPage=${perPage}`;
+        const res = await axios.get(url, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        return { error: true, data: [] };
+    }
+}
+
 export const editUserData = async (url, updateData) => {
     try {
         const params = {
@@ -133,6 +166,23 @@ export const deleteData = async (url) => {
         return data;
     } catch (error) {
         console.error(error);
+        throw error;
+    }
+}
+
+// axios.delete with request body (some servers expect body with DELETE)
+export const deleteDataWithBody = async (url, body) => {
+    try {
+        const { data } = await axios.delete(apiUrl + url, {
+            data: body,
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error("deleteDataWithBody error:", error);
         throw error;
     }
 }

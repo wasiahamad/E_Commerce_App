@@ -15,6 +15,7 @@ import { FaFacebook } from "react-icons/fa";
 import { FaTwitter } from "react-icons/fa";
 import { FaYoutube } from "react-icons/fa";
 import CardPanel from '../CardPanel';
+import WishlistPanel from '../WishlistPanel';
 import { IoMdClose } from 'react-icons/io';
 import Drawer from "@mui/material/Drawer";
 import { MyContext } from '../../App';
@@ -228,6 +229,23 @@ const Footer = () => {
                     />
                 </div>
                 <CardPanel />
+            </Drawer>
+
+            {/* Wishlist Panel Drawer */}
+            <Drawer
+                open={context.openCardPanel2}
+                onClose={() => context.setOpenCardPanel2(false)}
+                anchor={"right"}
+                className="cardPanel"
+            >
+                <div className=" w-[400px] flex items-center justify-between py-3 px-4 gap-4 border-b border-[rgba(0,0,0,0.1)]">
+                    <h4>Wishlist</h4>
+                    <IoMdClose
+                        className="text-[20px] cursor-pointer"
+                        onClick={() => context.setOpenCardPanel2(false)}
+                    />
+                </div>
+                <WishlistPanel />
             </Drawer>
         </>
     )

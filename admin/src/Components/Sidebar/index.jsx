@@ -187,6 +187,14 @@ const Sidebar = ({ isOpen }) => {
                 </Link>
               </li>
               <li className="w-full">
+                <Link to="/scan">
+                  <Button className="!w-full  flex gap-3 !capitalize !justify-start !text-[rgba(0,0,0,0.6)] !text-[13px] !font-[600] !pl-11">
+                    <span className="w-[5px] h-[5px] bg-[rgba(0,0,0,0.4)] rounded-full block"></span> {"  "}
+                    Scan Product
+                  </Button>
+                </Link>
+              </li>
+              <li className="w-full">
                 <Link to="/sub-category-list">
                   <Button className="!w-full  flex gap-3 !capitalize !justify-start !text-[rgba(0,0,0,0.6)] !text-[13px] !font-[600] !pl-11">
                     <span className="w-[5px] h-[5px] bg-[rgba(0,0,0,0.4)] rounded-full block"></span> {"  "}

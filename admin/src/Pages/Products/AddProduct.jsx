@@ -2,12 +2,17 @@ import { Button, MenuItem, Select } from '@mui/material'
 import React, { useContext, useEffect, useState } from 'react'
 import Rating from '@mui/material/Rating';
 import UploadBox from '../../Components/UploadBox';
+import Scanner from '../../Components/Scanner';
+import CircularProgress from '@mui/material/CircularProgress';
+import QRCode from 'qrcode';
+import { v4 as uuidv4 } from 'uuid';
 import { LazyLoadImage } from 'react-lazy-load-image-component';
 import 'react-lazy-load-image-component/src/effects/blur.css';
 import { IoMdClose } from "react-icons/io";
 import { MdCloudUpload } from "react-icons/md";
 import { MyContext } from '../../App';
-import { createCategory } from '../../utils/api';
+import { createCategory, editCategoryData, getData } from '../../utils/api';
+import { getData as getApiData } from '../../utils/api';
 
 const AddProduct = ({ product }) => {
     const [productCat, setProductCat] = useState('');
@@ -17,8 +22,10 @@ const AddProduct = ({ product }) => {
     const [productSize, setProductSize] = useState([]);
     const [productRams, setProductRams] = useState([]);
     const [productWeight, setProductWeight] = useState([]);
+    const [availableRams, setAvailableRams] = useState([])
+    const [availableSizes, setAvailableSizes] = useState([])
+    const [availableWeights, setAvailableWeights] = useState([])
     const [resetUploadBox, setResetUploadBox] = useState(false);
-    const [previewImages, setPreviewImages] = useState([]);
 
     const context = useContext(MyContext)
 
@@ -41,8 +48,58 @@ const AddProduct = ({ product }) => {
         productRam: [],
         size: [],
         productWeight: [],
-        image: []
+        image: [],
+        code: '',
+        codeType: 'barcode',
+        codeImage: ''
     });
+
+    const [scannerOpen, setScannerOpen] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    const handleScanDetected = async (code) => {
+        try {
+            if (!code) return setScannerOpen(false);
+            // call backend lookup
+            const res = await getData(`/api/v1/product/lookup?barcode=${encodeURIComponent(code)}`);
+            if (res && res.success && res.data) {
+                const payload = res.data;
+
+                // If product was found locally, alert duplicate and populate fields for review
+                if (res.source === 'local') {
+                    context.alertBox && context.alertBox('error', 'Duplicate Product: product already exists in database');
+                    const existing = payload; // payload is the product document
+                    setFormFields(prev => ({
+                        ...prev,
+                        name: existing.name || prev.name,
+                        description: existing.description || prev.description,
+                        brand: existing.brand || prev.brand,
+                        image: (existing.image && existing.image.length) ? existing.image : prev.image,
+                        code: code
+                    }));
+                } else {
+                    // External suggestion
+                    const suggested = payload.source === 'local' ? payload.data : payload;
+                    setFormFields(prev => ({
+                        ...prev,
+                        name: suggested.name || prev.name,
+                        description: suggested.description || prev.description,
+                        brand: suggested.brand || prev.brand,
+                        image: (suggested.images && suggested.images.length) ? suggested.images : prev.image,
+                        code: code
+                    }));
+                }
+            } else {
+                // not found — still set code so admin can create manually
+                setFormFields(prev => ({ ...prev, code }));
+            }
+        } catch (err) {
+            console.error('Lookup error', err);
+            setFormFields(prev => ({ ...prev, code }));
+        } finally {
+            setScannerOpen(false);
+        }
+    };
 
     // Product Category
     const handleChangeProductCat = (event) => {
@@ -152,34 +209,65 @@ const AddProduct = ({ product }) => {
         setFormFields(prev => ({ ...prev, [name]: value }));
     };
 
+    // Auto-calculate discount whenever price or oldPrice changes.
+    useEffect(() => {
+        const price = Number(formFields.price) || 0;
+        const oldPrice = Number(formFields.oldPrice) || 0;
+
+        if (oldPrice > 0 && price >= 0) {
+            // calculate percentage discount = ((oldPrice - price) / oldPrice) * 100
+            const raw = ((oldPrice - price) / oldPrice) * 100;
+            // if raw is negative (price > oldPrice) set discount to 0
+            const discountPercent = raw > 0 ? Number(raw.toFixed(2)) : 0;
+
+            // Only update state if different to avoid rerenders
+            if (Number(formFields.discount) !== discountPercent) {
+                setFormFields(prev => ({ ...prev, discount: discountPercent }));
+            }
+        } else {
+            // if oldPrice is empty or zero, don't show a discount (clear it)
+            if (formFields.discount !== '' && formFields.discount !== 0) {
+                setFormFields(prev => ({ ...prev, discount: '' }));
+            }
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [formFields.price, formFields.oldPrice]);
+
     // Rrating 
     const handleChangeRating = (event, newValue) => {
         setFormFields(prev => ({ ...prev, rating: newValue }));
     };
 
-    // uploading image ************* /
-    // Fill form in Add/Edit mode
+    // Load dynamic option lists: RAMs, Sizes, Weights
     useEffect(() => {
-        const model = context.isOpenAddProductForm?.model;
-        if (["Add Category", "Edit Category"].includes(model)) {
-            const data = context.isOpenAddProductForm?.model || {};
-            let images = [];
-            if (data.image) {
-                if (Array.isArray(data.image)) {
-                    images = data.image;
-                } else if (typeof data.image === "string") {
-                    images = data.image.split(",").map(url => url.trim());
-                }
+        let mounted = true
+        const load = async () => {
+            try {
+                const [rRes, sRes, wRes] = await Promise.all([
+                    getData('/api/v1/ram'),
+                    getData('/api/v1/size'),
+                    getData('/api/v1/weight')
+                ])
+
+                if (!mounted) return
+
+                const rData = (rRes && rRes.data) ? rRes.data : (rRes?.data || [])
+                const sData = (sRes && sRes.data) ? sRes.data : (sRes?.data || [])
+                const wData = (wRes && wRes.data) ? wRes.data : (wRes?.data || [])
+
+                setAvailableRams(rData.map(i => i.name))
+                setAvailableSizes(sData.map(i => i.name))
+                setAvailableWeights(wData.map(i => i.name))
+            } catch (err) {
+                console.error('Error loading dynamic option lists', err)
             }
-
-            setFormFields({
-                name: data.name || '',
-                image: images
-            });
-
-            setResetUploadBox(prev => !prev);
         }
-    }, [context.isOpenAddProductForm]);
+
+        load()
+        return () => { mounted = false }
+    }, [])
+
+    // uploading image ************* /
 
     // Handle file selection
     const handleFilesSelect = (files) => {
@@ -187,10 +275,6 @@ const AddProduct = ({ product }) => {
             ...prev,
             image: files
         }));
-
-        // for preview
-        const previews = files.map((file) => URL.createObjectURL(file));
-        setPreviewImages(previews);
     };
 
     // Fill form in Add/Edit mode
@@ -211,13 +295,13 @@ const AddProduct = ({ product }) => {
             setProductSize(product.size || []);
             setProductWeight(product.productWeight || []);
 
-            // ✅ preview for images (string urls bhi support karega)
+            // product.image (string urls or array) is assigned into formFields.image — UploadBox will render them
             if (Array.isArray(product.image)) {
-                setPreviewImages(product.image);
+                setFormFields(prev => ({ ...prev, image: product.image }));
             } else if (typeof product.image === "string") {
-                setPreviewImages(product.image.split(","));
+                setFormFields(prev => ({ ...prev, image: product.image.split(",") }));
             } else {
-                setPreviewImages([]);
+                setFormFields(prev => ({ ...prev, image: [] }));
             }
         }
     }, [product]);
@@ -250,6 +334,9 @@ const AddProduct = ({ product }) => {
 
         // most important 👇 backend validation ke liye
         formData.append("category", formFields.catId);
+    // append code fields
+    if (formFields.code) formData.append("code", formFields.code);
+    if (formFields.codeType) formData.append("codeType", formFields.codeType);
 
         // arrays
         formFields.productRam.forEach(r => formData.append("productRam[]", r));
@@ -271,6 +358,7 @@ const AddProduct = ({ product }) => {
         }
 
         try {
+            setSubmitting(true);
             if (context.isOpenAddProductForm?.model === "Edit Product") {
                 const productId = context.isOpenAddProductForm?.data?._id;
                 const res = await editCategoryData(`/api/v1/product/update/${productId}`, formData);
@@ -295,8 +383,22 @@ const AddProduct = ({ product }) => {
         } catch (error) {
             context.alertBox("error", "Network error occurred");
             console.error("Form submission error:", error);
+        } finally {
+            setSubmitting(false);
         }
     };
+
+    // Generate code (client-side) and preview QR
+    const handleGenerateCode = async () => {
+        try {
+            const newCode = uuidv4();
+            setFormFields(prev => ({ ...prev, code: newCode, codeType: 'qr' }));
+            const dataUrl = await QRCode.toDataURL(newCode, { margin: 1, width: 300 });
+            setFormFields(prev => ({ ...prev, codeImage: dataUrl }));
+        } catch (err) {
+            console.error('QR generation error', err);
+        }
+    }
 
     return (
         <section className='p-5 bg-gray-50'>
@@ -507,68 +609,68 @@ const AddProduct = ({ product }) => {
                             />
                         </div>
 
-                        <div className="col">
-                            <h3 className='text-[14px] font-[500] mb-1'>Product RAMS</h3>
+                        {availableRams && availableRams.length > 0 && (
+                            <div className="col">
+                                <h3 className='text-[14px] font-[500] mb-1'>Product RAMS</h3>
 
-                            <Select
-                                multiple
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={productRams}
-                                size="small"
-                                className="w-full mt-2 mb-6"
-                                label="Age"
-                                onChange={handleChangeProductRams}
-                            >
-                                <MenuItem value={"4GB"}>4GB</MenuItem>
-                                <MenuItem value={"6GB"}>6GB</MenuItem>
-                                <MenuItem value={"8GB"}>8GB</MenuItem>
-                            </Select>
-                        </div>
+                                <Select
+                                    multiple
+                                    labelId="demo-simple-select-helper-label"
+                                    id="demo-simple-select-helper"
+                                    value={productRams}
+                                    size="small"
+                                    className="w-full mt-2 mb-6"
+                                    label="RAM"
+                                    onChange={handleChangeProductRams}
+                                >
+                                    {availableRams.map((r, idx) => (
+                                        <MenuItem key={idx} value={r}>{r}</MenuItem>
+                                    ))}
+                                </Select>
+                            </div>
+                        )}
 
-                        <div className="col">
-                            <h3 className='text-[14px] font-[500] mb-1'>Product Weight</h3>
+                        {availableWeights && availableWeights.length > 0 && (
+                            <div className="col">
+                                <h3 className='text-[14px] font-[500] mb-1'>Product Weight</h3>
 
-                            <Select
-                                multiple
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={productWeight}
-                                size="small"
-                                className="w-full mt-2 mb-6"
-                                label="Age"
-                                onChange={handleChangeProductWeight}
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
-                            </Select>
-                        </div>
+                                <Select
+                                    multiple
+                                    labelId="demo-simple-select-helper-label"
+                                    id="demo-simple-select-helper"
+                                    value={productWeight}
+                                    size="small"
+                                    className="w-full mt-2 mb-6"
+                                    label="Weight"
+                                    onChange={handleChangeProductWeight}
+                                >
+                                    {availableWeights.map((w, idx) => (
+                                        <MenuItem key={idx} value={w}>{w}</MenuItem>
+                                    ))}
+                                </Select>
+                            </div>
+                        )}
 
-                        <div className="col">
-                            <h3 className='text-[14px] font-[500] mb-1'>Product Size</h3>
+                        {availableSizes && availableSizes.length > 0 && (
+                            <div className="col">
+                                <h3 className='text-[14px] font-[500] mb-1'>Product Size</h3>
 
-                            <Select
-                                multiple
-                                labelId="demo-simple-select-helper-label"
-                                id="demo-simple-select-helper"
-                                value={productSize}
-                                size="small"
-                                className="w-full mt-2 mb-6"
-                                label="Age"
-                                onChange={handleChangeProductSize}
-                            >
-                                <MenuItem value="">
-                                    <em>None</em>
-                                </MenuItem>
-                                <MenuItem value={10}>Ten</MenuItem>
-                                <MenuItem value={20}>Twenty</MenuItem>
-                                <MenuItem value={30}>Thirty</MenuItem>
-                            </Select>
-                        </div>
+                                <Select
+                                    multiple
+                                    labelId="demo-simple-select-helper-label"
+                                    id="demo-simple-select-helper"
+                                    value={productSize}
+                                    size="small"
+                                    className="w-full mt-2 mb-6"
+                                    label="Size"
+                                    onChange={handleChangeProductSize}
+                                >
+                                    {availableSizes.map((s, idx) => (
+                                        <MenuItem key={idx} value={s}>{s}</MenuItem>
+                                    ))}
+                                </Select>
+                            </div>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-4 gap-4 mb-0">
@@ -585,6 +687,34 @@ const AddProduct = ({ product }) => {
 
                     <div className="col w-full p-5 px-0 ">
                         <h3 className='font-[700] text-[18px] mb-3'>Media & Images</h3>
+                        {/* Code / QR section */}
+                        <div className="mb-4 p-3 border rounded">
+                            <h4 className='text-[14px] font-[600] mb-2'>Product Code (SKU / QR)</h4>
+                            <div className='flex items-center gap-3'>
+                                <input
+                                    type="text"
+                                    placeholder='Enter code or generate'
+                                    className='w-full h-[40px] rounded-[5px] focus:outline-none border p-3'
+                                    name='code'
+                                    value={formFields.code}
+                                    onChange={(e) => setFormFields(prev => ({ ...prev, code: e.target.value }))}
+                                />
+                                <button type='button' onClick={() => setScannerOpen(true)} className='bg-green-600 text-white px-4 py-2 rounded'>📷 Scan Product</button>
+                                <select value={formFields.codeType} onChange={(e) => setFormFields(prev => ({ ...prev, codeType: e.target.value }))} className='h-[40px] rounded p-2 border'>
+                                    <option value='qr'>QR</option>
+                                    <option value='barcode'>Barcode</option>
+                                </select>
+                            </div>
+
+                            {/* preview */}
+                            <div className='mt-3'>
+                                {formFields.codeImage ? (
+                                    <img src={formFields.codeImage} alt="code preview" className='w-[120px] h-[120px] object-contain border p-1' />
+                                ) : product?.codeImage ? (
+                                    <img src={product.codeImage} alt="code preview" className='w-[120px] h-[120px] object-contain border p-1' />
+                                ) : null}
+                            </div>
+                        </div>
                         <div className="grid grid-cols-7 gap-4 ">
                             {/* <div className="uploadBoxWrapper relative">
                                 <span className='absolute z-50 bg-red-700 -top-[5px] -right-[5px] rounded-full flex items-center justify-center text-white w-[20px] h-[20px] cursor-pointer'
@@ -603,31 +733,7 @@ const AddProduct = ({ product }) => {
                                 </div>
                             </div> */}
 
-                            {/* ✅ Show existing + new images */}
-                            {previewImages.map((img, idx) => (
-                                <div key={idx} className="uploadBoxWrapper relative">
-                                    <span
-                                        onClick={() => {
-                                            // remove from preview + formFields.image
-                                            setPreviewImages(previewImages.filter((_, i) => i !== idx));
-                                            setFormFields(prev => ({
-                                                ...prev,
-                                                image: prev.image.filter((_, i) => i !== idx),
-                                            }));
-                                        }}
-                                        className='absolute z-50 bg-red-700 -top-[5px] -right-[5px] rounded-full flex items-center justify-center text-white w-[20px] h-[20px] cursor-pointer'
-                                    >
-                                        <IoMdClose size={16} />
-                                    </span>
-                                    <div className="uploadBox rounded-md overflow-hidden border border-dashed border-[rgba(0,0,0,0.3)] h-[150px] w-[100%]">
-                                        <LazyLoadImage
-                                            src={img}
-                                            className="w-full h-full object-cover"
-                                            effect="blur"
-                                        />
-                                    </div>
-                                </div>
-                            ))}
+                            {/* Previews handled by UploadBox (thumbnails-only). */}
                             <UploadBox
                                 name="image"
                                 multiple={true}
@@ -640,16 +746,26 @@ const AddProduct = ({ product }) => {
                     </div>
                 </div>
                 <br /><hr />
-                <Button type="submit" className='!w-full !font-[600] !text-[16px] !bg-[#3872fa] !text-white !py-2 !rounded-[5px] !mt-5 !hover:bg-[#1a6df1]'>
+                <Button type="submit" disabled={submitting} className='!w-full !font-[600] !text-[16px] !bg-[#3872fa] !text-white !py-2 !rounded-[5px] !mt-5 !hover:bg-[#1a6df1]'>
                     <MdCloudUpload size={25} className='mr-2' />
-                    Publish and View
+                    {submitting ? (
+                        <span className="flex items-center gap-2 justify-center">
+                            <CircularProgress size={18} color="inherit" />
+                            <span>Publishing...</span>
+                        </span>
+                    ) : (
+                        'Publish and View'
+                    )}
                 </Button>
+                {/* Scanner modal */}
+                <Scanner open={scannerOpen} onClose={() => setScannerOpen(false)} onDetected={handleScanDetected} />
             </form>
         </section>
     )
 }
 
 export default AddProduct
+
 
 
 

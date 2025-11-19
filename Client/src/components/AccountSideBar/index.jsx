@@ -127,7 +127,7 @@ const AccountSideBar = () => {
                 </li>
 
                 <li className='w-full'>
-                    <NavLink to="/my-orders" exact={true} activeClassName="isActive">
+                    <NavLink to="/my-order" exact={true} activeClassName="isActive">
                         <Button className='flex items-center !justify-start !py-2 gap-2 w-full !rounded-none !capitalize !text-[rgba(0,0,0,0.8)] !px-5'>
                             <IoBagCheckOutline size={17} /> My Orders
                         </Button>

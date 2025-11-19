@@ -94,32 +94,69 @@ export const editData = async (url, updateData) => {
     }
 }
 
+// Generic PUT with JSON body
+export const putData = async (url, body) => {
+    try {
+        const { data } = await axios.put(apiUrl + url, body, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return data;
+    } catch (error) {
+        console.error("putData error:", error);
+        throw error;
+    }
+}
+
+// get orders (admin)
+// get orders (admin). Accepts optional userId or filters via params object.
+export const getOrders = async (page = 1, perPage = 10, params = {}) => {
+    try {
+        const query = new URLSearchParams({ page, perPage, ...(params || {}) }).toString();
+        const res = await axios.get(`${apiUrl}/api/v1/order?${query}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json",
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching orders:", error);
+        return { error: true, data: [] };
+    }
+}
+
 export const editCategoryData = async (url, updateData, files = []) => {
     try {
-        const formData = new FormData();
+        // If caller already provided a FormData (most admin forms do), send it as-is.
+        let formData;
+        if (updateData instanceof FormData) {
+            formData = updateData;
+        } else {
+            formData = new FormData();
+            // Append text fields
+            Object.keys(updateData || {}).forEach(key => {
+                // If value is an array (existingImages[] etc.), append each
+                const val = updateData[key];
+                if (Array.isArray(val)) {
+                    val.forEach(v => formData.append(key.endsWith('[]') ? key : `${key}[]`, v));
+                } else if (val !== undefined && val !== null) {
+                    formData.append(key, val);
+                }
+            });
 
-        // Append text fields
-        Object.keys(updateData).forEach(key => {
-            formData.append(key, updateData[key]);
-        });
-
-        // Append new image files (if any)
-        files.forEach(file => {
-            formData.append("image", file); // Ensure this matches the backend expectation
-        });
-
-        // If you have existing images, append them as well
-        if (updateData.existingImages) {
-            updateData.existingImages.forEach(image => {
-                formData.append("existingImages[]", image); // Use an array notation for existing images
+            // Append new image files (if any)
+            files.forEach(file => {
+                formData.append("image", file); // Ensure this matches the backend expectation
             });
         }
 
         const params = {
             headers: {
                 "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
-                // Remove Content-Type header
-                "Content-Type": "multipart/form-data",
+                // Let axios/browser set Content-Type (including boundary) for FormData
             },
         };
 
@@ -229,6 +266,37 @@ export const getProducts = async (page = 1, perPage = 10) => {
     }
 };
 
+// search products by name for admin autocomplete
+export const searchProducts = async (query) => {
+    try {
+        const res = await axios.get(`${apiUrl}/api/v1/product/search?query=${encodeURIComponent(query)}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error searching products:", error);
+        return { error: true, data: [] };
+    }
+};
+
+// search users by name/email (admin)
+export const searchUsers = async (query, page = 1, perPage = 10) => {
+    try {
+        const q = encodeURIComponent(query || "");
+        const res = await axios.get(`${apiUrl}/api/v1/user/search?query=${q}&page=${page}&perPage=${perPage}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+            },
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error searching users:", error);
+        return { error: true, data: [] };
+    }
+};
+
 // get all products by category ID
 export const getAllProductsByCatId = async (catId, page = 1, perPage = 10) => {
     try {
@@ -276,5 +344,20 @@ export const updateProduct = async (id, formData) => {
     }
 };
 
+// get users list
+export const getUsers = async (page = 1, perPage = 10) => {
+    try {
+        const res = await axios.get(`${apiUrl}/api/v1/user/all?page=${page}&perPage=${perPage}`, {
+            headers: {
+                "Authorization": `Bearer ${localStorage.getItem("accessToken")}`,
+                "Content-Type": "application/json", // Specify the content type as JSON
+            }
+        });
+        return res.data;
+    } catch (error) {
+        console.error("Error fetching users:", error);
+        return { error: true, data: [] };
+    }
+};
 
 

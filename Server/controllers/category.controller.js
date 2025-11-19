@@ -81,20 +81,27 @@ export const getAllCategories = async (req, res) => {
     try {
         // ✅ Get all categories
         const categories = await CategoryModel.find();
-        const categoryMap = {};
 
-        // ✅ Create category map
+        // Build a map keyed by stringified id to avoid object-key mismatches
+        const categoryMap = {};
         categories.forEach(cat => {
-            categoryMap[cat._id] = { ...cat._doc, children: [] };
+            const id = String(cat._id);
+            categoryMap[id] = { ...cat._doc, children: [] };
         });
 
         const rootCategories = [];
 
         categories.forEach(cat => {
-            if (!cat.parentCatId) {
-                rootCategories.push(categoryMap[cat._id]);
+            const id = String(cat._id);
+            const parentId = cat.parentCatId ? String(cat.parentCatId) : null;
+            if (!parentId || parentId === 'null') {
+                rootCategories.push(categoryMap[id]);
+            } else if (categoryMap[parentId]) {
+                categoryMap[parentId].children.push(categoryMap[id]);
             } else {
-                categoryMap[cat.parentCatId].children.push(categoryMap[cat._id]);
+                // Parent not found in the current list — treat as root and log warning
+                console.warn(`Parent category ${parentId} not found for category ${id}. Treating as root.`);
+                rootCategories.push(categoryMap[id]);
             }
         });
 
@@ -310,21 +317,64 @@ export const updateCategory = async (req, res) => {
             });
         }
 
-        // If new image uploaded (from imagesArr), delete old image from cloudinary
+        // Handle uploaded files (if any) and/or existing image URLs sent from frontend
         let updatedImage = existingCategory.image;
-        if (imagesArr.length > 0) {
-            const oldImage = existingCategory.image;
 
-            // Delete old image from Cloudinary
-            if (oldImage && oldImage[0]?.public_id) {
-                await cloudinary.uploader.destroy(oldImage[0].public_id);
+        // If files were uploaded in this request, upload them to Cloudinary now
+        const uploadedUrls = [];
+        const files = req.files || [];
+        if (files.length > 0) {
+            const options = {
+                use_filename: true,
+                unique_filename: false,
+                overwrite: false,
+            };
+
+            for (let i = 0; i < files.length; i++) {
+                try {
+                    const result = await cloudinary.uploader.upload(files[i].path, options);
+                    uploadedUrls.push(result.url);
+                } catch (err) {
+                    console.error('Cloudinary upload error', err);
+                } finally {
+                    try { fs.unlinkSync(files[i].path); } catch (e) { /* ignore */ }
+                }
+            }
+        }
+
+        // If we uploaded new images, remove old image from Cloudinary and use the new one
+        if (uploadedUrls.length > 0) {
+            console.log('Uploaded URLs:', uploadedUrls);
+            // delete old image from cloudinary (if present)
+            if (existingCategory.image) {
+                try {
+                    const imageName = existingCategory.image.split('/').pop().split('.')[0];
+                    await cloudinary.uploader.destroy(imageName);
+                } catch (err) {
+                    console.warn('Failed to delete old category image from Cloudinary', err);
+                }
             }
 
-            // Set new image
-            updatedImage = imagesArr;
-        } else if (req.body.image) {
-            // If no new upload but image info is sent from frontend (existing URL or object)
-            updatedImage = req.body.image;
+            // set primary updated image to first uploaded url
+            updatedImage = uploadedUrls[0];
+        } else {
+            // No new file uploads. Check if frontend sent existing image URLs (form field names vary).
+            // Support: req.body['existingImages[]'], req.body.existingImages, req.body.image
+            const existingFromBody = req.body['existingImages[]'] || req.body.existingImages || req.body.image;
+            console.log('existingFromBody:', existingFromBody);
+            if (existingFromBody) {
+                // existingFromBody could be a string or an array; prefer first element or the string itself
+                    if (Array.isArray(existingFromBody) && existingFromBody.length > 0) {
+                        updatedImage = existingFromBody[0];
+                    } else if (typeof existingFromBody === 'string') {
+                        // If frontend sent a comma-separated list, split it.
+                        if (existingFromBody.includes(',')) {
+                            updatedImage = existingFromBody.split(',')[0].trim();
+                        } else {
+                            updatedImage = existingFromBody;
+                        }
+                    }
+            }
         }
 
         // Update category
@@ -332,7 +382,7 @@ export const updateCategory = async (req, res) => {
             categoryId,
             {
                 ...(req.body.name && { name: req.body.name }),
-                ...(req.body.image && { image: updatedImage }),
+                ...(updatedImage !== undefined && { image: updatedImage }),
                 ...(req.body.parentCatId && { parentCatId: req.body.parentCatId }),
                 ...(req.body.parentCatName && { parentCatName: req.body.parentCatName }),
             },

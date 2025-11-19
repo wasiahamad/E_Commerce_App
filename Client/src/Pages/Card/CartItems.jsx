@@ -10,54 +10,71 @@ const CartItems = (props) => {
 
     // for cart size 
     const [sizeAnchorEl, setSizeAnchorEl] = useState(null);
-    const [selectedSize, setSelectedSize] = useState(props.size);
+    const [selectedSize, setSelectedSize] = useState(props.size || "S");
     const openSize = Boolean(sizeAnchorEl);
 
     // for cart qty
     const [qtyAnchorEl, setQtyAnchorEl] = useState(null);
-    const [selectedQty, setSelectedQty] = useState(props.qty);
+    const [selectedQty, setSelectedQty] = useState(props.qty || 1);
     const openQty = Boolean(qtyAnchorEl);
 
     // for cart size
     const handleClickSize = (event) => {
+        // if processing, ignore
+        if (props.isProcessing) return;
         setSizeAnchorEl(event.currentTarget);
     };
     const handleCloseSize = (value) => {
         setSizeAnchorEl(null);
         if (value !== null) {
             setSelectedSize(value);
+            // notify parent
+            if (typeof props.onChangeSize === 'function') {
+                props.onChangeSize(props._id, value);
+            }
         }
     };
 
     // for cart qty
     const handleClickQty = (event) => {
+        // if processing, ignore
+        if (props.isProcessing) return;
         setQtyAnchorEl(event.currentTarget);
     };
     const handleCloseQty = (value) => {
         setQtyAnchorEl(null);
         if (value !== null) {
             setSelectedQty(value);
+            // notify parent
+            if (typeof props.onChangeQty === 'function') {
+                // ensure number
+                const qty = Number(value);
+                props.onChangeQty(props._id, qty);
+            }
         }
     };
 
     return (
         <div className="cartItem w-full p-3 flex items-center gap-4 pb-5 border-b border-[rgba(0,0,0,0.1)] ">
             <div className="img w-[15%] rounded-md overflow-hidden ">
-                <Link to="/product/1" className="group">
+                <Link to={`/productDetails/${props.productId || props._id || props._id || props.product?.id || ''}`} className="group">
                     <img
-                        src="https://serviceapi.spicezgold.com/download/1742439426968_modestouze-attires-women-s-mukaish-worked-ethnic-jacket-with-top-and-pant-set-product-images-rvziicqwq6-2-202403231855.jpg"
-                        alt=""
+                        src={props.image || 'https://serviceapi.spicezgold.com/download/1742439426968_modestouze-attires-women-s-mukaish-worked-ethnic-jacket-with-top-and-pant-set-product-images-rvziicqwq6-2-202403231855.jpg'}
+                        alt={props.title || 'product'}
                         className="w-full group-hover:scale-105 "
                     />
                 </Link>
             </div>
 
             <div className="info w-[85%] relative">
-                <IoMdClose className="text-[20px] text-[#000] cursor-pointer absolute top-[10px] right-[0px] link" />
-                <span className="text-[12px] font-[300]">Allen Solly</span>
+                <IoMdClose
+                    className={`text-[20px] text-[#000] ${props.isProcessing ? 'opacity-40 cursor-not-allowed' : 'cursor-pointer'} absolute top-[10px] right-[0px] link`}
+                    onClick={() => !props.isProcessing && typeof props.onRemove === 'function' ? props.onRemove(props._id, props.productId) : null}
+                />
+                <span className="text-[12px] font-[300]">{props.brand || 'Brand Name'}</span>
                 <h4 className="text-[15px] font-[600] text-[#000]">
-                    <Link to="/product/1" className="link">
-                        Men Pure Cotton Striped Casual Shirt
+                    <Link to={`/productDetails/${props.productId || props._id || props.product?._id || props.product?.id}`} className="link">
+                        {props.title || 'Product Title'}
                     </Link>
                 </h4>
 
@@ -72,7 +89,7 @@ const CartItems = (props) => {
                 <div className="flex items-center gap-4 mt-1">
                     <div className="relative">
                         <span
-                            className="flex items-center justify-center bg-[#f1f1f1]  text-[11px] font-[600] py-1 px-2 rounded-md cursor-pointer"
+                            className={`flex items-center justify-center bg-[#f1f1f1]  text-[11px] font-[600] py-1 px-2 rounded-md ${props.isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
                             onClick={handleClickSize}
                         >
                             Size: {selectedSize} <GoTriangleDown />
@@ -95,9 +112,9 @@ const CartItems = (props) => {
                     </div>
 
                     <div className="relative">
-                        <sapn className="flex items-center justify-center bg-[#f1f1f1]  text-[11px] font-[600] py-1 px-2 rounded-md cursor-pointer" onClick={handleClickQty}>
+                        <span className={`flex items-center justify-center bg-[#f1f1f1]  text-[11px] font-[600] py-1 px-2 rounded-md ${props.isProcessing ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`} onClick={handleClickQty}>
                             Qty: {selectedQty} <GoTriangleDown />
-                        </sapn>
+                        </span>
                         <Menu
                             id="size-menu"
                             anchorEl={qtyAnchorEl}
@@ -123,9 +140,9 @@ const CartItems = (props) => {
 
                 <div className="flex items-center gap-4">
                     <p className="text-[14px] font-[500] text-[rgba(0,0,0,0.8)]">
-                        <span className="text-[#000] font-[600]">₹7999</span>
+                        <span className="text-[#000] font-[600]">₹{props.price ?? '0'}</span>
                         <span className="text-[rgba(0,0,0,0.5)] line-through ml-2">
-                            ₹9999
+                            ₹{props.oldPrice ?? ''}
                         </span>
                     </p>
                     <p className="text-[14px] font-[600] text-[#ff5252] py-1">20% off</p>

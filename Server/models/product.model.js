@@ -68,6 +68,26 @@ const productSchema = new mongoose.Schema({
         type: Number,
         default: 0
     },
+    reviews: [
+        {
+            userId: { type: mongoose.Schema.ObjectId, ref: 'User' },
+            userName: { type: String, default: '' },
+            userAvatar: { type: String, default: '' },
+            images: [
+                {
+                    type: String,
+                    default: ''
+                }
+            ],
+            rating: { type: Number, default: 0 },
+            comment: { type: String, default: '' },
+            createdAt: { type: Date, default: Date.now }
+        }
+    ],
+    reviewsCount: {
+        type: Number,
+        default: 0
+    },
     isFeatured: {
         type: Boolean,
         default: false
@@ -94,6 +114,29 @@ const productSchema = new mongoose.Schema({
             default: ""
         }
     ],
+    // Unique code (SKU / barcode / QR payload) to allow lookup by scanner
+    code: {
+        type: String,
+        unique: true,
+        sparse: true,
+        default: null,
+    },
+    // who created/added this product (admin user)
+    createdBy: {
+        type: mongoose.Schema.ObjectId,
+        ref: 'User',
+        default: null
+    },
+    // Type of code generated or provided (e.g., 'qr' or 'barcode')
+    codeType: {
+        type: String,
+        default: "qr",
+    },
+    // URL/path to generated code image (stored in uploads or cloudinary)
+    codeImage: {
+        type: String,
+        default: "",
+    },
     dateCreated: {
         type: Date,
         default: Date.now
