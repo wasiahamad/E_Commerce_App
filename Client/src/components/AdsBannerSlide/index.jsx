@@ -12,36 +12,44 @@ import { getData } from '../../utils/api';
 
 const FALLBACK = [
   {
-    img: "https://serviceapi.spicezgold.com/download/1741663363237_1737020916820_New_Project_52.jpg",
-    title: "Special Offer 1",
-    price: "₹999",
+    img: "https://images.unsplash.com/photo-1542838132-92c53300491e?auto=format&fit=crop&w=1600&q=85",
+    title: "Fresh Groceries, Every Day",
+    subtitle: "Farm-Fresh Fruits & Vegetables",
+    description: "Bring home freshness with quality fruits and vegetables at great prices.",
+    price: "Starting ₹49",
     cta: "Shop Now",
     position: "right",
-    _id: 'f1'
+    _id: "g1"
   },
   {
-    img: "https://serviceapi.spicezgold.com/download/1741663408792_1737020756772_New_Project_1.png",
-    title: "Special Offer 2",
-    price: "₹1999",
-    cta: "Shop Now",
+    img: "https://images.unsplash.com/photo-1543168256-418811576931?auto=format&fit=crop&w=1600&q=85",
+    title: "Your Daily Grocery Essentials",
+    subtitle: "Everything Your Kitchen Needs",
+    description: "Shop rice, pulses, cooking oils and everyday household essentials.",
+    price: "Starting ₹99",
+    cta: "Explore Products",
     position: "left",
-    _id: 'f2'
+    _id: "g2"
   },
   {
-    img: "https://serviceapi.spicezgold.com/download/1741664496923_1737020250515_New_Project_47.jpg",
-    title: "Special Offer 3",
-    price: "₹2999",
-    cta: "Shop Now",
+    img: "https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?auto=format&fit=crop&w=1600&q=85",
+    title: "Eat Fresh, Live Healthy",
+    subtitle: "Fresh Food for a Better Life",
+    description: "Discover fresh ingredients and make every meal healthier.",
+    price: "Special Offers",
+    cta: "Shop Fresh",
     position: "left",
-    _id: 'f3'
+    _id: "g3"
   },
   {
-    img: "https://serviceapi.spicezgold.com/download/1741664665391_1741497254110_New_Project_50.jpg",
-    title: "Special Offer 4",
-    price: "₹3999",
-    cta: "Shop Now",
+    img: "/public/banner.avif",
+    title: "Smart Shopping Starts Here",
+    subtitle: "Quality Products, Better Prices",
+    description: "Your favourite grocery products at prices you'll love.",
+    price: "Save More Today",
+    cta: "Buy Now",
     position: "right",
-    _id: 'f4'
+    _id: "g4"
   }
 ];
 

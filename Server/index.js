@@ -21,6 +21,10 @@ import bannerRouter from './routes/banner.route.js'
 import homeSliderRouter from './routes/homeSlider.route.js'
 import AdminModel from './models/admin.model.js'
 import bcrypt from 'bcrypt'
+import dns from 'dns'
+
+dns.setServers(['8.8.8.8', '8.8.4.4']);
+dns.setDefaultResultOrder('ipv4first');
 
 const app = express();
 dotenv.config();

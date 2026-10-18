@@ -122,8 +122,8 @@ const Home = () => {
           </div>
 
           <div className="part2 w-[30%] flex items-center justify-center gap-5 flex-col">
-            <BannerBoxV2 img="https://serviceapi.spicezgold.com/download/1741664665391_1741497254110_New_Project_50.jpg" info="right" />
-            <BannerBoxV2 img="https://serviceapi.spicezgold.com/download/1741664496923_1737020250515_New_Project_47.jpg" info="left" />
+            <BannerBoxV2 img="/public/Samsung.png" info="right" />
+            <BannerBoxV2 img="/public/FreshMart.png" info="left" />
           </div>
         </div>
       </section>

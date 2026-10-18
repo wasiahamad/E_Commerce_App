@@ -33,7 +33,7 @@ const HomeSliderV2 = () => {
             >
                 <SwiperSlide>
                     <div className="item overflow-hidden rounded-md w-full relative ">
-                        <img src="https://serviceapi.spicezgold.com/download/1742441193376_1737037654953_New_Project_45.jpg" />
+                        <img src="/public/banner1.avif" />
 
                         <div className="info absolute top-0 right-[-100%] opacity-0 w-[50%] p-8 z-50 h-[100%] flex items-center justify-center flex-col transition-all duration-1000">
                             <h4 className="text-[20px] font-[400] text-[rgba(0,0,0,0.8)] w-full mb-4 relative -right-[100%] opacity-0 ">
@@ -54,7 +54,7 @@ const HomeSliderV2 = () => {
 
                 <SwiperSlide>
                     <div className="item overflow-hidden rounded-md w-full  ">
-                        <img src="https://serviceapi.spicezgold.com/download/1742439896581_1737036773579_sample-1.jpg" />
+                        <img src="/public/banner2.avif" />
 
                         <div className="info absolute top-0 right-[-100%] opacity-0 w-[50%] p-8 z-50 h-[100%] flex items-center justify-center flex-col transition-all duration-1000">
                             <h4 className="text-[20px] font-[400] text-[rgba(0,0,0,0.8)] w-full mb-4 relative -right-[100%] opacity-0 ">
